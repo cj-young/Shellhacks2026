@@ -1,53 +1,41 @@
 import type { GameConnection } from "#/lib/use-game-connection";
 import { useEffect, useState } from "react";
 import recipes from "../../data/recipes.json";
+import ingredients from "../../data/ingredients.json";
 
 interface HostInterfaceProps {
   connection: GameConnection;
 }
 
-export function getRandomIntInclusive(min: number, max: number) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 export function HostInterface({ connection }: HostInterfaceProps) {
-  function generateRecipeOrder(length: number) {
-    const res: number[] = [];
-    let i = 0;
-
-    while (i < length) {
-      const select = getRandomIntInclusive(0, recipes.length - 1);
-      if (!res.includes(select)) {
-        res.push(select);
-        i++;
-      }
-    }
-
-    return res;
-  }
-
-  const [recipeOrder, setRecipeOrder] = useState<number[]>([]);
-
-  useEffect(() => {
-    setRecipeOrder(generateRecipeOrder(3));
-  }, []);
-
-  useEffect(() => {
-    if (recipeOrder.length != 0)
-      connection.socketRef.current?.emit("send_recipe_order", recipeOrder);
-  }, [recipeOrder]);
-
   return (
-    <div>
-      Host Interface
-      <button
-        type="button"
-        onClick={() => connection.socketRef.current?.emit("test")}
-      >
-        Emit some bullshit
-      </button>
+    <div className="flex flex-col">
+      <h1>Host Interface</h1>
+      <h2>Players</h2>
+      <ul>
+        {connection.state.players.map((v) => (
+          !v.isHost && <li>{v.name}</li>
+        ))}
+      </ul>
+      <h2>Recipe Order</h2>
+      <div className="flex flex-row gap-2">
+      {connection.state.recipeOrder.map((v,i) => (
+        <>
+        <div>
+          {v.ingredients.map((ing) => (
+            <>
+              <img src={ingredients[ing.id].image} className="h-12 w-12"/>
+              <span>x{ing.count}</span>
+            </>
+          ))}
+          <img/>
+          <hr/>
+          {v.name}
+        </div>
+        {i+1 < connection.state.recipeOrder.length && <span> → </span>}
+        </>
+      ))}
+      </div>
     </div>
   );
 }
