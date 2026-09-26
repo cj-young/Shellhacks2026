@@ -2,8 +2,7 @@ import type { Server as HttpServer } from 'node:http';
 
 import { Server, type Socket } from 'socket.io';
 
-import type { GameService } from '../../../game/application/game-service.ts';
-import { JoinSession } from '../../application/join-session.ts';
+import type { JoinSession } from '../../application/join-session.ts';
 import type { PlayerSummary } from '../../domain/player.ts';
 import type {
   ClientToServerEvents,
@@ -15,32 +14,26 @@ import type {
 const SOCKET_PATH = '/socket.io/';
 const MAX_BUFFER_BYTES = 16 * 1024;
 
-export type GameServer = Server<
+type GameServer = Server<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,
   SocketData
 >;
-export type GameSocket = Socket<
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData
->;
+type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
-export interface RealtimeModuleOptions {
+export interface SocketIoGatewayOptions {
   server: HttpServer;
-  gameService: GameService;
+  joinSession: JoinSession;
   allowedOrigins?: readonly string[];
 }
 
-export interface RealtimeModule {
-  io: GameServer;
+export interface SocketIoGateway {
   close(): Promise<void>;
 }
 
-export function createRealtimeModule(options: RealtimeModuleOptions): RealtimeModule {
-  const joinSession = new JoinSession(options.gameService);
+export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIoGateway {
+  const { joinSession } = options;
   const io: GameServer = new Server(options.server, {
     path: SOCKET_PATH,
     serveClient: false,
@@ -113,7 +106,7 @@ export function createRealtimeModule(options: RealtimeModuleOptions): RealtimeMo
     });
   }
 
-  return { io, close };
+  return { close };
 }
 
 function roomFor(gameCode: string): string {
