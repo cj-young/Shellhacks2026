@@ -1,28 +1,29 @@
-import type { GameConnection } from '#/lib/use-game-connection'
-import { useState } from 'react'
-import { Store } from './Store'
-import type { Ingredient } from '#/lib/types'
-import { MasterRecipe } from '../MasterRecipe'
-import { CursorPathTracker  } from '../CursorPathTracker'
-import type {CursorPoint} from '../CursorPathTracker';
+import type { GameConnection } from "#/lib/use-game-connection";
+import { useState } from "react";
+import { Store } from "./Store";
+import type { Ingredient } from "#/lib/types";
+import { MasterRecipe } from "../MasterRecipe";
+import { CursorPathTracker } from "../CursorPathTracker";
+import type { CursorPoint } from "../CursorPathTracker";
 
 interface ClientInterfaceProps {
-  connection: GameConnection
+  connection: GameConnection;
 }
 
-type ClientInterfaceState = "store" | "recipe"
+type ClientInterfaceState = "store" | "recipe";
 
 export function ClientInterface({ connection }: ClientInterfaceProps) {
-  const { recipeOrder } = connection.state
-  const [interfaceState, setInterfaceState] = useState<ClientInterfaceState>("store")
-  const [inventory, setInventory] = useState<Ingredient[]>([])
-  const [recipeState, setRecipeState] = useState<number>(0)
+  const { recipeOrder } = connection.state;
+  const [interfaceState, setInterfaceState] =
+    useState<ClientInterfaceState>("store");
+  const [inventory, setInventory] = useState<Ingredient[]>([]);
+  const [recipeState, setRecipeState] = useState<number>(0);
 
-  const [currentPoints, setCurrentPoints] = useState<CursorPoint[]>([])
+  const [currentPoints, setCurrentPoints] = useState<CursorPoint[]>([]);
 
   function checkoutFromStore(inv: Ingredient[]) {
-    setInventory([...inventory, ...inv])
-    setInterfaceState("recipe")
+    setInventory([...inventory, ...inv]);
+    setInterfaceState("recipe");
   }
 
   return (
@@ -60,5 +61,5 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
             )
         }
     </div>
-  )
+  );
 }

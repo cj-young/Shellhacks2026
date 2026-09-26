@@ -1,46 +1,56 @@
-import React, { useState } from 'react'
-import { Pill } from '../Pill'
-import { PLAYER_COLORS } from '#/data/chop-chop-mock'
+import React, { useState } from "react";
+import { Pill } from "../Pill";
+import { PLAYER_COLORS } from "#/data/chop-chop-mock";
 
-const demoPlayer = { name: 'Jordan', color: PLAYER_COLORS[1], avatar: 'J' }
-const currentItem = { name: 'Basil Oil', emoji: '🌿', optimalRange: { min: 60, max: 80 } }
+const demoPlayer = { name: "Jordan", color: PLAYER_COLORS[1], avatar: "J" };
+const currentItem = {
+  name: "Basil Oil",
+  emoji: "🌿",
+  optimalRange: { min: 60, max: 80 },
+};
 
 export function MobileStove() {
-  const [isHolding, setIsHolding] = useState(false)
-  const [currentHeat, setCurrentHeat] = useState(0)
-  const [result, setResult] = useState<'perfect' | 'undercooked' | 'burned' | null>(null)
+  const [isHolding, setIsHolding] = useState(false);
+  const [currentHeat, setCurrentHeat] = useState(0);
+  const [result, setResult] = useState<
+    "perfect" | "undercooked" | "burned" | null
+  >(null);
 
   const handleMouseDown = () => {
-    setIsHolding(true)
-    setResult(null)
+    setIsHolding(true);
+    setResult(null);
     // Simulate heat increase
     const interval = setInterval(() => {
       setCurrentHeat((h) => {
         if (h >= 100) {
-          clearInterval(interval)
-          return 100
+          clearInterval(interval);
+          return 100;
         }
-        return h + 2
-      })
-    }, 50)
-  }
+        return h + 2;
+      });
+    }, 50);
+  };
 
   const handleMouseUp = () => {
-    setIsHolding(false)
+    setIsHolding(false);
     if (currentHeat < currentItem.optimalRange.min) {
-      setResult('undercooked')
+      setResult("undercooked");
     } else if (currentHeat > currentItem.optimalRange.max) {
-      setResult('burned')
+      setResult("burned");
     } else {
-      setResult('perfect')
+      setResult("perfect");
     }
-  }
+  };
 
   return (
     <div className="w-full h-screen max-w-sm mx-auto overflow-hidden flex flex-col bg-[var(--bg)] dot-grid">
       {/* Station header */}
       <div className="p-4 border-b-4 border-[var(--ink)]">
-        <Pill color="royal" textColor="text-white" className="w-full justify-center">
+        <Pill
+          color="royal"
+          textColor="text-white"
+          className="w-full justify-center"
+        >
           Stove Station
         </Pill>
       </div>
@@ -77,7 +87,10 @@ export function MobileStove() {
           </div>
           <div className="flex justify-between text-xs text-[var(--ink-soft)]">
             <span>Too cold</span>
-            <span>Perfect ({currentItem.optimalRange.min}°–{currentItem.optimalRange.max}°)</span>
+            <span>
+              Perfect ({currentItem.optimalRange.min}°–
+              {currentItem.optimalRange.max}°)
+            </span>
             <span>Burned</span>
           </div>
         </div>
@@ -86,7 +99,9 @@ export function MobileStove() {
       {/* Hold instruction */}
       <div className="flex-1 flex flex-col items-center justify-center gap-4">
         <div className="text-center mb-4">
-          <div className="text-label mb-2 text-[var(--ink-soft)]">HOLD TO COOK</div>
+          <div className="text-label mb-2 text-[var(--ink-soft)]">
+            HOLD TO COOK
+          </div>
           <div className="text-sm text-[var(--ink)]">
             Press and hold when the heat reaches the green zone
           </div>
@@ -103,12 +118,12 @@ export function MobileStove() {
             border-4 border-[var(--ink)] transition-all duration-100
             ${
               isHolding
-                ? 'bg-[var(--sun)] scale-95 shadow-[0_2px_0_var(--ink)]'
-                : 'bg-[var(--surface)] scale-100 shadow-[0_5px_0_var(--ink)]'
+                ? "bg-[var(--sun)] scale-95 shadow-[0_2px_0_var(--ink)]"
+                : "bg-[var(--surface)] scale-100 shadow-[0_5px_0_var(--ink)]"
             }
           `}
         >
-          {isHolding ? '🔥' : '👆'}
+          {isHolding ? "🔥" : "👆"}
         </button>
 
         {/* Result */}
@@ -117,10 +132,14 @@ export function MobileStove() {
             className={`
               px-4 py-2 rounded-full font-bold text-white text-sm
               border-2 border-[var(--ink)]
-              ${result === 'perfect' ? 'bg-[var(--leaf)]' : result === 'burned' ? 'bg-[var(--tomato)]' : 'bg-[var(--sky)]'}
+              ${result === "perfect" ? "bg-[var(--leaf)]" : result === "burned" ? "bg-[var(--tomato)]" : "bg-[var(--sky)]"}
             `}
           >
-            {result === 'perfect' ? '✓ Perfect!' : result === 'burned' ? '❌ Burned!' : '❌ Undercooked'}
+            {result === "perfect"
+              ? "✓ Perfect!"
+              : result === "burned"
+                ? "❌ Burned!"
+                : "❌ Undercooked"}
           </div>
         )}
       </div>
@@ -132,5 +151,5 @@ export function MobileStove() {
         </div>
       </div>
     </div>
-  )
+  );
 }

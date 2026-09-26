@@ -1,29 +1,29 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useCallback, useState } from 'react'
-import { useGameConnection } from '#/lib/use-game-connection'
-import { ClientInterface } from '#/components/client/ClientInterface'
+import { createFileRoute } from "@tanstack/react-router";
+import { useCallback, useState } from "react";
+import { useGameConnection } from "#/lib/use-game-connection";
+import { ClientInterface } from "#/components/client/ClientInterface";
 
-export const Route = createFileRoute('/join')({ component: JoinScreen })
+export const Route = createFileRoute("/join")({ component: JoinScreen });
 
 function JoinScreen() {
-  const [nameInput, setNameInput] = useState('')
-  const [codeInput, setCodeInput] = useState('')
+  const [nameInput, setNameInput] = useState("");
+  const [codeInput, setCodeInput] = useState("");
   const [joined, setJoined] = useState<{ code: string; name: string } | null>(
     null,
-  )
-  const connection = useGameConnection(joined)
+  );
+  const connection = useGameConnection(joined);
 
-  const canJoin = nameInput.trim().length > 0 && codeInput.trim().length > 0
+  const canJoin = nameInput.trim().length > 0 && codeInput.trim().length > 0;
 
   const join = useCallback(() => {
-    const name = nameInput.trim()
-    const code = codeInput.trim().toUpperCase()
-    if (!name || !code) return
-    setJoined({ code, name })
-  }, [codeInput, nameInput])
+    const name = nameInput.trim();
+    const code = codeInput.trim().toUpperCase();
+    if (!name || !code) return;
+    setJoined({ code, name });
+  }, [codeInput, nameInput]);
 
-  if(connection.started)
-    return (<ClientInterface connection={connection}></ClientInterface>)
+  if (connection.started)
+    return <ClientInterface connection={connection}></ClientInterface>;
 
   return (
     <div className="min-h-screen bg-slate-950 p-8 text-slate-100">
@@ -33,8 +33,8 @@ function JoinScreen() {
         <form
           className="flex flex-col gap-2"
           onSubmit={(event) => {
-            event.preventDefault()
-            join()
+            event.preventDefault();
+            join();
           }}
         >
           <input
@@ -76,12 +76,12 @@ function JoinScreen() {
               {connection.players.map((player) => (
                 <li
                   key={player.id}
-                  className={player.connected ? undefined : 'text-slate-500'}
+                  className={player.connected ? undefined : "text-slate-500"}
                 >
                   {player.name}
-                  {player.id === connection.playerId ? ' (you)' : ''}
-                  {player.isHost ? ' (host)' : ''}
-                  {player.connected ? '' : ' (disconnected)'}
+                  {player.id === connection.playerId ? " (you)" : ""}
+                  {player.isHost ? " (host)" : ""}
+                  {player.connected ? "" : " (disconnected)"}
                 </li>
               ))}
             </ul>
@@ -107,5 +107,5 @@ function JoinScreen() {
         </a>
       </div>
     </div>
-  )
+  );
 }

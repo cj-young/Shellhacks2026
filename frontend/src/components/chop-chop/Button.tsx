@@ -1,12 +1,12 @@
-import React from 'react'
+import React from "react";
 
-type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger'
+type ButtonVariant = "primary" | "secondary" | "success" | "danger";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant
-  size?: 'sm' | 'md' | 'lg'
-  children: React.ReactNode
-  icon?: React.ReactNode
+  variant?: ButtonVariant;
+  size?: "sm" | "md" | "lg";
+  children: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -27,20 +27,20 @@ const variantStyles: Record<ButtonVariant, string> = {
     bg-[var(--tomato)] text-white border-[var(--border-width)] border-[var(--ink)]
     shadow-[0_5px_0_var(--ink)]
   `,
-}
+};
 
 const sizeStyles: Record<string, string> = {
-  sm: 'px-4 py-2 text-sm',
-  md: 'px-6 py-3 text-base',
-  lg: 'px-8 py-4 text-lg',
-}
+  sm: "px-4 py-2 text-sm",
+  md: "px-6 py-3 text-base",
+  lg: "px-8 py-4 text-lg",
+};
 
 export function Button({
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   children,
   icon,
-  className = '',
+  className = "",
   ...props
 }: ButtonProps) {
   return (
@@ -58,11 +58,11 @@ export function Button({
       {...props}
     >
       {/* Highlight streak for primary button */}
-      {variant === 'primary' && (
+      {variant === "primary" && (
         <div className="absolute top-1 left-2 w-3 h-1 bg-white rounded-full opacity-70" />
       )}
       {icon}
       {children}
     </button>
-  )
+  );
 }

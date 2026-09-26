@@ -1,24 +1,24 @@
-import React from 'react'
+import React from "react";
 
 interface AvatarProps {
-  color: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
-  initials?: string
-  isSelected?: boolean
-  isTaken?: boolean
-  takenBy?: string
+  color: string;
+  size?: "sm" | "md" | "lg" | "xl";
+  initials?: string;
+  isSelected?: boolean;
+  isTaken?: boolean;
+  takenBy?: string;
 }
 
 const sizeMap = {
-  sm: 'w-8 h-8 text-xs',
-  md: 'w-12 h-12 text-sm',
-  lg: 'w-16 h-16 text-lg',
-  xl: 'w-24 h-24 text-2xl',
-}
+  sm: "w-8 h-8 text-xs",
+  md: "w-12 h-12 text-sm",
+  lg: "w-16 h-16 text-lg",
+  xl: "w-24 h-24 text-2xl",
+};
 
 export function Avatar({
   color,
-  size = 'md',
+  size = "md",
   initials,
   isSelected,
   isTaken,
@@ -32,7 +32,7 @@ export function Avatar({
           ${sizeMap[size]}
           border-[var(--border-width)] border-[var(--ink)]
           font-bold text-white
-          ${isTaken ? 'opacity-40' : ''}
+          ${isTaken ? "opacity-40" : ""}
           transition-all duration-150
         `}
         style={{ backgroundColor: color }}
@@ -59,5 +59,5 @@ export function Avatar({
         </div>
       )}
     </div>
-  )
+  );
 }

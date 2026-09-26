@@ -1,16 +1,16 @@
-import React from 'react'
-import { Card } from './Card'
+import React from "react";
+import { Card } from "./Card";
 
 interface RoomCodeProps {
-  code: string
-  variant?: 'mobile' | 'host'
+  code: string;
+  variant?: "mobile" | "host";
 }
 
-export function RoomCode({ code, variant = 'mobile' }: RoomCodeProps) {
-  if (variant === 'mobile') {
+export function RoomCode({ code, variant = "mobile" }: RoomCodeProps) {
+  if (variant === "mobile") {
     return (
       <div className="flex gap-2 justify-center">
-        {code.split('').map((letter, i) => (
+        {code.split("").map((letter, i) => (
           <div
             key={i}
             className={`
@@ -25,17 +25,20 @@ export function RoomCode({ code, variant = 'mobile' }: RoomCodeProps) {
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   return (
     <Card className="bg-[var(--sun)]">
       <div className="text-center">
         <div className="text-label text-[var(--ink)] mb-2">ROOM CODE</div>
-        <div className="display-lg text-[var(--ink)]" style={{ letterSpacing: '0.1em' }}>
+        <div
+          className="display-lg text-[var(--ink)]"
+          style={{ letterSpacing: "0.1em" }}
+        >
           {code}
         </div>
       </div>
     </Card>
-  )
+  );
 }
