@@ -22,45 +22,44 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const [currentPoints, setCurrentPoints] = useState<CursorPoint[]>([]);
 
   function checkoutFromStore(inv: Ingredient[]) {
-    setInventory(inv);
+    setInventory([...inventory, ...inv]);
     setInterfaceState("recipe");
   }
 
   return (
     <div>
-      <h2>Client interface</h2>
-      <p>
-        {recipeOrder.length === 0
-          ? "Waiting for game state…"
-          : `${recipeOrder.length} recipes received`}
-      </p>
-      {interfaceState == "store" ? (
-        <Store uploadInventory={checkoutFromStore}></Store>
-      ) : (
-        <>
-          <p>Inventory</p>
-          <div className="flex flex-row gap-1">
-            {inventory.map((v) => (
-              <img className="w-12 h-12" src={v.image} />
-            ))}
-          </div>
-          <p>In recipe</p>
-          <div>
-            <CursorPathTracker onPointsChange={setCurrentPoints} />
-            <MasterRecipe
-              recipe={recipeOrder[recipeState]}
-              points={currentPoints}
-              onCompleteChange={(complete) => {
-                if (complete) {
-                  console.log(recipeState);
-                  if (recipeState + 1 < recipeOrder.length)
-                    setRecipeState(recipeState + 1);
-                }
-              }}
-            />
-          </div>
-        </>
-      )}
+        <h2>Client interface</h2>
+        <p>
+            {recipeOrder.length === 0
+            ? 'Waiting for game state…'
+            : `${recipeOrder.length} recipes received`}
+        </p>
+        {
+            interfaceState == "store" ? (
+                <Store uploadInventory={checkoutFromStore}></Store>
+            )
+            : (
+                <>
+                <p>Inventory</p>
+                <div className="flex flex-row gap-1">
+                    {inventory.map((v) => (
+                        <img className="w-12 h-12" src={v.image}/>
+                    ))}
+                </div>
+                <p>In recipe {recipeState+1} / {recipeOrder.length}</p>
+                <div className='relative overflow-hidden'>
+                    <CursorPathTracker onPointsChange={setCurrentPoints} />
+                    <MasterRecipe recipe={recipeOrder[recipeState]} points={currentPoints} 
+                    onCompleteChange={(complete)=>{if(complete) {
+                        console.log(recipeState)
+                        if(recipeState+1 < recipeOrder.length)
+                            setRecipeState(recipeState+1)
+                    }}} />
+                </div>
+                <button type='button' className='border z-100 cursor-pointer' onClick={()=>setInterfaceState("store")}>Return to Store</button>
+                </>
+            )
+        }
     </div>
   );
 }
