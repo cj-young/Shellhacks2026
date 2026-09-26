@@ -22,11 +22,18 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
     onPointsChange?.(points);
   }, [onPointsChange, points]);
 
+  const getPoint = (event: PointerEvent<HTMLDivElement>): CursorPoint => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+
+    return {
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    };
+  };
+
   const addPoint = (event: PointerEvent<HTMLDivElement>) => {
-    setPoints((currentPoints) => [
-      ...currentPoints,
-      { x: event.clientX, y: event.clientY },
-    ]);
+    const point = getPoint(event);
+    setPoints((currentPoints) => [...currentPoints, point]);
   };
 
   const clearPath = () => {
@@ -39,7 +46,7 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
 
     activePointerId.current = event.pointerId;
     event.currentTarget.setPointerCapture(event.pointerId);
-    setPoints([{ x: event.clientX, y: event.clientY }]);
+    setPoints([getPoint(event)]);
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -54,7 +61,7 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
   return (
     <div
       aria-label="Drag anywhere to draw a temporary path"
-      className="absolute w-full h-full touch-none overflow-hidden bg-transparent"
+      className="absolute z-10 w-full h-full touch-none overflow-hidden bg-transparent"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
@@ -63,7 +70,7 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
     >
       <svg
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0 h-full w-full"
+        className="pointer-events-none absolute inset-0 h-full w-full"
       >
         {points.length > 1 && (
           <polyline
