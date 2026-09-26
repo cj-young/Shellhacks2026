@@ -25,8 +25,10 @@ export {
 export { InMemoryGameStore } from "./infrastructure/in-memory-game-store.ts";
 export type {
   AddItemsResult,
+  EndRoundResult,
   JoinPlayerInput,
   JoinPlayerResult,
+  StartGameOptions,
   StartGameResult,
 } from "./application/game-service.ts";
 export type { GameStore } from "./ports/game-store.ts";

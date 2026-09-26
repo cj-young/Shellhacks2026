@@ -1,17 +1,19 @@
 import type { GameService } from "../../game/application/game-service.ts";
-import type { GameState } from "../../game/domain/game.ts";
+import type { GameState, GameStatus } from "../../game/domain/game.ts";
 import type { PurchaseItem } from "../../game/domain/inventory.ts";
 import { toPlayerSummary } from "../domain/player.ts";
 import type { PlayerSummary } from "../domain/player.ts";
-import type { ClientGameState } from "../domain/protocol.ts";
+import type { ClientGameState, PlayerResult } from "../domain/protocol.ts";
 
 export type JoinResult =
   | {
       ok: true;
       gameCode: string;
+      status: GameStatus;
       player: PlayerSummary;
       reconnectToken: string;
       players: PlayerSummary[];
+      state: ClientGameState;
     }
   | { ok: false; code: string; message: string };
 
@@ -29,6 +31,19 @@ export type StartResult =
 export interface StartInput {
   code: string;
   isHost: boolean;
+}
+
+export type EndRoundResult =
+  | {
+      ok: true;
+      gameCode: string;
+      state: ClientGameState;
+      results: PlayerResult[];
+    }
+  | { ok: false; code: string; message: string };
+
+export interface EndRoundInput {
+  code: string;
 }
 
 export interface LeaveInput {
@@ -59,6 +74,11 @@ const PURCHASE_MESSAGES: Record<string, string> = {
   INVALID_ITEM: "One or more items are invalid",
 };
 
+const END_MESSAGES: Record<string, string> = {
+  GAME_NOT_FOUND: "No game found for that code",
+  GAME_NOT_ACTIVE: "The game is not active",
+};
+
 export class GameSession {
   readonly #gameService: GameService;
 
@@ -84,13 +104,15 @@ export class GameSession {
     return {
       ok: true,
       gameCode: result.game.code,
+      status: result.game.status,
       player: toPlayerSummary(result.player),
       reconnectToken: result.player.reconnectToken,
       players: result.game.state.players.map(toPlayerSummary),
+      state: toClientGameState(result.game.state),
     };
   }
 
-  async start(input: StartInput): Promise<StartResult> {
+  async start(input: StartInput, durationMs?: number): Promise<StartResult> {
     if (!input.isHost) {
       return {
         ok: false,
@@ -99,7 +121,9 @@ export class GameSession {
       };
     }
 
-    const result = await this.#gameService.startGame(input.code);
+    const result = await this.#gameService.startGame(input.code, {
+      durationMs,
+    });
 
     if (!result.ok) {
       if (result.code === "GAME_NOT_FOUND") {
@@ -150,11 +174,40 @@ export class GameSession {
       state: toClientGameState(result.game.state),
     };
   }
+
+  async endRound(input: EndRoundInput): Promise<EndRoundResult> {
+    const result = await this.#gameService.endRound(input.code);
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message: END_MESSAGES[result.code] ?? "Unable to end the round",
+      };
+    }
+
+    const results: PlayerResult[] = [...result.game.state.players]
+      .sort((a, b) => b.score - a.score)
+      .map((player) => ({
+        playerId: player.id,
+        name: player.name,
+        score: player.score,
+      }));
+
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+      results,
+    };
+  }
 }
 
 function toClientGameState(state: GameState): ClientGameState {
   return {
     recipeOrder: state.recipeOrder,
     players: state.players.map(toPlayerSummary),
+    roundStartedAt: state.roundStartedAt,
+    roundEndsAt: state.roundEndsAt,
   };
 }

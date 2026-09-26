@@ -128,6 +128,30 @@ channels:
     messages:
       purchaseItems:
         $ref: '#/components/messages/PurchaseItems'
+  timerSync:
+    address: timer_sync
+    title: Timer sync
+    description: |
+      Sent once when the round starts (and to a client that joins an active game). Carries the
+      absolute `roundEndsAt` plus the server clock (`serverNow`) so clients can compute their
+      clock offset and tick down locally. The server ends the round authoritatively with
+      `game_ended`.
+    x-socketio:
+      event: timer_sync
+    messages:
+      timerSync:
+        $ref: '#/components/messages/TimerSync'
+  gameEnded:
+    address: game_ended
+    title: Game ended
+    description: |
+      Broadcast when the round timer expires. Carries the final rankings; the game status
+      becomes `finished` and further play events are rejected.
+    x-socketio:
+      event: game_ended
+    messages:
+      gameEnded:
+        $ref: '#/components/messages/GameEnded'
 
 operations:
   sendJoined:
@@ -165,6 +189,16 @@ operations:
     summary: Receive a purchase request from a player.
     channel:
       $ref: '#/channels/purchaseItems'
+  sendTimerSync:
+    action: send
+    summary: Send the round end time and the server clock once.
+    channel:
+      $ref: '#/channels/timerSync'
+  sendGameEnded:
+    action: send
+    summary: Announce the end of the round with final rankings.
+    channel:
+      $ref: '#/channels/gameEnded'
 
 components:
   messages:
@@ -202,6 +236,16 @@ components:
       title: Purchase items
       payload:
         $ref: '#/components/schemas/PurchaseItemsPayload'
+    TimerSync:
+      name: timer_sync
+      title: Timer sync
+      payload:
+        $ref: '#/components/schemas/TimerSyncPayload'
+    GameEnded:
+      name: game_ended
+      title: Game ended
+      payload:
+        $ref: '#/components/schemas/GameEndedPayload'
   schemas:
     PlayerSummary:
       type: object
@@ -241,7 +285,7 @@ components:
           additionalProperties:
             type: integer
           examples:
-            - { "0": 2 }
+            - { "1": 2 }
     JoinedPayload:
       type: object
       additionalProperties: false
@@ -294,9 +338,9 @@ components:
       properties:
         id:
           type: integer
-          description: Ingredient id (positional index into the ingredients catalogue).
+          description: Ingredient id from the ingredients catalogue.
           examples:
-            - 0
+            - 1
         count:
           type: integer
           description: Quantity to add (1-99).
@@ -309,6 +353,50 @@ components:
       description: Items to purchase. Processed all-or-nothing.
       items:
         $ref: '#/components/schemas/PurchaseItem'
+    TimerSyncPayload:
+      type: object
+      additionalProperties: false
+      required:
+        - roundEndsAt
+        - serverNow
+      properties:
+        roundEndsAt:
+          type: integer
+          description: Unix timestamp (ms) when the round ends.
+          examples:
+            - 1790400532276
+        serverNow:
+          type: integer
+          description: Server clock at send time (ms); clients use it to compute a clock offset.
+          examples:
+            - 1790400448276
+    PlayerResult:
+      type: object
+      additionalProperties: false
+      required:
+        - playerId
+        - name
+        - score
+      properties:
+        playerId:
+          type: string
+        name:
+          type: string
+        score:
+          type: integer
+          examples:
+            - 100
+    GameEndedPayload:
+      type: object
+      additionalProperties: false
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          description: Players ranked by score (highest first).
+          items:
+            $ref: '#/components/schemas/PlayerResult'
     GameErrorPayload:
       type: object
       additionalProperties: false

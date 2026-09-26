@@ -1,9 +1,12 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
+import ingredients from "../../data/ingredients.json" with { type: "json" };
 import { GameService } from "../../game/application/game-service.ts";
 import { InMemoryGameStore } from "../../game/infrastructure/in-memory-game-store.ts";
 import { GameSession } from "./game-session.ts";
+
+const ITEM_ID = ingredients[0].id;
 
 function setup(): { gameService: GameService; session: GameSession } {
   const gameService = new GameService(new InMemoryGameStore());
@@ -127,6 +130,7 @@ test("start activates the game for the host", async () => {
   }
   assert.equal(result.gameCode, game.code);
   assert.equal(result.state.recipeOrder.length, 3);
+  assert.equal(typeof result.state.roundEndsAt, "number");
   assert.equal((await gameService.getGame(game.code))?.status, "active");
 });
 
@@ -218,14 +222,14 @@ test("purchase adds items and returns the updated client state", async () => {
   const result = await session.purchase({
     code: game.code,
     playerId: joined.player.id,
-    items: [{ id: 0, count: 2 }],
+    items: [{ id: ITEM_ID, count: 2 }],
   });
 
   if (!result.ok) {
     assert.fail("expected the purchase to succeed");
   }
   assert.equal(result.gameCode, game.code);
-  assert.equal(result.state.players[0]?.inventory[0], 2);
+  assert.equal(result.state.players[0]?.inventory[ITEM_ID], 2);
 });
 
 test("purchase rejects when the game is not active", async () => {
@@ -239,7 +243,7 @@ test("purchase rejects when the game is not active", async () => {
   const result = await session.purchase({
     code: game.code,
     playerId: joined.player.id,
-    items: [{ id: 0, count: 1 }],
+    items: [{ id: ITEM_ID, count: 1 }],
   });
 
   assert.equal(result.ok, false);
@@ -247,4 +251,23 @@ test("purchase rejects when the game is not active", async () => {
     assert.fail("expected the purchase to fail");
   }
   assert.equal(result.code, "GAME_NOT_ACTIVE");
+});
+
+test("endRound returns the final rankings", async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+  const joined = await session.join({ code: game.code, name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await gameService.startGame(game.code);
+
+  const result = await session.endRound({ code: game.code });
+
+  if (!result.ok) {
+    assert.fail("expected end to succeed");
+  }
+  assert.equal(result.results.length, 1);
+  assert.equal(result.results[0]?.name, "Ada");
+  assert.equal(result.state.roundEndsAt !== null, true);
 });
