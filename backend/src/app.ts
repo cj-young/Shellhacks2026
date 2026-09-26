@@ -3,22 +3,22 @@ import express, {
   type Request,
   type Response,
   type Router,
-} from 'express'
+} from "express";
 
 export interface AppDependencies {
-  gameRouter: Router
+  gameRouter: Router;
 }
 
 export function createApp({ gameRouter }: AppDependencies): Express {
-  const app = express()
+  const app = express();
 
-  app.use(express.json())
+  app.use(express.json());
 
-  app.get('/', (_req: Request, res: Response) => {
-    res.send('Hello World!')
-  })
+  app.get("/", (_req: Request, res: Response) => {
+    res.send("Hello World!");
+  });
 
-  app.use('/games', gameRouter)
+  app.use("/games", gameRouter);
 
-  return app
+  return app;
 }
