@@ -1,10 +1,13 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
+import ingredients from "../../data/ingredients.json" with { type: "json" };
 import type { Game } from "../domain/game.ts";
 import { InMemoryGameStore } from "../infrastructure/in-memory-game-store.ts";
 import type { GameStore } from "../ports/game-store.ts";
 import { GameService, MAX_PLAYERS } from "./game-service.ts";
+
+const ITEM_ID = ingredients[0].id;
 
 test("createGame stores the game and getGame finds it case-insensitively", async () => {
   const service = new GameService(new InMemoryGameStore());
@@ -67,13 +70,21 @@ test("startGame moves a lobby game to active and persists it", async () => {
   const service = new GameService(new InMemoryGameStore());
   const game = await service.createGame();
 
-  const result = await service.startGame(game.code.toLowerCase());
+  const result = await service.startGame(game.code.toLowerCase(), {
+    durationMs: 60_000,
+  });
 
   assert.equal(result.ok, true);
   if (!result.ok) {
     assert.fail("expected start to succeed");
   }
   assert.equal(result.game.status, "active");
+  assert.equal(typeof result.game.state.roundStartedAt, "number");
+  assert.equal(
+    (result.game.state.roundEndsAt ?? 0) -
+      (result.game.state.roundStartedAt ?? 0),
+    60_000,
+  );
   assert.equal((await service.getGame(game.code))?.status, "active");
 });
 
@@ -220,8 +231,8 @@ test("addItemsToInventory merges counts into the player inventory", async () => 
     game.code,
     joined.player.id,
     [
-      { id: 0, count: 2 },
-      { id: 0, count: 3 },
+      { id: ITEM_ID, count: 2 },
+      { id: ITEM_ID, count: 3 },
     ],
   );
 
@@ -230,7 +241,7 @@ test("addItemsToInventory merges counts into the player inventory", async () => 
     assert.fail("expected the purchase to succeed");
   }
   const stored = await service.getGame(game.code);
-  assert.deepEqual(stored?.state.players[0]?.inventory, { 0: 5 });
+  assert.deepEqual(stored?.state.players[0]?.inventory, { [ITEM_ID]: 5 });
 });
 
 test("consumeItemsFromInventory removes items atomically", async () => {
@@ -293,7 +304,7 @@ test("addItemsToInventory is all-or-nothing for unknown ids", async () => {
     game.code,
     joined.player.id,
     [
-      { id: 0, count: 1 },
+      { id: ITEM_ID, count: 1 },
       { id: 999, count: 1 },
     ],
   );
@@ -320,7 +331,7 @@ test("addItemsToInventory rejects invalid counts", async () => {
     const result = await service.addItemsToInventory(
       game.code,
       joined.player.id,
-      [{ id: 0, count }],
+      [{ id: ITEM_ID, count }],
     );
     assert.equal(result.ok, false);
     if (result.ok) {
@@ -363,7 +374,7 @@ test("addItemsToInventory rejects a lobby game", async () => {
   const result = await service.addItemsToInventory(
     game.code,
     joined.player.id,
-    [{ id: 0, count: 1 }],
+    [{ id: ITEM_ID, count: 1 }],
   );
 
   assert.equal(result.ok, false);
@@ -379,7 +390,7 @@ test("addItemsToInventory rejects an unknown player", async () => {
   await service.startGame(game.code);
 
   const result = await service.addItemsToInventory(game.code, "nobody", [
-    { id: 0, count: 1 },
+    { id: ITEM_ID, count: 1 },
   ]);
 
   assert.equal(result.ok, false);
@@ -387,4 +398,32 @@ test("addItemsToInventory rejects an unknown player", async () => {
     assert.fail("expected the purchase to fail");
   }
   assert.equal(result.code, "PLAYER_NOT_FOUND");
+});
+
+test("endRound finishes an active game", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  await service.startGame(game.code);
+
+  const result = await service.endRound(game.code);
+
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    assert.fail("expected end to succeed");
+  }
+  assert.equal(result.game.status, "finished");
+  assert.equal((await service.getGame(game.code))?.status, "finished");
+});
+
+test("endRound rejects a lobby game", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+
+  const result = await service.endRound(game.code);
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected end to fail");
+  }
+  assert.equal(result.code, "GAME_NOT_ACTIVE");
 });

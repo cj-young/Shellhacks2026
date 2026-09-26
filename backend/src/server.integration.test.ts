@@ -1,13 +1,16 @@
 import { strict as assert } from "node:assert";
-import { createServer, type Server } from "node:http";
+import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { after, before, test } from "node:test";
 
 import { io, type Socket } from "socket.io-client";
 
+import ingredients from "./data/ingredients.json" with { type: "json" };
 import { createApp } from "./app.ts";
 import { createGameModule, type GameModule } from "./game/index.ts";
 import { createRealtimeModule, type RealtimeModule } from "./realtime/index.ts";
+
+const ITEM_ID = ingredients[0].id;
 
 interface JoinedPayload {
   playerId: string;
@@ -43,6 +46,15 @@ interface GameStatePayload {
     name: string;
     inventory: Record<string, number>;
   }>;
+}
+
+interface TimerSyncPayload {
+  roundEndsAt: number;
+  serverNow: number;
+}
+
+interface GameEndedPayload {
+  results: Array<{ playerId: string; name: string; score: number }>;
 }
 
 function connectClient(
@@ -81,23 +93,45 @@ function waitFor<T>(
   });
 }
 
-let server: Server;
 let realtime: RealtimeModule;
 let gameModule: GameModule;
 let base: string;
 
-before(async () => {
-  gameModule = createGameModule();
-  const app = createApp({ gameRouter: gameModule.router });
-  server = createServer(app);
-  realtime = createRealtimeModule({ server, gameService: gameModule.service });
+interface ServerInstance {
+  realtime: RealtimeModule;
+  gameModule: GameModule;
+  base: string;
+}
 
-  await new Promise<void>((resolve) => {
-    server.listen(0, "127.0.0.1", resolve);
+async function startServer(
+  options: { roundDurationMs?: number } = {},
+): Promise<ServerInstance> {
+  const instanceGameModule = createGameModule();
+  const app = createApp({ gameRouter: instanceGameModule.router });
+  const instanceServer = createServer(app);
+  const instanceRealtime = createRealtimeModule({
+    server: instanceServer,
+    gameService: instanceGameModule.service,
+    ...options,
   });
 
-  const { port } = server.address() as AddressInfo;
-  base = `http://127.0.0.1:${port}`;
+  await new Promise<void>((resolve) => {
+    instanceServer.listen(0, "127.0.0.1", resolve);
+  });
+
+  const { port } = instanceServer.address() as AddressInfo;
+  return {
+    realtime: instanceRealtime,
+    gameModule: instanceGameModule,
+    base: `http://127.0.0.1:${port}`,
+  };
+}
+
+before(async () => {
+  const instance = await startServer();
+  realtime = instance.realtime;
+  gameModule = instance.gameModule;
+  base = instance.base;
 });
 
 after(async () => {
@@ -275,14 +309,14 @@ test("purchases items and broadcasts the inventory to everyone", async () => {
 
   const hostPurchase = waitFor<GameStatePayload>(host, "update_state");
   const guestPurchase = waitFor<GameStatePayload>(guest, "update_state");
-  host.emit("purchase_items", [{ id: 0, count: 2 }]);
+  host.emit("purchase_items", [{ id: ITEM_ID, count: 2 }]);
 
   const [hostView, guestView] = await Promise.all([
     hostPurchase,
     guestPurchase,
   ]);
   const hostPlayer = hostView.players.find((player) => player.name === "Hosty");
-  assert.deepEqual(hostPlayer?.inventory, { 0: 2 });
+  assert.deepEqual(hostPlayer?.inventory, { [ITEM_ID]: 2 });
   assert.deepEqual(guestView, hostView);
 
   host.close();
@@ -342,6 +376,46 @@ test("rejects an invalid purchase", async () => {
   assert.equal(error.code, "INVALID_ITEM");
 
   host.close();
+});
+
+test("syncs the round timer and ends the game at expiry", async () => {
+  const instance = await startServer({ roundDurationMs: 200 });
+
+  try {
+    const game = await instance.gameModule.service.createGame();
+    const host = connectClient(instance.base, {
+      code: game.code,
+      token: game.hostToken,
+      name: "Hosty",
+    });
+    const joined = waitFor<JoinedPayload>(host, "joined");
+    host.connect();
+    await joined;
+
+    const started = waitFor<GameStartedPayload>(host, "game_started");
+    const sync = waitFor<TimerSyncPayload>(host, "timer_sync");
+    const ended = waitFor<GameEndedPayload>(host, "game_ended", 2000);
+    host.emit("start_game");
+
+    await started;
+
+    const syncPayload = await sync;
+    assert.equal(typeof syncPayload.roundEndsAt, "number");
+    assert.equal(typeof syncPayload.serverNow, "number");
+
+    const endedPayload = await ended;
+    assert.equal(endedPayload.results.length, 1);
+    assert.equal(endedPayload.results[0]?.name, "Hosty");
+
+    const failure = waitFor<GameErrorPayload>(host, "game_error");
+    host.emit("purchase_items", [{ id: ITEM_ID, count: 1 }]);
+    const error = await failure;
+    assert.equal(error.code, "GAME_NOT_ACTIVE");
+
+    host.close();
+  } finally {
+    await instance.realtime.close();
+  }
 });
 
 test("rejects a join once the game has started", async () => {
