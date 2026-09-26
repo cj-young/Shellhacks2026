@@ -1,13 +1,13 @@
-import React from 'react'
-import { Logo } from '../Logo'
-import { Pill } from '../Pill'
-import { PlayerPill } from '../PlayerPill'
-import { RoomCode } from '../RoomCode'
-import { Button } from '../Button'
-import { MOCK_PLAYERS, ROOM_CODE } from '#/data/chop-chop-mock'
+import React from "react";
+import { Logo } from "../Logo";
+import { Pill } from "../Pill";
+import { PlayerPill } from "../PlayerPill";
+import { RoomCode } from "../RoomCode";
+import { Button } from "../Button";
+import { MOCK_PLAYERS, ROOM_CODE } from "#/data/chop-chop-mock";
 
 export function HostLobby() {
-  const newestPlayer = MOCK_PLAYERS.find((p) => p.isNewest)
+  const newestPlayer = MOCK_PLAYERS.find((p) => p.isNewest);
 
   return (
     <div className="w-screen h-screen bg-[var(--bg)] dot-grid overflow-hidden flex flex-col">
@@ -26,7 +26,9 @@ export function HostLobby() {
             </Pill>
           </div>
           <div className="text-2xl font-display font-bold text-[var(--ink)]">
-            Cook together.<br />Pass it on.
+            Cook together.
+            <br />
+            Pass it on.
           </div>
 
           {/* Players pills */}
@@ -46,7 +48,9 @@ export function HostLobby() {
           {/* Circular QR badge */}
           <div className="w-32 h-32 rounded-full bg-[var(--sky)] border-4 border-[var(--ink)] shadow-[0_5px_0_var(--ink)] flex items-center justify-center relative">
             <div className="text-white text-xs font-bold text-center absolute inset-0 flex items-center justify-center">
-              SCAN TO<br />JOIN
+              SCAN TO
+              <br />
+              JOIN
             </div>
             {/* QR placeholder */}
             <div className="w-16 h-16 bg-white rounded-lg border-2 border-[var(--ink)] flex items-center justify-center text-lg">
@@ -76,7 +80,9 @@ export function HostLobby() {
                 👋
               </div>
             </div>
-            <div className="text-sm font-bold text-[var(--ink)]">{newestPlayer.name} joined!</div>
+            <div className="text-sm font-bold text-[var(--ink)]">
+              {newestPlayer.name} joined!
+            </div>
           </div>
         )}
 
@@ -91,5 +97,5 @@ export function HostLobby() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,21 +1,25 @@
-import React, { useState } from 'react'
-import { Pill } from '../Pill'
-import { Avatar } from '../Avatar'
-import { Button } from '../Button'
-import { PLAYER_COLORS } from '#/data/chop-chop-mock'
+import React, { useState } from "react";
+import { Pill } from "../Pill";
+import { Avatar } from "../Avatar";
+import { Button } from "../Button";
+import { PLAYER_COLORS } from "#/data/chop-chop-mock";
 
 // Demo: show first player's prep screen
-const demoPlayer = { name: 'Alex', color: PLAYER_COLORS[0], avatar: 'A' }
-const currentItem = { name: 'Tomato', emoji: '🍅', progress: 35 }
+const demoPlayer = { name: "Alex", color: PLAYER_COLORS[0], avatar: "A" };
+const currentItem = { name: "Tomato", emoji: "🍅", progress: 35 };
 
 export function MobilePrep() {
-  const [swiped, setSwiped] = useState(false)
+  const [swiped, setSwiped] = useState(false);
 
   return (
     <div className="w-full h-screen max-w-sm mx-auto overflow-hidden flex flex-col bg-[var(--bg)] dot-grid">
       {/* Station header */}
       <div className="p-4 border-b-4 border-[var(--ink)]">
-        <Pill color="royal" textColor="text-white" className="w-full justify-center">
+        <Pill
+          color="royal"
+          textColor="text-white"
+          className="w-full justify-center"
+        >
           Prep Station
         </Pill>
       </div>
@@ -40,7 +44,9 @@ export function MobilePrep() {
       {/* Swipe instruction */}
       <div className="flex-1 flex flex-col items-center justify-center gap-4">
         <div className="text-center">
-          <div className="text-label mb-2 text-[var(--ink-soft)]">SWIPE TO CHOP</div>
+          <div className="text-label mb-2 text-[var(--ink-soft)]">
+            SWIPE TO CHOP
+          </div>
           <div className="text-sm text-[var(--ink)]">
             Swipe left and right to chop up the {currentItem.name}
           </div>
@@ -53,8 +59,8 @@ export function MobilePrep() {
             flex items-center justify-center transition-all
             ${
               swiped
-                ? 'bg-[var(--leaf)] border-[var(--leaf)]'
-                : 'bg-[var(--surface)] border-[var(--ink)]'
+                ? "bg-[var(--leaf)] border-[var(--leaf)]"
+                : "bg-[var(--surface)] border-[var(--ink)]"
             }
           `}
           onTouchStart={() => setSwiped(false)}
@@ -63,7 +69,7 @@ export function MobilePrep() {
           <div className="text-center">
             <div className="text-2xl mb-2">👆</div>
             <div className="text-xs font-bold text-[var(--ink)]">
-              {swiped ? '✓ Nice chop!' : 'Swipe here'}
+              {swiped ? "✓ Nice chop!" : "Swipe here"}
             </div>
           </div>
         </div>
@@ -76,5 +82,5 @@ export function MobilePrep() {
         </div>
       </div>
     </div>
-  )
+  );
 }

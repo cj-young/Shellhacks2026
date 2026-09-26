@@ -1,29 +1,45 @@
-import { randomUUID } from "node:crypto";
-
 import type { GameService } from "../../game/application/game-service.ts";
-import { normalizeGameCode } from "../../game/domain/code.ts";
 import type { GameState } from "../../game/domain/game.ts";
-import { normalizePlayerName } from "../domain/player.ts";
+import { toPlayerSummary } from "../domain/player.ts";
 import type { PlayerSummary } from "../domain/player.ts";
+import type { ClientGameState } from "../domain/protocol.ts";
 
 export type JoinResult =
-  | { ok: true; gameCode: string; player: PlayerSummary }
+  | {
+      ok: true;
+      gameCode: string;
+      player: PlayerSummary;
+      reconnectToken: string;
+      players: PlayerSummary[];
+    }
   | { ok: false; code: string; message: string };
 
 export interface JoinInput {
   code: string;
   name?: string;
   hostToken?: string;
+  reconnectToken?: string;
 }
 
 export type StartResult =
-  | { ok: true; gameCode: string; state: GameState }
+  | { ok: true; gameCode: string; state: ClientGameState }
   | { ok: false; code: string; message: string };
 
 export interface StartInput {
   code: string;
   isHost: boolean;
 }
+
+export interface LeaveInput {
+  code: string;
+  playerId: string;
+}
+
+const JOIN_MESSAGES: Record<string, string> = {
+  GAME_NOT_FOUND: "No game found for that code",
+  GAME_STARTED: "This game has already started",
+  GAME_FULL: "This game is full",
+};
 
 export class GameSession {
   readonly #gameService: GameService;
@@ -33,36 +49,27 @@ export class GameSession {
   }
 
   async join(input: JoinInput): Promise<JoinResult> {
-    const game = await this.#gameService.getGame(normalizeGameCode(input.code));
+    const result = await this.#gameService.joinPlayer(input.code, {
+      name: input.name,
+      hostToken: input.hostToken,
+      reconnectToken: input.reconnectToken,
+    });
 
-    if (!game) {
+    if (!result.ok) {
       return {
         ok: false,
-        code: "GAME_NOT_FOUND",
-        message: "No game found for that code",
+        code: result.code,
+        message: JOIN_MESSAGES[result.code] ?? "Unable to join the game",
       };
     }
 
-    if (game.status !== "lobby") {
-      return {
-        ok: false,
-        code: "GAME_STARTED",
-        message: "This game has already started",
-      };
-    }
-
-    const isHost =
-      input.hostToken !== undefined && input.hostToken === game.hostToken;
-    const name =
-      normalizePlayerName(input.name) || (isHost ? "Host" : "Player");
-    const player: PlayerSummary = {
-      id: randomUUID(),
-      name,
-      joinedAt: Date.now(),
-      isHost,
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      player: toPlayerSummary(result.player),
+      reconnectToken: result.player.reconnectToken,
+      players: result.game.state.players.map(toPlayerSummary),
     };
-
-    return { ok: true, gameCode: game.code, player };
   }
 
   async start(input: StartInput): Promise<StartResult> {
@@ -92,6 +99,21 @@ export class GameSession {
       };
     }
 
-    return { ok: true, gameCode: result.game.code, state: result.game.state };
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+    };
   }
+
+  async leave(input: LeaveInput): Promise<void> {
+    await this.#gameService.markDisconnected(input.code, input.playerId);
+  }
+}
+
+function toClientGameState(state: GameState): ClientGameState {
+  return {
+    recipeOrder: state.recipeOrder,
+    players: state.players.map(toPlayerSummary),
+  };
 }

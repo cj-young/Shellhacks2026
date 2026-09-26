@@ -1,60 +1,60 @@
-import { useEffect, useRef, useState } from 'react'
-import type { PointerEvent } from 'react'
+import { useEffect, useRef, useState } from "react";
+import type { PointerEvent } from "react";
 
 export type CursorPoint = {
-  x: number
-  y: number
-}
+  x: number;
+  y: number;
+};
 
 type CursorPathTrackerProps = {
   /** Called whenever the in-progress path changes, and with [] when it clears. */
-  onPointsChange?: (points: CursorPoint[]) => void
-}
+  onPointsChange?: (points: CursorPoint[]) => void;
+};
 
 /**
  * Draws a temporary trail while a mouse, pen, or touch pointer is held down.
  */
 export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
-  const [points, setPoints] = useState<CursorPoint[]>([])
-  const activePointerId = useRef<number | null>(null)
+  const [points, setPoints] = useState<CursorPoint[]>([]);
+  const activePointerId = useRef<number | null>(null);
 
   useEffect(() => {
-    onPointsChange?.(points)
-  }, [onPointsChange, points])
+    onPointsChange?.(points);
+  }, [onPointsChange, points]);
 
   const addPoint = (event: PointerEvent<HTMLDivElement>) => {
     setPoints((currentPoints) => [
       ...currentPoints,
       { x: event.clientX, y: event.clientY },
-    ])
-  }
+    ]);
+  };
 
   const clearPath = () => {
-    activePointerId.current = null
-    setPoints([])
-  }
+    activePointerId.current = null;
+    setPoints([]);
+  };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (activePointerId.current !== null) return
+    if (activePointerId.current !== null) return;
 
-    activePointerId.current = event.pointerId
-    event.currentTarget.setPointerCapture(event.pointerId)
-    setPoints([{ x: event.clientX, y: event.clientY }])
-  }
+    activePointerId.current = event.pointerId;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setPoints([{ x: event.clientX, y: event.clientY }]);
+  };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerId !== activePointerId.current) return
-    addPoint(event)
-  }
+    if (event.pointerId !== activePointerId.current) return;
+    addPoint(event);
+  };
 
   const handlePointerEnd = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerId === activePointerId.current) clearPath()
-  }
+    if (event.pointerId === activePointerId.current) clearPath();
+  };
 
   return (
     <div
       aria-label="Drag anywhere to draw a temporary path"
-      className="absolute w-screen min-h-screen touch-none overflow-hidden bg-slate-950"
+      className="absolute w-screen min-h-screen touch-none overflow-hidden bg-transparent"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
@@ -68,7 +68,7 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
         {points.length > 1 && (
           <polyline
             fill="none"
-            points={points.map(({ x, y }) => `${x},${y}`).join(' ')}
+            points={points.map(({ x, y }) => `${x},${y}`).join(" ")}
             stroke="rgb(34 211 238)"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -87,5 +87,5 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
         </div>
       </div> */}
     </div>
-  )
+  );
 }

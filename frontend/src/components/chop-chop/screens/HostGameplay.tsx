@@ -1,23 +1,25 @@
-import React, { useEffect, useState } from 'react'
-import { MOCK_GAMEPLAY_STATE, MOCK_PLAYERS } from '#/data/chop-chop-mock'
-import { Pill } from '../Pill'
-import { Card } from '../Card'
+import React, { useEffect, useState } from "react";
+import { MOCK_GAMEPLAY_STATE, MOCK_PLAYERS } from "#/data/chop-chop-mock";
+import { Pill } from "../Pill";
+import { Card } from "../Card";
 
 export function HostGameplay() {
-  const [timeRemaining, setTimeRemaining] = useState(MOCK_GAMEPLAY_STATE.timeRemaining)
+  const [timeRemaining, setTimeRemaining] = useState(
+    MOCK_GAMEPLAY_STATE.timeRemaining,
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeRemaining((t) => Math.max(0, t - 1))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
+      setTimeRemaining((t) => Math.max(0, t - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="w-screen h-screen bg-[var(--bg)] dot-grid overflow-hidden flex flex-col p-6 gap-4">
@@ -61,7 +63,7 @@ export function HostGameplay() {
 
       {/* Middle section: Stations */}
       <div className="flex-1 flex gap-4 min-h-0">
-        {(['prep', 'stove', 'plating'] as const).map((station) => (
+        {(["prep", "stove", "plating"] as const).map((station) => (
           <div key={station} className="flex-1 flex flex-col">
             <Card className="flex-1 flex flex-col">
               <div className="text-label mb-4 capitalize text-center">
@@ -118,7 +120,7 @@ export function HostGameplay() {
                 <div className="h-2 bg-[var(--bg)] rounded-full overflow-hidden border border-[var(--ink)] mt-1">
                   <div
                     className="h-full bg-[player.color] transition-all"
-                    style={{ width: '65%', backgroundColor: player.color }}
+                    style={{ width: "65%", backgroundColor: player.color }}
                   />
                 </div>
               </div>
@@ -136,5 +138,5 @@ export function HostGameplay() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -20,3 +20,7 @@ export function normalizeGameCode(code: string): string {
 export function generateHostToken(): string {
   return randomBytes(24).toString("base64url");
 }
+
+export function generateReconnectToken(): string {
+  return randomBytes(24).toString("base64url");
+}

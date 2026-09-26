@@ -1,16 +1,19 @@
-export const MAX_PLAYER_NAME_LENGTH = 20;
+import type { Player } from "../../game/domain/player.ts";
 
 export interface PlayerSummary {
   readonly id: string;
   readonly name: string;
-  readonly joinedAt: number;
   readonly isHost: boolean;
+  readonly joinedAt: number;
+  readonly connected: boolean;
 }
 
-export function normalizePlayerName(raw: string | undefined): string {
-  if (!raw) {
-    return "";
-  }
-
-  return raw.trim().replace(/\s+/g, " ").slice(0, MAX_PLAYER_NAME_LENGTH);
+export function toPlayerSummary(player: Player): PlayerSummary {
+  return {
+    id: player.id,
+    name: player.name,
+    isHost: player.isHost,
+    joinedAt: player.joinedAt,
+    connected: player.connected,
+  };
 }

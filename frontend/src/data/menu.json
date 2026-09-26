@@ -7,34 +7,208 @@
     { "id": "pantry", "name": "Pantry" }
   ],
   "ingredients": [
-    { "id": "tomato", "name": "Tomato", "shelf": "produce", "color": "#F2553D", "label": "TOMATO" },
-    { "id": "lettuce", "name": "Lettuce", "shelf": "produce", "color": "#3CB54A", "label": "LETTUCE" },
-    { "id": "garlic", "name": "Garlic", "shelf": "produce", "color": "#FFFFFF", "label": "GARLIC" },
-    { "id": "onion", "name": "Onion", "shelf": "produce", "color": "#F2BE63", "label": "ONION" },
-    { "id": "carrot", "name": "Carrot", "shelf": "produce", "color": "#FF9A3C", "label": "CARROT" },
-    { "id": "broccoli", "name": "Broccoli", "shelf": "produce", "color": "#1E8A4A", "label": "BROCCOLI" },
-    { "id": "red-bell-pepper", "name": "Red bell pepper", "shelf": "produce", "color": "#F2553D", "label": "PEPPER" },
-    { "id": "celery", "name": "Celery", "shelf": "produce", "color": "#8FD14F", "label": "CELERY" },
-    { "id": "green-onion", "name": "Green onion", "shelf": "produce", "color": "#3CB54A", "label": "SCALLION" },
-    { "id": "potato", "name": "Potato", "shelf": "produce", "color": "#E9A866", "label": "POTATO" },
-    { "id": "avocado", "name": "Avocado", "shelf": "produce", "color": "#1E8A4A", "label": "AVOCADO" },
-    { "id": "lime", "name": "Lime", "shelf": "produce", "color": "#8FD14F", "label": "LIME" },
-    { "id": "lemon", "name": "Lemon", "shelf": "produce", "color": "#FFD83A", "label": "LEMON", "decoy": true, "lookalike": "lime" },
-    { "id": "leek", "name": "Leek", "shelf": "produce", "color": "#1E8A4A", "label": "LEEK", "decoy": true, "lookalike": "green-onion" },
-    { "id": "ground-beef", "name": "Ground beef", "shelf": "meat", "color": "#FF8A7A", "label": "BEEF" },
-    { "id": "chicken", "name": "Chicken", "shelf": "meat", "color": "#E9A866", "label": "CHICKEN" },
-    { "id": "steak", "name": "Steak", "shelf": "meat", "color": "#D9474A", "label": "STEAK" },
-    { "id": "cheese", "name": "Cheese", "shelf": "dairy", "color": "#FFC928", "label": "CHEESE" },
-    { "id": "egg", "name": "Egg", "shelf": "dairy", "color": "#FFF1D2", "label": "EGG" },
-    { "id": "milk", "name": "Milk", "shelf": "dairy", "color": "#4FB3F0", "label": "MILK" },
-    { "id": "butter", "name": "Butter", "shelf": "dairy", "color": "#FFE58A", "label": "BUTTER" },
-    { "id": "burger-bun", "name": "Burger bun", "shelf": "bakery", "color": "#F2BE63", "label": "BUN" },
-    { "id": "tortilla", "name": "Tortilla", "shelf": "bakery", "color": "#FFF1D2", "label": "TORTILLA" },
-    { "id": "pasta", "name": "Pasta", "shelf": "pantry", "color": "#FFDD6B", "label": "PASTA" },
-    { "id": "flour", "name": "Flour", "shelf": "pantry", "color": "#FFFFFF", "label": "FLOUR" },
-    { "id": "rice", "name": "Rice", "shelf": "pantry", "color": "#FFFFFF", "label": "RICE" },
-    { "id": "soy-sauce", "name": "Soy sauce", "shelf": "pantry", "color": "#4A4F8C", "label": "SOY" },
-    { "id": "sugar", "name": "Sugar", "shelf": "pantry", "color": "#F48FB7", "label": "SUGAR", "decoy": true, "lookalike": "flour" }
+    {
+      "id": "tomato",
+      "name": "Tomato",
+      "shelf": "produce",
+      "color": "#F2553D",
+      "label": "TOMATO"
+    },
+    {
+      "id": "lettuce",
+      "name": "Lettuce",
+      "shelf": "produce",
+      "color": "#3CB54A",
+      "label": "LETTUCE"
+    },
+    {
+      "id": "garlic",
+      "name": "Garlic",
+      "shelf": "produce",
+      "color": "#FFFFFF",
+      "label": "GARLIC"
+    },
+    {
+      "id": "onion",
+      "name": "Onion",
+      "shelf": "produce",
+      "color": "#F2BE63",
+      "label": "ONION"
+    },
+    {
+      "id": "carrot",
+      "name": "Carrot",
+      "shelf": "produce",
+      "color": "#FF9A3C",
+      "label": "CARROT"
+    },
+    {
+      "id": "broccoli",
+      "name": "Broccoli",
+      "shelf": "produce",
+      "color": "#1E8A4A",
+      "label": "BROCCOLI"
+    },
+    {
+      "id": "red-bell-pepper",
+      "name": "Red bell pepper",
+      "shelf": "produce",
+      "color": "#F2553D",
+      "label": "PEPPER"
+    },
+    {
+      "id": "celery",
+      "name": "Celery",
+      "shelf": "produce",
+      "color": "#8FD14F",
+      "label": "CELERY"
+    },
+    {
+      "id": "green-onion",
+      "name": "Green onion",
+      "shelf": "produce",
+      "color": "#3CB54A",
+      "label": "SCALLION"
+    },
+    {
+      "id": "potato",
+      "name": "Potato",
+      "shelf": "produce",
+      "color": "#E9A866",
+      "label": "POTATO"
+    },
+    {
+      "id": "avocado",
+      "name": "Avocado",
+      "shelf": "produce",
+      "color": "#1E8A4A",
+      "label": "AVOCADO"
+    },
+    {
+      "id": "lime",
+      "name": "Lime",
+      "shelf": "produce",
+      "color": "#8FD14F",
+      "label": "LIME"
+    },
+    {
+      "id": "lemon",
+      "name": "Lemon",
+      "shelf": "produce",
+      "color": "#FFD83A",
+      "label": "LEMON",
+      "decoy": true,
+      "lookalike": "lime"
+    },
+    {
+      "id": "leek",
+      "name": "Leek",
+      "shelf": "produce",
+      "color": "#1E8A4A",
+      "label": "LEEK",
+      "decoy": true,
+      "lookalike": "green-onion"
+    },
+    {
+      "id": "ground-beef",
+      "name": "Ground beef",
+      "shelf": "meat",
+      "color": "#FF8A7A",
+      "label": "BEEF"
+    },
+    {
+      "id": "chicken",
+      "name": "Chicken",
+      "shelf": "meat",
+      "color": "#E9A866",
+      "label": "CHICKEN"
+    },
+    {
+      "id": "steak",
+      "name": "Steak",
+      "shelf": "meat",
+      "color": "#D9474A",
+      "label": "STEAK"
+    },
+    {
+      "id": "cheese",
+      "name": "Cheese",
+      "shelf": "dairy",
+      "color": "#FFC928",
+      "label": "CHEESE"
+    },
+    {
+      "id": "egg",
+      "name": "Egg",
+      "shelf": "dairy",
+      "color": "#FFF1D2",
+      "label": "EGG"
+    },
+    {
+      "id": "milk",
+      "name": "Milk",
+      "shelf": "dairy",
+      "color": "#4FB3F0",
+      "label": "MILK"
+    },
+    {
+      "id": "butter",
+      "name": "Butter",
+      "shelf": "dairy",
+      "color": "#FFE58A",
+      "label": "BUTTER"
+    },
+    {
+      "id": "burger-bun",
+      "name": "Burger bun",
+      "shelf": "bakery",
+      "color": "#F2BE63",
+      "label": "BUN"
+    },
+    {
+      "id": "tortilla",
+      "name": "Tortilla",
+      "shelf": "bakery",
+      "color": "#FFF1D2",
+      "label": "TORTILLA"
+    },
+    {
+      "id": "pasta",
+      "name": "Pasta",
+      "shelf": "pantry",
+      "color": "#FFDD6B",
+      "label": "PASTA"
+    },
+    {
+      "id": "flour",
+      "name": "Flour",
+      "shelf": "pantry",
+      "color": "#FFFFFF",
+      "label": "FLOUR"
+    },
+    {
+      "id": "rice",
+      "name": "Rice",
+      "shelf": "pantry",
+      "color": "#FFFFFF",
+      "label": "RICE"
+    },
+    {
+      "id": "soy-sauce",
+      "name": "Soy sauce",
+      "shelf": "pantry",
+      "color": "#4A4F8C",
+      "label": "SOY"
+    },
+    {
+      "id": "sugar",
+      "name": "Sugar",
+      "shelf": "pantry",
+      "color": "#F48FB7",
+      "label": "SUGAR",
+      "decoy": true,
+      "lookalike": "flour"
+    }
   ],
   "recipes": [
     {
@@ -54,8 +228,16 @@
       "name": "Cheeseburger",
       "ingredients": ["burger-bun", "ground-beef", "cheese", "lettuce"],
       "steps": [
-        { "gesture": "flip", "ingredient": "ground-beef", "label": "Flip patty" },
-        { "gesture": "flip", "ingredient": "ground-beef", "label": "Flip patty" },
+        {
+          "gesture": "flip",
+          "ingredient": "ground-beef",
+          "label": "Flip patty"
+        },
+        {
+          "gesture": "flip",
+          "ingredient": "ground-beef",
+          "label": "Flip patty"
+        },
         { "gesture": "chop", "ingredient": "lettuce", "label": "Chop lettuce" },
         { "gesture": "plate", "label": "Plate" }
       ]
@@ -78,7 +260,11 @@
       "steps": [
         { "gesture": "chop", "ingredient": "tomato", "label": "Chop tomato" },
         { "gesture": "chop", "ingredient": "lettuce", "label": "Chop lettuce" },
-        { "gesture": "stir", "ingredient": "ground-beef", "label": "Stir beef" },
+        {
+          "gesture": "stir",
+          "ingredient": "ground-beef",
+          "label": "Stir beef"
+        },
         { "gesture": "plate", "label": "Plate" }
       ]
     },
@@ -87,9 +273,17 @@
       "name": "Veggie Stir-Fry",
       "ingredients": ["broccoli", "carrot", "red-bell-pepper", "soy-sauce"],
       "steps": [
-        { "gesture": "chop", "ingredient": "broccoli", "label": "Chop broccoli" },
+        {
+          "gesture": "chop",
+          "ingredient": "broccoli",
+          "label": "Chop broccoli"
+        },
         { "gesture": "chop", "ingredient": "carrot", "label": "Chop carrot" },
-        { "gesture": "chop", "ingredient": "red-bell-pepper", "label": "Chop pepper" },
+        {
+          "gesture": "chop",
+          "ingredient": "red-bell-pepper",
+          "label": "Chop pepper"
+        },
         { "gesture": "stir", "label": "Stir" },
         { "gesture": "plate", "label": "Plate" }
       ]
@@ -100,7 +294,11 @@
       "ingredients": ["egg", "cheese", "onion", "red-bell-pepper"],
       "steps": [
         { "gesture": "chop", "ingredient": "onion", "label": "Chop onion" },
-        { "gesture": "chop", "ingredient": "red-bell-pepper", "label": "Chop pepper" },
+        {
+          "gesture": "chop",
+          "ingredient": "red-bell-pepper",
+          "label": "Chop pepper"
+        },
         { "gesture": "stir", "ingredient": "egg", "label": "Stir eggs" },
         { "gesture": "flip", "label": "Flip omelette" },
         { "gesture": "plate", "label": "Plate" }
@@ -112,7 +310,11 @@
       "ingredients": ["rice", "egg", "carrot", "green-onion"],
       "steps": [
         { "gesture": "chop", "ingredient": "carrot", "label": "Chop carrot" },
-        { "gesture": "chop", "ingredient": "green-onion", "label": "Chop green onion" },
+        {
+          "gesture": "chop",
+          "ingredient": "green-onion",
+          "label": "Chop green onion"
+        },
         { "gesture": "stir", "ingredient": "rice", "label": "Stir rice" },
         { "gesture": "stir", "ingredient": "egg", "label": "Stir egg" },
         { "gesture": "plate", "label": "Plate" }

@@ -1,3 +1,5 @@
+import type { Player } from "./player.ts";
+
 export type GameStatus = "lobby" | "active";
 
 export type Game = {
@@ -12,15 +14,18 @@ export type Game = {
 export function MakeEmptyState() {
   return {
     recipeOrder: [],
+    players: [],
   } as GameState;
 }
 
 export type GameState = {
   recipeOrder: Recipe[];
+  players: Player[];
 };
 
 export type Recipe = {
   name: string;
+  ingredients: { id: number; count: number }[];
   stages: RecipeStage[];
 };
 
@@ -39,4 +44,10 @@ export type LineType = {
 export type Point = {
   x: number;
   y: number;
+};
+
+export type Ingredient = {
+  name: string;
+  image: string;
+  category: string;
 };

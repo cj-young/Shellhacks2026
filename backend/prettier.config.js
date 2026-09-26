@@ -4,7 +4,7 @@
 const config = {
   semi: true,
   singleQuote: false,
-  trailingComma: 'all',
-}
+  trailingComma: "all",
+};
 
-export default config
+export default config;

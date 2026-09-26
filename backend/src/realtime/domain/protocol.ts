@@ -5,6 +5,7 @@ export interface JoinedPayload {
   playerId: string;
   gameCode: string;
   isHost: boolean;
+  reconnectToken: string;
   players: PlayerSummary[];
 }
 
@@ -12,13 +13,21 @@ export interface GameStartedPayload {
   gameCode: string;
 }
 
+/**
+ * The sanitized view of game state sent to clients: players are stripped of
+ * their reconnect tokens.
+ */
+export type ClientGameState = Omit<GameState, "players"> & {
+  players: PlayerSummary[];
+};
+
 export interface ServerToClientEvents {
   joined: (payload: JoinedPayload) => void;
   player_joined: (player: PlayerSummary) => void;
-  player_left: (payload: { playerId: string }) => void;
+  player_disconnected: (payload: { playerId: string }) => void;
   game_started: (payload: GameStartedPayload) => void;
   game_error: (payload: { code: string; message: string }) => void;
-  update_state: (state: GameState) => void;
+  update_state: (state: ClientGameState) => void;
 }
 
 export interface ClientToServerEvents {

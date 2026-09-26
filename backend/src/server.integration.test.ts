@@ -13,15 +13,17 @@ interface JoinedPayload {
   playerId: string;
   gameCode: string;
   isHost: boolean;
-  players: Array<{ id: string; name: string }>;
+  reconnectToken: string;
+  players: Array<{ id: string; name: string; connected: boolean }>;
 }
 
 interface PlayerJoinedPayload {
   id: string;
   name: string;
+  connected: boolean;
 }
 
-interface PlayerLeftPayload {
+interface PlayerDisconnectedPayload {
   playerId: string;
 }
 
@@ -36,6 +38,7 @@ interface GameStartedPayload {
 
 interface GameStatePayload {
   recipeOrder: unknown[];
+  players: Array<Record<string, unknown>>;
 }
 
 function connectClient(
@@ -138,7 +141,7 @@ test("emits game_error and disconnects for an unknown code", async () => {
   client.close();
 });
 
-test("relays presence between clients and honours the host token", async () => {
+test("relays presence, keeps disconnected players, and resumes with a token", async () => {
   const game = await gameModule.service.createGame();
 
   const host = connectClient(base, {
@@ -152,7 +155,8 @@ test("relays presence between clients and honours the host token", async () => {
   const hostPayload = await hostJoined;
   assert.equal(hostPayload.isHost, true);
   assert.equal(hostPayload.players.length, 1);
-  assert.equal(hostPayload.players[0].name, "Hosty");
+  assert.equal(hostPayload.players[0]?.name, "Hosty");
+  assert.ok(hostPayload.reconnectToken.length > 0);
 
   const guest = connectClient(base, { code: game.code, name: "Guesty" });
   const guestJoined = waitFor<JoinedPayload>(guest, "joined");
@@ -163,30 +167,53 @@ test("relays presence between clients and honours the host token", async () => {
     guestJoined,
     hostSawGuest,
   ]);
-  assert.equal(guestPayload.isHost, false);
-  assert.equal(guestPayload.players.length, 2);
-  assert.equal(presence.id, guestPayload.playerId);
   assert.equal(presence.name, "Guesty");
+  assert.equal(guestPayload.players.length, 2);
 
-  const guestLeft = waitFor<PlayerLeftPayload>(host, "player_left");
+  const disconnected = waitFor<PlayerDisconnectedPayload>(
+    host,
+    "player_disconnected",
+  );
   guest.disconnect();
 
-  const left = await guestLeft;
-  assert.equal(left.playerId, guestPayload.playerId);
+  const gone = await disconnected;
+  assert.equal(gone.playerId, guestPayload.playerId);
+
+  const reconnected = connectClient(base, {
+    code: game.code,
+    name: "Guesty",
+    reconnectToken: guestPayload.reconnectToken,
+  });
+  const reconnectedJoined = waitFor<JoinedPayload>(reconnected, "joined");
+  const hostSawReconnect = waitFor<PlayerJoinedPayload>(host, "player_joined");
+  reconnected.connect();
+
+  const [resumedPayload, resumedPresence] = await Promise.all([
+    reconnectedJoined,
+    hostSawReconnect,
+  ]);
+  assert.equal(resumedPayload.playerId, guestPayload.playerId);
+  assert.equal(resumedPayload.players.length, 2);
+  assert.equal(resumedPresence.id, guestPayload.playerId);
+  assert.equal(resumedPresence.connected, true);
 
   host.close();
-  guest.close();
+  reconnected.close();
 });
 
-test("host starts the game and notifies every player", async () => {
+test("host starts the game, notifies everyone, and never leaks tokens", async () => {
   const game = await gameModule.service.createGame();
 
-  const host = connectClient(base, { code: game.code, token: game.hostToken });
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
   const hostJoined = waitFor<JoinedPayload>(host, "joined");
   host.connect();
   await hostJoined;
 
-  const guest = connectClient(base, { code: game.code });
+  const guest = connectClient(base, { code: game.code, name: "Guesty" });
   const guestJoined = waitFor<JoinedPayload>(guest, "joined");
   const hostSawGuest = waitFor<PlayerJoinedPayload>(host, "player_joined");
   guest.connect();
@@ -205,6 +232,10 @@ test("host starts the game and notifies every player", async () => {
   assert.equal(hostGameState.recipeOrder.length, 3);
   assert.deepEqual(guestGameState, hostGameState);
 
+  for (const player of hostGameState.players) {
+    assert.equal("reconnectToken" in player, false);
+  }
+
   host.close();
   guest.close();
 });
@@ -212,7 +243,11 @@ test("host starts the game and notifies every player", async () => {
 test("rejects a join once the game has started", async () => {
   const game = await gameModule.service.createGame();
 
-  const host = connectClient(base, { code: game.code, token: game.hostToken });
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
   const hostJoined = waitFor<JoinedPayload>(host, "joined");
   host.connect();
   await hostJoined;
@@ -221,7 +256,7 @@ test("rejects a join once the game has started", async () => {
   host.emit("start_game");
   await started;
 
-  const late = connectClient(base, { code: game.code });
+  const late = connectClient(base, { code: game.code, name: "Late" });
   const failure = waitFor<GameErrorPayload>(late, "game_error");
   late.connect();
 
@@ -235,7 +270,7 @@ test("rejects a join once the game has started", async () => {
 test("rejects a start from a non-host player", async () => {
   const game = await gameModule.service.createGame();
 
-  const guest = connectClient(base, { code: game.code });
+  const guest = connectClient(base, { code: game.code, name: "Guesty" });
   const guestJoined = waitFor<JoinedPayload>(guest, "joined");
   guest.connect();
   await guestJoined;

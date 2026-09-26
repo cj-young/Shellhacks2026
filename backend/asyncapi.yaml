@@ -7,11 +7,13 @@ info:
     Socket.IO API used for game lobbies.
 
     Clients connect to the Socket.IO endpoint with handshake auth
-    `{ code, name, token? }`:
+    `{ code, name, token?, reconnectToken? }`:
 
-    - `code`  - the 6-character game code
-    - `name`  - the display name chosen by the player
-    - `token` - the host token returned by `POST /api/games`; sent only by the host
+    - `code`           - the 6-character game code
+    - `name`           - the display name chosen by the player
+    - `token`          - the host token returned by `POST /api/games`; sent only by the host
+    - `reconnectToken` - a per-player token returned in `joined`; send it back to resume the
+      same player, including after the game has started
 
     The public path is `/api/socket.io/` (Caddy strips the `/api` prefix before proxying to
     the backend, which serves Socket.IO at `/socket.io/`). The event names below are
@@ -46,6 +48,11 @@ servers:
           token:
             type: string
             description: Host token. Sent only by the host.
+          reconnectToken:
+            type: string
+            description: |
+              Per-player resume token returned in `joined`. Send it to reconnect as the same
+              player without consuming a new slot.
 
 channels:
   joined:
@@ -66,15 +73,17 @@ channels:
     messages:
       playerJoined:
         $ref: '#/components/messages/PlayerJoined'
-  playerLeft:
-    address: player_left
-    title: Player left
-    description: Sent to the remaining members when a player disconnects or leaves.
+  playerDisconnected:
+    address: player_disconnected
+    title: Player disconnected
+    description: |
+      Sent to the remaining members when a player disconnects. The player is kept in the
+      roster with `connected: false` and can return with their reconnect token.
     x-socketio:
-      event: player_left
+      event: player_disconnected
     messages:
-      playerLeft:
-        $ref: '#/components/messages/PlayerLeft'
+      playerDisconnected:
+        $ref: '#/components/messages/PlayerDisconnected'
   gameStarted:
     address: game_started
     title: Game started
@@ -118,11 +127,11 @@ operations:
     summary: Notify members that a player joined.
     channel:
       $ref: '#/channels/playerJoined'
-  sendPlayerLeft:
+  sendPlayerDisconnected:
     action: send
-    summary: Notify members that a player left.
+    summary: Notify members that a player disconnected.
     channel:
-      $ref: '#/channels/playerLeft'
+      $ref: '#/channels/playerDisconnected'
   sendGameStarted:
     action: send
     summary: Notify all members that the game started.
@@ -151,11 +160,11 @@ components:
       title: Player joined
       payload:
         $ref: '#/components/schemas/PlayerSummary'
-    PlayerLeft:
-      name: player_left
-      title: Player left
+    PlayerDisconnected:
+      name: player_disconnected
+      title: Player disconnected
       payload:
-        $ref: '#/components/schemas/PlayerLeftPayload'
+        $ref: '#/components/schemas/PlayerDisconnectedPayload'
     GameStarted:
       name: game_started
       title: Game started
@@ -179,6 +188,7 @@ components:
         - name
         - joinedAt
         - isHost
+        - connected
       properties:
         id:
           type: string
@@ -198,6 +208,9 @@ components:
         isHost:
           type: boolean
           description: True only for the player that presented the matching host token.
+        connected:
+          type: boolean
+          description: False when the player has disconnected but is still in the roster.
     JoinedPayload:
       type: object
       additionalProperties: false
@@ -205,6 +218,7 @@ components:
         - playerId
         - gameCode
         - isHost
+        - reconnectToken
         - players
       properties:
         playerId:
@@ -215,12 +229,15 @@ components:
           pattern: '^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$'
         isHost:
           type: boolean
+        reconnectToken:
+          type: string
+          description: Per-player resume token. Only sent to the recipient.
         players:
           type: array
           description: Full roster including the recipient.
           items:
             $ref: '#/components/schemas/PlayerSummary'
-    PlayerLeftPayload:
+    PlayerDisconnectedPayload:
       type: object
       additionalProperties: false
       required:
@@ -250,6 +267,7 @@ components:
           enum:
             - GAME_NOT_FOUND
             - GAME_STARTED
+            - GAME_FULL
             - NOT_HOST
             - ALREADY_STARTED
             - INTERNAL_ERROR
