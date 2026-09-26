@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { RefObject } from 'react'
 import { io } from 'socket.io-client'
 import type { Socket } from 'socket.io-client'
+import { MakeEmptyState, type GameState } from './types'
 
 export type Player = { id: string; isHost: boolean }
 export type GameAuth = { code: string; token?: string }
@@ -15,6 +16,7 @@ export type GameConnection = {
   status: string
   message: string
   started: boolean
+  state: GameState
 }
 
 export function useGameConnection(auth: GameAuth | null): GameConnection {
@@ -24,6 +26,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
   const [status, setStatus] = useState('Not connected')
   const [message, setMessage] = useState('')
   const [started, setStarted] = useState(false)
+  const [state, setState] = useState<GameState>(MakeEmptyState())
 
   const code = auth?.code
   const token = auth?.token
@@ -73,6 +76,13 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
         setStatus('Error')
       },
     )
+    socket.on(
+      'update_state',
+      (gameState:GameState) => {
+        setState(gameState)
+        console.log(gameState)
+      }
+    )
 
     return () => {
       socket.disconnect()
@@ -80,5 +90,5 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     }
   }, [code, token])
 
-  return { socketRef, players, playerId, status, message, started }
+  return { socketRef, players, playerId, status, message, started, state }
 }
