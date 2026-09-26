@@ -1,0 +1,247 @@
+asyncapi: 3.1.0
+
+info:
+  title: Shellhacks Game Realtime API
+  version: 0.1.0
+  description:
+    Socket.IO API used for game lobbies.
+
+    Clients connect to the Socket.IO endpoint with handshake auth `{ code, token? }`:
+
+    - `code`  - the 6-character game code
+    - `token` - the host token returned by `POST /api/games`; sent only by the host
+
+    The public path is `/api/socket.io/` (Caddy strips the `/api` prefix before proxying to
+    the backend, which serves Socket.IO at `/socket.io/`). The event names below are
+    Socket.IO event names.
+
+    A join can fail: the server emits `game_error` and then disconnects the socket.
+
+servers:
+  local:
+    host: localhost:8080
+    protocol: socket.io
+    pathname: /api/socket.io/
+    description: Local development (through Caddy)
+    x-socketio:
+      path: /api/socket.io/
+      transports:
+        - websocket
+        - polling
+      auth:
+        type: object
+        required:
+          - code
+        properties:
+          code:
+            type: string
+            description: Six-character game code.
+          token:
+            type: string
+            description: Host token. Sent only by the host.
+
+channels:
+  joined:
+    address: joined
+    title: Joined
+    description: Sent to a client once it has successfully joined a lobby.
+    x-socketio:
+      event: joined
+    messages:
+      joined:
+        $ref: '#/components/messages/Joined'
+  playerJoined:
+    address: player_joined
+    title: Player joined
+    description: Sent to every other member when a player joins the lobby.
+    x-socketio:
+      event: player_joined
+    messages:
+      playerJoined:
+        $ref: '#/components/messages/PlayerJoined'
+  playerLeft:
+    address: player_left
+    title: Player left
+    description: Sent to the remaining members when a player disconnects or leaves.
+    x-socketio:
+      event: player_left
+    messages:
+      playerLeft:
+        $ref: '#/components/messages/PlayerLeft'
+  gameStarted:
+    address: game_started
+    title: Game started
+    description: Broadcast to every member when the host starts the game.
+    x-socketio:
+      event: game_started
+    messages:
+      gameStarted:
+        $ref: '#/components/messages/GameStarted'
+  gameError:
+    address: game_error
+    title: Game error
+    description:
+      Sent to the affected client when an operation fails. A failed join is followed by a
+      server-initiated disconnect.
+    x-socketio:
+      event: game_error
+    messages:
+      gameError:
+        $ref: '#/components/messages/GameError'
+  startGame:
+    address: start_game
+    title: Start game
+    description:
+      Sent by the host to start the game. A non-host sender receives `game_error` with code
+      `NOT_HOST`; starting an already-active game returns `ALREADY_STARTED`.
+    x-socketio:
+      event: start_game
+    messages:
+      startGame:
+        $ref: '#/components/messages/StartGame'
+
+operations:
+  sendJoined:
+    action: send
+    summary: Notify a client that it joined, including the current roster.
+    channel:
+      $ref: '#/channels/joined'
+  sendPlayerJoined:
+    action: send
+    summary: Notify members that a player joined.
+    channel:
+      $ref: '#/channels/playerJoined'
+  sendPlayerLeft:
+    action: send
+    summary: Notify members that a player left.
+    channel:
+      $ref: '#/channels/playerLeft'
+  sendGameStarted:
+    action: send
+    summary: Notify all members that the game started.
+    channel:
+      $ref: '#/channels/gameStarted'
+  sendGameError:
+    action: send
+    summary: Report a failed operation to the affected client.
+    channel:
+      $ref: '#/channels/gameError'
+  receiveStartGame:
+    action: receive
+    summary: Receive a start request from the host.
+    channel:
+      $ref: '#/channels/startGame'
+
+components:
+  messages:
+    Joined:
+      name: joined
+      title: Joined
+      payload:
+        $ref: '#/components/schemas/JoinedPayload'
+    PlayerJoined:
+      name: player_joined
+      title: Player joined
+      payload:
+        $ref: '#/components/schemas/PlayerSummary'
+    PlayerLeft:
+      name: player_left
+      title: Player left
+      payload:
+        $ref: '#/components/schemas/PlayerLeftPayload'
+    GameStarted:
+      name: game_started
+      title: Game started
+      payload:
+        $ref: '#/components/schemas/GameStartedPayload'
+    GameError:
+      name: game_error
+      title: Game error
+      payload:
+        $ref: '#/components/schemas/GameErrorPayload'
+    StartGame:
+      name: start_game
+      title: Start game
+      description: No payload.
+  schemas:
+    PlayerSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - joinedAt
+        - isHost
+      properties:
+        id:
+          type: string
+          description: Server-assigned player identifier (UUID).
+          examples:
+            - 2bee17e1-01a8-4a5e-b47e-3e74a1661657
+        joinedAt:
+          type: integer
+          description: Join time as a Unix timestamp in milliseconds.
+          examples:
+            - 1790400532276
+        isHost:
+          type: boolean
+          description: True only for the player that presented the matching host token.
+    JoinedPayload:
+      type: object
+      additionalProperties: false
+      required:
+        - playerId
+        - gameCode
+        - isHost
+        - players
+      properties:
+        playerId:
+          type: string
+          description: Identifier of the recipient.
+        gameCode:
+          type: string
+          pattern: '^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$'
+        isHost:
+          type: boolean
+        players:
+          type: array
+          description: Full roster including the recipient.
+          items:
+            $ref: '#/components/schemas/PlayerSummary'
+    PlayerLeftPayload:
+      type: object
+      additionalProperties: false
+      required:
+        - playerId
+      properties:
+        playerId:
+          type: string
+    GameStartedPayload:
+      type: object
+      additionalProperties: false
+      required:
+        - gameCode
+      properties:
+        gameCode:
+          type: string
+          pattern: '^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$'
+    GameErrorPayload:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code.
+          enum:
+            - GAME_NOT_FOUND
+            - GAME_STARTED
+            - NOT_HOST
+            - ALREADY_STARTED
+            - INTERNAL_ERROR
+        message:
+          type: string
+          description: Human-readable error message.
+          examples:
+            - No game found for that code
