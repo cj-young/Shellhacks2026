@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
 import { useGameConnection } from '#/lib/use-game-connection'
+import { HostInterface } from '#/components/HostInterface';
 
 type Game = { code: string; hostToken: string }
 
@@ -63,6 +64,10 @@ function HostScreen() {
   }, [connection.socketRef])
 
   const errorMessage = createError || connection.message
+
+  if (connection.started) {
+    return (<HostInterface connection={connection}></HostInterface>)
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 p-8 text-slate-100">

@@ -21,6 +21,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   start_game: () => void;
+  test: () => void;
 }
 
 export interface InterServerEvents {}

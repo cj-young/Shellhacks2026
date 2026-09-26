@@ -92,6 +92,10 @@ export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIo
       void handleStartGame();
     });
 
+    socket.on('test', () => {
+      io.to(room).emit('game_error', {code: "400", message: 'AHHHHHHHHHHHHHH'})
+    })
+
     async function handleStartGame(): Promise<void> {
       const startResult = await session.start({ code: gameCode, isHost: player.isHost });
 
