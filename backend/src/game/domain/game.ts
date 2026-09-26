@@ -1,4 +1,5 @@
 import type { Player } from "./player.ts";
+import type { Recipe } from "./recipe.ts";
 
 export type GameStatus = "lobby" | "active";
 
@@ -21,33 +22,4 @@ export function MakeEmptyState() {
 export type GameState = {
   recipeOrder: Recipe[];
   players: Player[];
-};
-
-export type Recipe = {
-  name: string;
-  ingredients: { id: number; count: number }[];
-  stages: RecipeStage[];
-};
-
-export type RecipeStage = {
-  type: string;
-  image?: string;
-  lines: LineType[];
-};
-
-export type LineType = {
-  start: Point;
-  end: Point;
-  radius: number;
-};
-
-export type Point = {
-  x: number;
-  y: number;
-};
-
-export type Ingredient = {
-  name: string;
-  image: string;
-  category: string;
 };

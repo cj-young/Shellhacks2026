@@ -104,6 +104,11 @@ export class GameService {
       reconnectToken: generateReconnectToken(),
       joinedAt: Date.now(),
       connected: true,
+
+      recipeIndex: 0,
+      recipeStageIndex: 0,
+      inventory: [],
+      score: 0,
     };
 
     const joinedGame = this.#withPlayers(game, [...game.state.players, player]);
