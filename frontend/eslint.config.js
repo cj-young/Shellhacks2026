@@ -1,6 +1,7 @@
 //  @ts-check
 
 import { tanstackConfig } from '@tanstack/eslint-config'
+import prettierConfig from 'eslint-config-prettier'
 
 export default [
   ...tanstackConfig,
@@ -14,6 +15,7 @@ export default [
       'pnpm/json-enforce-catalog': 'off',
     },
   },
+  prettierConfig,
   {
     ignores: ['eslint.config.js', 'prettier.config.js'],
   },

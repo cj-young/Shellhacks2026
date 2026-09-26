@@ -1,0 +1,78 @@
+openapi: 3.1.0
+
+info:
+  title: Shellhacks Game API
+  version: 0.1.0
+  description: HTTP API for creating games.
+
+    In local development the public base URL is `http://localhost:8080` (Caddy), which
+    strips the `/api` prefix before proxying to the backend. Realtime gameplay is handled
+    over Socket.IO and is documented in `asyncapi.yaml`.
+  license:
+    name: ISC
+    identifier: ISC
+
+security: []
+
+servers:
+  - url: "{scheme}://{host}"
+    description: Local development (through Caddy; the `/api` prefix is stripped by the proxy)
+    variables:
+      scheme:
+        default: http
+        enum:
+          - http
+          - https
+      host:
+        default: localhost:8080
+        description: Host and port of the Caddy entrypoint.
+
+tags:
+  - name: games
+    description: Game creation
+
+paths:
+  /api/games:
+    post:
+      tags:
+        - games
+      operationId: createGame
+      summary: Create a new game
+      description:
+        Allocates a unique 6-character game code together with a host token.
+
+        The `hostToken` is returned only by this endpoint. The host must present it as the
+        `token` field of the Socket.IO handshake auth (see `asyncapi.yaml`) to be recognised
+        as the host and be allowed to start the game.
+      responses:
+        "201":
+          description: Game created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateGameResponse"
+        "400":
+          description: Malformed JSON request body
+        "500":
+          description: Unable to allocate a unique game code (unexpected server error)
+
+components:
+  schemas:
+    CreateGameResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - hostToken
+      properties:
+        code:
+          type: string
+          description: Join code shared with players.
+          pattern: "^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$"
+          examples:
+            - ABC234
+        hostToken:
+          type: string
+          description: Secret host credential. Returned only at creation time.
+          examples:
+            - 5v_qSvibmq-Fp9hREs476vZgm3aLhJfm

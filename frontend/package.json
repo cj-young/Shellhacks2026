@@ -11,8 +11,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint",
-    "format": "prettier --write . && eslint --fix",
-    "check": "prettier --check ."
+    "format": "eslint --fix && prettier --write .",
+    "check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -22,6 +23,7 @@
     "@tanstack/react-start": "latest",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "socket.io-client": "^4.8.4",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
@@ -33,6 +35,7 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.20.0",
+    "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.1",
     "typescript": "^6.0.2",
     "vite": "^8.0.0"
