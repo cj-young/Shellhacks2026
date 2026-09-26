@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { PointerEvent } from 'react'
 
 export type CursorPoint = {
   x: number

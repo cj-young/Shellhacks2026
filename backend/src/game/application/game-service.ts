@@ -1,19 +1,23 @@
-import { generateRecipeOrder } from '../../util.ts';
-import { generateGameCode, generateHostToken, normalizeGameCode } from '../domain/code.ts';
-import { MakeEmptyState, type Game } from '../domain/game.ts';
-import type { GameStore } from '../ports/game-store.ts';
+import { generateRecipeOrder } from '../../util.ts'
+import {
+  generateGameCode,
+  generateHostToken,
+  normalizeGameCode,
+} from '../domain/code.ts'
+import { MakeEmptyState, type Game } from '../domain/game.ts'
+import type { GameStore } from '../ports/game-store.ts'
 
-const MAX_CODE_ATTEMPTS = 5;
+const MAX_CODE_ATTEMPTS = 5
 
 export type StartGameResult =
   | { ok: true; game: Game }
-  | { ok: false; code: 'GAME_NOT_FOUND' | 'ALREADY_STARTED' };
+  | { ok: false; code: 'GAME_NOT_FOUND' | 'ALREADY_STARTED' }
 
 export class GameService {
-  readonly #store: GameStore;
+  readonly #store: GameStore
 
   constructor(store: GameStore) {
-    this.#store = store;
+    this.#store = store
   }
 
   async createGame(): Promise<Game> {
@@ -23,37 +27,41 @@ export class GameService {
         hostToken: generateHostToken(),
         status: 'lobby',
         createdAt: Date.now(),
-        state: MakeEmptyState()
-      };
+        state: MakeEmptyState(),
+      }
 
       if (await this.#store.createIfAbsent(game)) {
-        return game;
+        return game
       }
     }
 
-    throw new Error('Failed to allocate a unique game code');
+    throw new Error('Failed to allocate a unique game code')
   }
 
   async getGame(code: string): Promise<Game | undefined> {
-    return this.#store.get(normalizeGameCode(code));
+    return this.#store.get(normalizeGameCode(code))
   }
 
   async startGame(code: string): Promise<StartGameResult> {
-    const game = await this.#store.get(normalizeGameCode(code));
+    const game = await this.#store.get(normalizeGameCode(code))
 
     if (!game) {
-      return { ok: false, code: 'GAME_NOT_FOUND' };
+      return { ok: false, code: 'GAME_NOT_FOUND' }
     }
 
     if (game.status !== 'lobby') {
-      return { ok: false, code: 'ALREADY_STARTED' };
+      return { ok: false, code: 'ALREADY_STARTED' }
     }
 
     const order = generateRecipeOrder(3)
 
-    const started: Game = { ...game, status: 'active', state: {...game.state, recipeOrder: order}};
-    await this.#store.save(started);
+    const started: Game = {
+      ...game,
+      status: 'active',
+      state: { ...game.state, recipeOrder: order },
+    }
+    await this.#store.save(started)
 
-    return { ok: true, game: started };
+    return { ok: true, game: started }
   }
 }
