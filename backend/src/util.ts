@@ -11,9 +11,10 @@ export function getRandomIntInclusive(min: number, max: number) {
 export function generateRecipeOrder(length: number): Recipe[] {
   const sanitizedRecipes: Recipe[] = recipes.map((recipe) => ({
     name: recipe.name,
+    ingredients: recipe.ingredients,
     stages: recipe.stages.map((stage) => ({
       ...stage,
-      ingredientsConsumed: new Map(
+      ingredientsConsumed: Object.fromEntries(
         Object.entries(stage.ingredientsConsumed).map(([a, b]) => [
           Number(a),
           b,
@@ -38,5 +39,5 @@ export function generateRecipeOrder(length: number): Recipe[] {
 
 /** Ingredient ids are positional indexes into the ingredients catalogue. */
 export function isKnownIngredientId(id: number): boolean {
-  return Number.isInteger(id) && (!!ingredients.find((v)=>v.id == id))
+  return Number.isInteger(id) && !!ingredients.find((v) => v.id == id);
 }

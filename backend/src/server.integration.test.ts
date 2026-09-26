@@ -289,6 +289,35 @@ test("purchases items and broadcasts the inventory to everyone", async () => {
   guest.close();
 });
 
+test("consumes ingredients and broadcasts the updated inventory", async () => {
+  const game = await gameModule.service.createGame();
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
+  const joined = waitFor<JoinedPayload>(host, "joined");
+  host.connect();
+  await joined;
+
+  const started = waitFor<GameStartedPayload>(host, "game_started");
+  const startState = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("start_game");
+  await Promise.all([started, startState]);
+
+  const purchase = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("purchase_items", [{ id: 0, count: 2 }]);
+  await purchase;
+
+  const consumed = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("consume_ingredients", [{ id: 0, count: 2 }]);
+  const state = await consumed;
+  const player = state.players.find((entry) => entry.name === "Hosty");
+  assert.deepEqual(player?.inventory, {});
+
+  host.close();
+});
+
 test("rejects an invalid purchase", async () => {
   const game = await gameModule.service.createGame();
 

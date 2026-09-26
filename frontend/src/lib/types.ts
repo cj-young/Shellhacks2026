@@ -11,6 +11,7 @@ export type PlayerSummary = {
   isHost: boolean;
   joinedAt: number;
   connected: boolean;
+  inventory: Record<number, number>;
 };
 
 export type GameState = {
@@ -28,6 +29,7 @@ export type RecipeStage = {
   type: string;
   image?: string;
   lines: LineType[];
+  ingredientsConsumed: Record<number, number>;
 };
 
 export type LineType = {

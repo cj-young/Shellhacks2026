@@ -233,6 +233,53 @@ test("addItemsToInventory merges counts into the player inventory", async () => 
   assert.deepEqual(stored?.state.players[0]?.inventory, { 0: 5 });
 });
 
+test("consumeItemsFromInventory removes items atomically", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+  await service.addItemsToInventory(game.code, joined.player.id, [
+    { id: 0, count: 2 },
+  ]);
+
+  const result = await service.consumeItemsFromInventory(
+    game.code,
+    joined.player.id,
+    [{ id: 0, count: 2 }],
+  );
+
+  assert.equal(result.ok, true);
+  const stored = await service.getGame(game.code);
+  assert.deepEqual(stored?.state.players[0]?.inventory, {});
+});
+
+test("consumeItemsFromInventory does not partially consume inventory", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+  await service.addItemsToInventory(game.code, joined.player.id, [
+    { id: 0, count: 1 },
+  ]);
+
+  const result = await service.consumeItemsFromInventory(
+    game.code,
+    joined.player.id,
+    [{ id: 0, count: 2 }],
+  );
+
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, "INSUFFICIENT_INVENTORY");
+  const stored = await service.getGame(game.code);
+  assert.deepEqual(stored?.state.players[0]?.inventory, { 0: 1 });
+});
+
 test("addItemsToInventory is all-or-nothing for unknown ids", async () => {
   const service = new GameService(new InMemoryGameStore());
   const game = await service.createGame();
