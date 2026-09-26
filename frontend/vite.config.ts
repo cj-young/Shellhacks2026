@@ -10,6 +10,9 @@ const config = defineConfig({
   resolve: { tsconfigPaths: true },
   server: { allowedHosts: true },
   plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
+  server: {
+    allowedHosts: true,
+  },
 })
 
 export default config
