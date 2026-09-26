@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
 import { useGameConnection } from '#/lib/use-game-connection'
-import { HostInterface } from '#/components/HostInterface'
+import { HostInterface } from '#/components/host/HostInterface'
 
 type HostGame = { code: string; hostToken: string; name: string }
 
