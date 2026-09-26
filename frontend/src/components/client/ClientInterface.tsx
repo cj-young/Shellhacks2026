@@ -13,7 +13,12 @@ import {
   lilita,
   nunito,
 } from "#/components/chop-chop/design";
-import { Basket, COUNTER_BG, PhoneTopBar } from "#/components/chop-chop/race";
+import {
+  Basket,
+  COUNTER_BG,
+  PhoneTopBar,
+  StoreButton,
+} from "#/components/chop-chop/race";
 
 interface ClientInterfaceProps {
   connection: GameConnection;
@@ -35,7 +40,20 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const [currentPoints, setCurrentPoints] = useState<CursorPoint[]>([]);
 
   function checkoutFromStore(inv: Ingredient[]) {
-    setInventory(inv);
+    setInventory([...inventory, ...inv]);
+
+    const purchaseMap = new Map();
+
+    inv.forEach((v) => {
+      const exists = purchaseMap.get(v.id);
+      if (exists) purchaseMap.set(v.id, { id: v.id, count: exists.count + 1 });
+      else purchaseMap.set(v.id, { id: v.id, count: 1 });
+    });
+
+    connection.socketRef.current?.emit(
+      "purchase_items",
+      Array.from(purchaseMap.values()),
+    );
     setInterfaceState("recipe");
   }
 
@@ -166,6 +184,19 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
 
       <div style={{ position: "fixed", inset: 0, zIndex: 30 }}>
         <CursorPathTracker onPointsChange={setCurrentPoints} />
+      </div>
+
+      <div
+        style={{
+          position: "fixed",
+          left: 0,
+          bottom: 0,
+          width: 110,
+          height: 110,
+          zIndex: 40,
+        }}
+      >
+        <StoreButton onClick={() => setInterfaceState("store")} />
       </div>
 
       {SHOW_TEST_CONTROLS && !finished && recipe && (

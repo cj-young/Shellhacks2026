@@ -22,7 +22,10 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {
+          "0": 1
+        }
       },
       {
         "type": "lines",
@@ -38,7 +41,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       }
     ]
   },
@@ -65,7 +69,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       },
       {
         "type": "lines",
@@ -81,7 +86,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       }
     ]
   },
@@ -108,7 +114,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       },
       {
         "type": "lines",
@@ -124,7 +131,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       }
     ]
   },
@@ -151,7 +159,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       },
       {
         "type": "lines",
@@ -167,7 +176,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       }
     ]
   },
@@ -194,7 +204,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       },
       {
         "type": "lines",
@@ -210,7 +221,8 @@
             "end": { "x": 130, "y": 130 },
             "radius": 20
           }
-        ]
+        ],
+        "ingredientsConsumed": {}
       }
     ]
   }

@@ -1,3 +1,5 @@
+import type { Inventory } from "./inventory.ts";
+
 export const MAX_PLAYER_NAME_LENGTH = 20;
 
 export interface Player {
@@ -7,6 +9,11 @@ export interface Player {
   readonly reconnectToken: string;
   readonly joinedAt: number;
   readonly connected: boolean;
+
+  recipeIndex: number;
+  recipeStageIndex: number;
+  inventory: Inventory;
+  score: number;
 }
 
 export function normalizePlayerName(raw: string | undefined): string {

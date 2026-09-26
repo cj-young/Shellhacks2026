@@ -206,3 +206,138 @@ test("markDisconnected keeps the player but marks them offline", async () => {
   assert.equal(stored?.state.players.length, 1);
   assert.equal(stored?.state.players[0]?.connected, false);
 });
+
+test("addItemsToInventory merges counts into the player inventory", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  const result = await service.addItemsToInventory(
+    game.code,
+    joined.player.id,
+    [
+      { id: 0, count: 2 },
+      { id: 0, count: 3 },
+    ],
+  );
+
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    assert.fail("expected the purchase to succeed");
+  }
+  const stored = await service.getGame(game.code);
+  assert.deepEqual(stored?.state.players[0]?.inventory, { 0: 5 });
+});
+
+test("addItemsToInventory is all-or-nothing for unknown ids", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  const result = await service.addItemsToInventory(
+    game.code,
+    joined.player.id,
+    [
+      { id: 0, count: 1 },
+      { id: 999, count: 1 },
+    ],
+  );
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected the purchase to fail");
+  }
+  assert.equal(result.code, "INVALID_ITEM");
+  const stored = await service.getGame(game.code);
+  assert.deepEqual(stored?.state.players[0]?.inventory, {});
+});
+
+test("addItemsToInventory rejects invalid counts", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  for (const count of [0, -1, 1.5, 1000]) {
+    const result = await service.addItemsToInventory(
+      game.code,
+      joined.player.id,
+      [{ id: 0, count }],
+    );
+    assert.equal(result.ok, false);
+    if (result.ok) {
+      assert.fail("expected the purchase to fail");
+    }
+    assert.equal(result.code, "INVALID_ITEM");
+  }
+});
+
+test("addItemsToInventory rejects an empty list", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  const result = await service.addItemsToInventory(
+    game.code,
+    joined.player.id,
+    [],
+  );
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected the purchase to fail");
+  }
+  assert.equal(result.code, "INVALID_ITEM");
+});
+
+test("addItemsToInventory rejects a lobby game", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+
+  const result = await service.addItemsToInventory(
+    game.code,
+    joined.player.id,
+    [{ id: 0, count: 1 }],
+  );
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected the purchase to fail");
+  }
+  assert.equal(result.code, "GAME_NOT_ACTIVE");
+});
+
+test("addItemsToInventory rejects an unknown player", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  await service.startGame(game.code);
+
+  const result = await service.addItemsToInventory(game.code, "nobody", [
+    { id: 0, count: 1 },
+  ]);
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected the purchase to fail");
+  }
+  assert.equal(result.code, "PLAYER_NOT_FOUND");
+});

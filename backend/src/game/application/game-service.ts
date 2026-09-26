@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { generateRecipeOrder } from "../../util.ts";
+import { generateRecipeOrder, isKnownIngredientId } from "../../util.ts";
 import {
   generateGameCode,
   generateHostToken,
@@ -8,11 +8,13 @@ import {
   normalizeGameCode,
 } from "../domain/code.ts";
 import { MakeEmptyState, type Game } from "../domain/game.ts";
+import type { Inventory, PurchaseItem } from "../domain/inventory.ts";
 import { normalizePlayerName, type Player } from "../domain/player.ts";
 import type { GameStore } from "../ports/game-store.ts";
 
 const MAX_CODE_ATTEMPTS = 5;
 export const MAX_PLAYERS = 5;
+export const MAX_ITEM_COUNT = 99;
 
 export type StartGameResult =
   | { ok: true; game: Game }
@@ -27,6 +29,17 @@ export interface JoinPlayerInput {
 export type JoinPlayerResult =
   | { ok: true; game: Game; player: Player }
   | { ok: false; code: "GAME_NOT_FOUND" | "GAME_STARTED" | "GAME_FULL" };
+
+export type AddItemsResult =
+  | { ok: true; game: Game }
+  | {
+      ok: false;
+      code:
+        | "GAME_NOT_FOUND"
+        | "GAME_NOT_ACTIVE"
+        | "PLAYER_NOT_FOUND"
+        | "INVALID_ITEM";
+    };
 
 export class GameService {
   readonly #store: GameStore;
@@ -104,6 +117,11 @@ export class GameService {
       reconnectToken: generateReconnectToken(),
       joinedAt: Date.now(),
       connected: true,
+
+      recipeIndex: 0,
+      recipeStageIndex: 0,
+      inventory: {},
+      score: 0,
     };
 
     const joinedGame = this.#withPlayers(game, [...game.state.players, player]);
@@ -148,7 +166,59 @@ export class GameService {
     return { ok: true, game: started };
   }
 
+  async addItemsToInventory(
+    code: string,
+    playerId: string,
+    items: PurchaseItem[],
+  ): Promise<AddItemsResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+
+    if (!game) {
+      return { ok: false, code: "GAME_NOT_FOUND" };
+    }
+
+    if (game.status !== "active") {
+      return { ok: false, code: "GAME_NOT_ACTIVE" };
+    }
+
+    const player = game.state.players.find((entry) => entry.id === playerId);
+
+    if (!player) {
+      return { ok: false, code: "PLAYER_NOT_FOUND" };
+    }
+
+    console.log("reached up to error")
+    if (items.length === 0 || !items.every(isValidPurchaseItem)) {
+      return { ok: false, code: "INVALID_ITEM" };
+    }
+
+    const inventory: Inventory = { ...player.inventory };
+    for (const item of items) {
+      inventory[item.id] = (inventory[item.id] ?? 0) + item.count;
+    }
+
+    const updated: Player = { ...player, inventory };
+    const next = this.#withPlayers(
+      game,
+      game.state.players.map((entry) =>
+        entry.id === updated.id ? updated : entry,
+      ),
+    );
+    await this.#store.save(next);
+
+    return { ok: true, game: next };
+  }
+
   #withPlayers(game: Game, players: Player[]): Game {
     return { ...game, state: { ...game.state, players } };
   }
+}
+
+function isValidPurchaseItem(item: PurchaseItem): boolean {
+  return (
+    isKnownIngredientId(item.id) &&
+    Number.isInteger(item.count) &&
+    item.count >= 1 &&
+    item.count <= MAX_ITEM_COUNT
+  );
 }

@@ -1,4 +1,5 @@
 import type { GameState } from "../../game/domain/game.ts";
+import type { PurchaseItem } from "../../game/domain/inventory.ts";
 import type { PlayerSummary } from "./player.ts";
 
 export interface JoinedPayload {
@@ -43,6 +44,7 @@ export interface ClientToServerEvents {
   start_game: () => void;
   send_recipe_order: (order: number[]) => void; //order of recipe IDs
   recipe_completed: () => void;
+  purchase_items: (items: PurchaseItem[]) => void;
 }
 
 export interface InterServerEvents {}
