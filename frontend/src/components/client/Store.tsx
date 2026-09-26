@@ -30,11 +30,13 @@ const AISLES: { name: string; items: Ingredient[] }[] = (() => {
 
 export function Store({
   uploadInventory,
+  onCartChange,
   score,
   progress,
   notice,
 }: {
   uploadInventory: (inv: Ingredient[]) => void;
+  onCartChange: (cart: Ingredient[]) => void;
   score: number;
   progress: number;
   notice?: string;
@@ -45,6 +47,12 @@ export function Store({
   function checkout() {
     uploadInventory(inventory);
     setInventory([]);
+  }
+
+  function addToCart(ingredient: Ingredient) {
+    const nextCart = [...inventory, ingredient];
+    setInventory(nextCart);
+    onCartChange(nextCart);
   }
 
   const page = AISLES.at(aisle) ?? { name: "STORE", items: [] };
@@ -66,7 +74,7 @@ export function Store({
       onNextAisle={() => flip(1)}
       onTake={(slot) => {
         const ing = page.items.at(slot);
-        if (ing) setInventory([...inventory, ing]);
+        if (ing) addToCart(ing);
       }}
       onLeave={checkout}
     />

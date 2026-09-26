@@ -74,6 +74,17 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     setInterfaceState("recipe");
   }
 
+  function syncCart(cart: Ingredient[]) {
+    const itemCounts = new Map<number, number>();
+    for (const ingredient of cart) {
+      itemCounts.set(ingredient.id, (itemCounts.get(ingredient.id) ?? 0) + 1);
+    }
+    connection.socketRef.current?.emit(
+      "update_cart",
+      Array.from(itemCounts, ([id, count]) => ({ id, count })),
+    );
+  }
+
   function hasIngredientsForStage(
     recipeIndex: number,
     stageIndex: number,
@@ -189,6 +200,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     return (
       <Store
         uploadInventory={checkoutFromStore}
+        onCartChange={syncCart}
         score={myPoints}
         progress={progress}
         notice={total === 0 ? "Waiting for the recipes…" : undefined}

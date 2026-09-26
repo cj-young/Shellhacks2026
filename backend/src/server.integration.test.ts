@@ -7,7 +7,11 @@ import { io, type Socket } from "socket.io-client";
 
 import ingredients from "./data/ingredients.json" with { type: "json" };
 import { createApp } from "./app.ts";
-import { createGameModule, type GameModule } from "./game/index.ts";
+import {
+  createGameModule,
+  POINTS_PER_RECIPE,
+  type GameModule,
+} from "./game/index.ts";
 import { createRealtimeModule, type RealtimeModule } from "./realtime/index.ts";
 
 const ITEM_ID = ingredients[0].id;
@@ -44,7 +48,11 @@ interface GameStatePayload {
   players: Array<{
     id: string;
     name: string;
+    cart: Record<string, number>;
     inventory: Record<string, number>;
+    recipeIndex: number;
+    recipeStageIndex: number;
+    score: number;
   }>;
 }
 
@@ -317,10 +325,37 @@ test("purchases items and broadcasts the inventory to everyone", async () => {
   ]);
   const hostPlayer = hostView.players.find((player) => player.name === "Hosty");
   assert.deepEqual(hostPlayer?.inventory, { [ITEM_ID]: 2 });
+  assert.deepEqual(hostPlayer?.cart, {});
   assert.deepEqual(guestView, hostView);
 
   host.close();
   guest.close();
+});
+
+test("syncs a player's cart to the shared game state", async () => {
+  const game = await gameModule.service.createGame();
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
+  const joined = waitFor<JoinedPayload>(host, "joined");
+  host.connect();
+  await joined;
+
+  const started = waitFor<GameStartedPayload>(host, "game_started");
+  const startState = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("start_game");
+  await Promise.all([started, startState]);
+
+  const cartUpdated = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("update_cart", [{ id: ITEM_ID, count: 2 }]);
+  const state = await cartUpdated;
+  const player = state.players.find((entry) => entry.name === "Hosty");
+  assert.deepEqual(player?.cart, { [ITEM_ID]: 2 });
+  assert.deepEqual(player?.inventory, {});
+
+  host.close();
 });
 
 test("consumes ingredients and broadcasts the updated inventory", async () => {
@@ -374,6 +409,42 @@ test("rejects an invalid purchase", async () => {
 
   const error = await failure;
   assert.equal(error.code, "INVALID_ITEM");
+
+  host.close();
+});
+
+test("finishes a recipe and broadcasts progress to everyone", async () => {
+  const game = await gameModule.service.createGame();
+
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
+  const joined = waitFor<JoinedPayload>(host, "joined");
+  host.connect();
+  await joined;
+
+  const started = waitFor<GameStartedPayload>(host, "game_started");
+  const startState = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("start_game");
+  await Promise.all([started, startState]);
+
+  const stored = await gameModule.service.getGame(game.code);
+  const totalStages = stored?.state.recipeOrder[0]?.stages.length ?? 0;
+
+  let last: GameStatePayload | undefined;
+  for (let index = 0; index < totalStages; index += 1) {
+    const next = waitFor<GameStatePayload>(host, "update_state");
+    host.emit("finish_stage");
+    last = await next;
+  }
+
+  const player = last?.players.find((entry) => entry.name === "Hosty");
+  assert.equal(player?.score, POINTS_PER_RECIPE);
+  assert.equal(player?.recipeIndex, 1);
+  assert.equal(player?.recipeStageIndex, 0);
+  assert.deepEqual(player?.inventory, {});
 
   host.close();
 });

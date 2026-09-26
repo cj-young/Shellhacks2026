@@ -162,8 +162,16 @@ export function createSocketIoGateway(
       void handlePurchase(items);
     });
 
+    socket.on("update_cart", (items) => {
+      void handleUpdateCart(items);
+    });
+
     socket.on("consume_ingredients", (items) => {
       void handleConsumeIngredients(items);
+    });
+
+    socket.on("finish_stage", () => {
+      void handleFinishStage();
     });
 
     async function handlePurchase(items: PurchaseItem[]): Promise<void> {
@@ -195,6 +203,31 @@ export function createSocketIoGateway(
       io.to(room).emit("update_state", purchase.state);
     }
 
+    async function handleUpdateCart(items: PurchaseItem[]): Promise<void> {
+      if (!isPurchaseItems(items)) {
+        socket.emit("game_error", {
+          code: "INVALID_ITEM",
+          message: "Invalid cart",
+        });
+        return;
+      }
+
+      const update = await session.updateCart({
+        code: gameCode,
+        playerId: player.id,
+        items,
+      });
+      if (!update.ok) {
+        socket.emit("game_error", {
+          code: update.code,
+          message: update.message,
+        });
+        return;
+      }
+
+      io.to(room).emit("update_state", update.state);
+    }
+
     async function handleConsumeIngredients(
       items: PurchaseItem[],
     ): Promise<void> {
@@ -220,6 +253,23 @@ export function createSocketIoGateway(
       }
 
       io.to(room).emit("update_state", consumption.state);
+    }
+
+    async function handleFinishStage(): Promise<void> {
+      const result = await session.finishStage({
+        code: gameCode,
+        playerId: player.id,
+      });
+
+      if (!result.ok) {
+        socket.emit("game_error", {
+          code: result.code,
+          message: result.message,
+        });
+        return;
+      }
+
+      io.to(room).emit("update_state", result.state);
     }
 
     socket.on("disconnect", () => {

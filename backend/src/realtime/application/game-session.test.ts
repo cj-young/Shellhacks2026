@@ -271,3 +271,23 @@ test("endRound returns the final rankings", async () => {
   assert.equal(result.results[0]?.name, "Ada");
   assert.equal(result.state.roundEndsAt !== null, true);
 });
+
+test("finishStage returns the updated state", async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+  const joined = await session.join({ code: game.code, name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await gameService.startGame(game.code);
+
+  const result = await session.finishStage({
+    code: game.code,
+    playerId: joined.player.id,
+  });
+
+  if (!result.ok) {
+    assert.fail("expected finish to succeed");
+  }
+  assert.equal(result.state.players[0]?.recipeStageIndex, 1);
+});

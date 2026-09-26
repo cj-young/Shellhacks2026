@@ -19,24 +19,51 @@ const SHOP_ROTATIONS = [-6, 5, -4, 6];
 const ingredientById = (id: number): Ingredient | undefined =>
   ingredients.at(id);
 
-/** A player's shopping card for a server recipe, ticked off from their inventory. */
-function shoppingStack(
+type ServerPlayer = GameConnection["state"]["players"][number];
+
+/**
+ * A player's card from their server state: shopping (ticked from cart + inventory) until they
+ * have everything for their current recipe or have started it, then the prep step they're on.
+ */
+function playerStack(
   player: { id: string; name: string; color: string },
-  recipe: Recipe,
-  recipeNumber: number,
-  inventory: Record<number, number>,
-): RaceStack {
+  server: ServerPlayer | undefined,
+  order: Recipe[],
+): RaceStack | null {
+  const recipeIndex = Math.min(server?.recipeIndex ?? 0, order.length - 1);
+  const recipe = order.at(recipeIndex);
+  if (!recipe) return null;
+
+  const owned = (id: number) =>
+    (server?.inventory[id] ?? 0) + (server?.cart[id] ?? 0);
+  const stageIndex = server?.recipeStageIndex ?? 0;
+  const hasEverything = recipe.ingredients.every(
+    (needed) => (server?.inventory[needed.id] ?? 0) >= needed.count,
+  );
+  const base = { ...player, recipe: recipeIndex + 1, recipeName: recipe.name };
+
+  if (stageIndex > 0 || hasEverything) {
+    return {
+      ...base,
+      phase: "prep",
+      // The team's recipe stages are line-tracing ("lines"), which plays as a swipe.
+      gesture: "chop",
+      gestureName: "TRACE!",
+      stepLabel: "Trace the lines on your phone",
+      step: Math.min(stageIndex + 1, recipe.stages.length),
+      steps: Math.max(1, recipe.stages.length),
+    };
+  }
+
   return {
-    ...player,
-    recipe: recipeNumber,
-    recipeName: recipe.name,
+    ...base,
     phase: "shop",
     items: recipe.ingredients.map((needed, i) => {
       const ingredient = ingredientById(needed.id);
       return {
         kind: ingredient ? iconIdFor(ingredient) : "",
         rot: SHOP_ROTATIONS[i % SHOP_ROTATIONS.length],
-        done: (inventory[needed.id] ?? 0) >= needed.count,
+        done: owned(needed.id) >= needed.count,
       };
     }),
   };
@@ -73,10 +100,13 @@ export function HostInterface({ connection }: HostInterfaceProps) {
       color: LOBBY_COLORS[i % LOBBY_COLORS.length],
     }));
 
+  const serverPlayers = new Map(connection.state.players.map((p) => [p.id, p]));
+
   if (results && showLeaderboard) {
     const scoreFor = (id: string) =>
       Math.max(
         results.find((r) => r.playerId === id)?.score ?? 0,
+        serverPlayers.get(id)?.score ?? 0,
         connection.scores[id] ?? 0,
       );
     return (
@@ -101,17 +131,10 @@ export function HostInterface({ connection }: HostInterfaceProps) {
       : Math.max(0, Math.ceil((roundEndsAt - now) / 1000));
 
   const order = connection.state.recipeOrder;
-  // Inventories arrive with each state update (e.g. after a checkout).
-  const inventories = new Map(
-    connection.state.players.map((p) => [p.id, p.inventory]),
-  );
-  // Per-player recipe progress isn't sent to clients yet, so every card shows the first recipe.
-  const firstRecipe = order.at(0);
-  const liveStacks: RaceStack[] = firstRecipe
-    ? players.map((player) =>
-        shoppingStack(player, firstRecipe, 1, inventories.get(player.id) ?? {}),
-      )
-    : [];
+  // Cart, inventory and recipe progress arrive with each state update from the server.
+  const liveStacks: RaceStack[] = players
+    .map((player) => playerStack(player, serverPlayers.get(player.id), order))
+    .filter((stack): stack is RaceStack => stack !== null);
 
   const demo = liveStacks.length === 0;
 
