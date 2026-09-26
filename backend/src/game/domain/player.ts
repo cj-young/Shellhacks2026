@@ -12,6 +12,7 @@ export interface Player {
 
   recipeIndex: number;
   recipeStageIndex: number;
+  cart: Inventory;
   inventory: Inventory;
   score: number;
 }

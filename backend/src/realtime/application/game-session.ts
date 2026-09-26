@@ -63,6 +63,8 @@ export interface PurchaseInput {
 
 export type ConsumeIngredientsInput = PurchaseInput;
 export type ConsumeIngredientsResult = PurchaseResult;
+export type UpdateCartInput = PurchaseInput;
+export type UpdateCartResult = PurchaseResult;
 
 export type FinishStageResult =
   | { ok: true; gameCode: string; state: ClientGameState }
@@ -188,6 +190,28 @@ export class GameSession {
         code: result.code,
         message:
           PURCHASE_MESSAGES[result.code] ?? "Unable to purchase these items",
+      };
+    }
+
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+    };
+  }
+
+  async updateCart(input: UpdateCartInput): Promise<UpdateCartResult> {
+    const result = await this.#gameService.updateCart(
+      input.code,
+      input.playerId,
+      input.items,
+    );
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message: PURCHASE_MESSAGES[result.code] ?? "Unable to update the cart",
       };
     }
 

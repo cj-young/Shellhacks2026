@@ -4,8 +4,10 @@ import ingredients from "../../data/ingredients.json";
 
 export function Store({
   uploadInventory,
+  onCartChange,
 }: {
   uploadInventory: (inv: Ingredient[]) => void;
+  onCartChange: (cart: Ingredient[]) => void;
 }) {
   const [inventory, setInventory] = useState<Ingredient[]>([]);
 
@@ -14,14 +16,17 @@ export function Store({
     setInventory([]);
   }
 
+  function addToCart(ingredient: Ingredient) {
+    const nextCart = [...inventory, ingredient];
+    setInventory(nextCart);
+    onCartChange(nextCart);
+  }
+
   return (
     <>
       <div>
         {ingredients.map((ing) => (
-          <button
-            type="button"
-            onClick={() => setInventory([...inventory, ing])}
-          >
+          <button type="button" onClick={() => addToCart(ing)}>
             <img className="w-12 h-12" src={ing.image} />
             <p>
               {ing.name} ({ing.category})
