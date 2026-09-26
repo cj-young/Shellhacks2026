@@ -7,10 +7,15 @@ export interface JoinedPayload {
   players: PlayerSummary[];
 }
 
+export interface GameStartedPayload {
+  gameCode: string;
+}
+
 export interface ServerToClientEvents {
   joined: (payload: JoinedPayload) => void;
   player_joined: (player: PlayerSummary) => void;
   player_left: (payload: { playerId: string }) => void;
+  game_started: (payload: GameStartedPayload) => void;
   game_error: (payload: { code: string; message: string }) => void;
 }
 

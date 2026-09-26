@@ -29,6 +29,10 @@ interface GameErrorPayload {
   message: string;
 }
 
+interface GameStartedPayload {
+  gameCode: string;
+}
+
 function connectClient(base: string, auth: Record<string, string>, origin?: string): Socket {
   return io(base, {
     path: '/socket.io/',
@@ -145,5 +149,71 @@ test('relays presence between clients and honours the host token', async () => {
   assert.equal(left.playerId, guestPayload.playerId);
 
   host.close();
+  guest.close();
+});
+
+test('host starts the game and notifies every player', async () => {
+  const game = await gameModule.service.createGame();
+
+  const host = connectClient(base, { code: game.code, token: game.hostToken });
+  const hostJoined = waitFor<JoinedPayload>(host, 'joined');
+  host.connect();
+  await hostJoined;
+
+  const guest = connectClient(base, { code: game.code });
+  const guestJoined = waitFor<JoinedPayload>(guest, 'joined');
+  const hostSawGuest = waitFor<PlayerJoinedPayload>(host, 'player_joined');
+  guest.connect();
+  await Promise.all([guestJoined, hostSawGuest]);
+
+  const hostStarted = waitFor<GameStartedPayload>(host, 'game_started');
+  const guestStarted = waitFor<GameStartedPayload>(guest, 'game_started');
+  host.emit('start_game');
+
+  const [hostEvent, guestEvent] = await Promise.all([hostStarted, guestStarted]);
+  assert.equal(hostEvent.gameCode, game.code);
+  assert.equal(guestEvent.gameCode, game.code);
+
+  host.close();
+  guest.close();
+});
+
+test('rejects a join once the game has started', async () => {
+  const game = await gameModule.service.createGame();
+
+  const host = connectClient(base, { code: game.code, token: game.hostToken });
+  const hostJoined = waitFor<JoinedPayload>(host, 'joined');
+  host.connect();
+  await hostJoined;
+
+  const started = waitFor<GameStartedPayload>(host, 'game_started');
+  host.emit('start_game');
+  await started;
+
+  const late = connectClient(base, { code: game.code });
+  const failure = waitFor<GameErrorPayload>(late, 'game_error');
+  late.connect();
+
+  const error = await failure;
+  assert.equal(error.code, 'GAME_STARTED');
+
+  host.close();
+  late.close();
+});
+
+test('rejects a start from a non-host player', async () => {
+  const game = await gameModule.service.createGame();
+
+  const guest = connectClient(base, { code: game.code });
+  const guestJoined = waitFor<JoinedPayload>(guest, 'joined');
+  guest.connect();
+  await guestJoined;
+
+  const failure = waitFor<GameErrorPayload>(guest, 'game_error');
+  guest.emit('start_game');
+
+  const error = await failure;
+  assert.equal(error.code, 'NOT_HOST');
+
   guest.close();
 });

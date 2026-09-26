@@ -13,7 +13,16 @@ export interface JoinInput {
   hostToken?: string;
 }
 
-export class JoinSession {
+export type StartResult =
+  | { ok: true; gameCode: string }
+  | { ok: false; code: string; message: string };
+
+export interface StartInput {
+  code: string;
+  isHost: boolean;
+}
+
+export class GameSession {
   readonly #gameService: GameService;
 
   constructor(gameService: GameService) {
@@ -27,9 +36,39 @@ export class JoinSession {
       return { ok: false, code: 'GAME_NOT_FOUND', message: 'No game found for that code' };
     }
 
+    if (game.status !== 'lobby') {
+      return {
+        ok: false,
+        code: 'GAME_STARTED',
+        message: 'This game has already started',
+      };
+    }
+
     const isHost = input.hostToken !== undefined && input.hostToken === game.hostToken;
     const player: PlayerSummary = { id: randomUUID(), joinedAt: Date.now(), isHost };
 
     return { ok: true, gameCode: game.code, player };
+  }
+
+  async start(input: StartInput): Promise<StartResult> {
+    if (!input.isHost) {
+      return { ok: false, code: 'NOT_HOST', message: 'Only the host can start the game' };
+    }
+
+    const result = await this.#gameService.startGame(input.code);
+
+    if (!result.ok) {
+      if (result.code === 'GAME_NOT_FOUND') {
+        return { ok: false, code: 'GAME_NOT_FOUND', message: 'No game found for that code' };
+      }
+
+      return {
+        ok: false,
+        code: 'ALREADY_STARTED',
+        message: 'This game has already started',
+      };
+    }
+
+    return { ok: true, gameCode: result.game.code };
   }
 }

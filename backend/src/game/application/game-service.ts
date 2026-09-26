@@ -4,6 +4,10 @@ import type { GameStore } from '../ports/game-store.ts';
 
 const MAX_CODE_ATTEMPTS = 5;
 
+export type StartGameResult =
+  | { ok: true; game: Game }
+  | { ok: false; code: 'GAME_NOT_FOUND' | 'ALREADY_STARTED' };
+
 export class GameService {
   readonly #store: GameStore;
 
@@ -16,6 +20,7 @@ export class GameService {
       const game: Game = {
         code: generateGameCode(),
         hostToken: generateHostToken(),
+        status: 'lobby',
         createdAt: Date.now(),
       };
 
@@ -29,5 +34,22 @@ export class GameService {
 
   async getGame(code: string): Promise<Game | undefined> {
     return this.#store.get(normalizeGameCode(code));
+  }
+
+  async startGame(code: string): Promise<StartGameResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+
+    if (!game) {
+      return { ok: false, code: 'GAME_NOT_FOUND' };
+    }
+
+    if (game.status !== 'lobby') {
+      return { ok: false, code: 'ALREADY_STARTED' };
+    }
+
+    const started: Game = { ...game, status: 'active' };
+    await this.#store.save(started);
+
+    return { ok: true, game: started };
   }
 }

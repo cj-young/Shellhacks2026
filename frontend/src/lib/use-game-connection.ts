@@ -14,6 +14,7 @@ export type GameConnection = {
   playerId: string | null
   status: string
   message: string
+  started: boolean
 }
 
 export function useGameConnection(auth: GameAuth | null): GameConnection {
@@ -22,6 +23,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [status, setStatus] = useState('Not connected')
   const [message, setMessage] = useState('')
+  const [started, setStarted] = useState(false)
 
   const code = auth?.code
   const token = auth?.token
@@ -32,11 +34,13 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
       setPlayerId(null)
       setStatus('Not connected')
       setMessage('')
+      setStarted(false)
       return
     }
 
     setStatus('Connecting...')
     setMessage('')
+    setStarted(false)
 
     const socket = io({ path: '/api/socket.io/', auth: { code, token } })
     socketRef.current = socket
@@ -58,6 +62,10 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     socket.on('player_left', ({ playerId: leftId }: { playerId: string }) => {
       setPlayers((current) => current.filter((entry) => entry.id !== leftId))
     })
+    socket.on('game_started', () => {
+      setStarted(true)
+      setStatus('Game started')
+    })
     socket.on(
       'game_error',
       ({ message: errorMessage }: { message: string }) => {
@@ -72,5 +80,5 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     }
   }, [code, token])
 
-  return { socketRef, players, playerId, status, message }
+  return { socketRef, players, playerId, status, message, started }
 }

@@ -2,7 +2,7 @@ import type { Server as HttpServer } from 'node:http';
 
 import { Server, type Socket } from 'socket.io';
 
-import type { JoinSession } from '../../application/join-session.ts';
+import type { GameSession } from '../../application/game-session.ts';
 import type { PlayerSummary } from '../../domain/player.ts';
 import type {
   ClientToServerEvents,
@@ -24,7 +24,7 @@ type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServer
 
 export interface SocketIoGatewayOptions {
   server: HttpServer;
-  joinSession: JoinSession;
+  session: GameSession;
   allowedOrigins?: readonly string[];
 }
 
@@ -33,7 +33,7 @@ export interface SocketIoGateway {
 }
 
 export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIoGateway {
-  const { joinSession } = options;
+  const { session } = options;
   const io: GameServer = new Server(options.server, {
     path: SOCKET_PATH,
     serveClient: false,
@@ -57,7 +57,7 @@ export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIo
 
     let result;
     try {
-      result = await joinSession.join({ code, hostToken });
+      result = await session.join({ code, hostToken });
     } catch {
       socket.emit('game_error', { code: 'INTERNAL_ERROR', message: 'Unable to join the game' });
       socket.disconnect(true);
@@ -89,11 +89,19 @@ export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIo
     socket.to(room).emit('player_joined', player);
 
     socket.on('start_game', () => {
-      socket.emit('game_error', {
-        code: 'NOT_IMPLEMENTED',
-        message: 'start_game is not implemented yet',
-      });
+      void handleStartGame();
     });
+
+    async function handleStartGame(): Promise<void> {
+      const startResult = await session.start({ code: gameCode, isHost: player.isHost });
+
+      if (!startResult.ok) {
+        socket.emit('game_error', { code: startResult.code, message: startResult.message });
+        return;
+      }
+
+      io.to(room).emit('game_started', { gameCode: startResult.gameCode });
+    }
 
     socket.on('disconnect', () => {
       io.to(room).emit('player_left', { playerId: player.id });

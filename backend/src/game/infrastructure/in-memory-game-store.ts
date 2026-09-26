@@ -17,6 +17,10 @@ export class InMemoryGameStore implements GameStore {
     return this.#games.get(code);
   }
 
+  async save(game: Game): Promise<void> {
+    this.#games.set(game.code, game);
+  }
+
   async delete(code: string): Promise<boolean> {
     return this.#games.delete(code);
   }

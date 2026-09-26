@@ -95,13 +95,15 @@ function HostScreen() {
               </button>
             </div>
 
-            <button
-              className="rounded border border-slate-600 px-4 py-2 hover:bg-slate-800"
-              onClick={startGame}
-              type="button"
-            >
-              Start game
-            </button>
+            {!connection.started && (
+              <button
+                className="rounded border border-slate-600 px-4 py-2 hover:bg-slate-800"
+                onClick={startGame}
+                type="button"
+              >
+                Start game
+              </button>
+            )}
 
             <div className="rounded border border-slate-700 p-4">
               <p className="text-sm text-slate-400">

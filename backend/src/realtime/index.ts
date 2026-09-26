@@ -1,7 +1,7 @@
 import type { Server as HttpServer } from 'node:http';
 
 import type { GameService } from '../game/index.ts';
-import { JoinSession } from './application/join-session.ts';
+import { GameSession } from './application/game-session.ts';
 import { createSocketIoGateway } from './infrastructure/socketio/socketio-gateway.ts';
 
 export interface RealtimeModuleOptions {
@@ -15,17 +15,18 @@ export interface RealtimeModule {
 }
 
 export function createRealtimeModule(options: RealtimeModuleOptions): RealtimeModule {
-  const joinSession = new JoinSession(options.gameService);
+  const session = new GameSession(options.gameService);
 
   return createSocketIoGateway({
     server: options.server,
-    joinSession,
+    session,
     allowedOrigins: options.allowedOrigins,
   });
 }
 
 export type {
   ClientToServerEvents,
+  GameStartedPayload,
   InterServerEvents,
   JoinedPayload,
   ServerToClientEvents,

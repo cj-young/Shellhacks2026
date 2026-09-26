@@ -66,6 +66,15 @@ function JoinScreen() {
           <p className="text-sm text-amber-400">{connection.message}</p>
         )}
 
+        {connection.started && (
+          <a
+            className="rounded border border-cyan-400 px-4 py-2 text-center font-medium hover:bg-cyan-400/10"
+            href="/"
+          >
+            Enter the game
+          </a>
+        )}
+
         <a className="text-sm text-cyan-400 underline" href="/host">
           Host a game instead
         </a>

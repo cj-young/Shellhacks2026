@@ -10,6 +10,7 @@ test('createGame stores the game and getGame finds it case-insensitively', async
   const service = new GameService(new InMemoryGameStore());
   const game = await service.createGame();
 
+  assert.equal(game.status, 'lobby');
   assert.ok(game.hostToken.length > 0);
   assert.equal((await service.getGame(game.code.toLowerCase()))?.code, game.code);
   assert.equal((await service.getGame(`  ${game.code}  `))?.code, game.code);
@@ -25,6 +26,9 @@ test('createGame retries when a code is already taken', async () => {
     },
     async get(): Promise<Game | undefined> {
       return undefined;
+    },
+    async save(): Promise<void> {
+      return;
     },
     async delete(): Promise<boolean> {
       return false;
@@ -45,10 +49,53 @@ test('createGame rejects after exhausting all attempts', async () => {
     async get(): Promise<Game | undefined> {
       return undefined;
     },
+    async save(): Promise<void> {
+      return;
+    },
     async delete(): Promise<boolean> {
       return false;
     },
   };
 
   await assert.rejects(() => new GameService(store).createGame());
+});
+
+test('startGame moves a lobby game to active and persists it', async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+
+  const result = await service.startGame(game.code.toLowerCase());
+
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    assert.fail('expected start to succeed');
+  }
+  assert.equal(result.game.status, 'active');
+  assert.equal((await service.getGame(game.code))?.status, 'active');
+});
+
+test('startGame reports GAME_NOT_FOUND for an unknown code', async () => {
+  const service = new GameService(new InMemoryGameStore());
+
+  const result = await service.startGame('ZZZZZZ');
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail('expected start to fail');
+  }
+  assert.equal(result.code, 'GAME_NOT_FOUND');
+});
+
+test('startGame reports ALREADY_STARTED for an active game', async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  await service.startGame(game.code);
+
+  const result = await service.startGame(game.code);
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail('expected start to fail');
+  }
+  assert.equal(result.code, 'ALREADY_STARTED');
 });
