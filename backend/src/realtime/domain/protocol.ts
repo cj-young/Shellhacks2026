@@ -28,11 +28,21 @@ export interface ServerToClientEvents {
   game_started: (payload: GameStartedPayload) => void;
   game_error: (payload: { code: string; message: string }) => void;
   update_state: (state: ClientGameState) => void;
+  player_scored: (payload: PlayerScoredPayload) => void;
+}
+
+export interface PlayerScoredPayload {
+  playerId: string;
+  /** Points awarded for this completion. */
+  points: number;
+  /** The player's running total for this game. */
+  total: number;
 }
 
 export interface ClientToServerEvents {
   start_game: () => void;
   send_recipe_order: (order: number[]) => void; //order of recipe IDs
+  recipe_completed: () => void;
 }
 
 export interface InterServerEvents {}

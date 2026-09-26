@@ -22,6 +22,8 @@ export type GameConnection = {
   message: string;
   started: boolean;
   state: GameState;
+  /** Running points per player id, from the server's `player_scored` events. */
+  scores: Record<string, number>;
 };
 
 const tokenKey = (code: string) => `shellhacks.playerToken:${code}`;
@@ -54,6 +56,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
   const [message, setMessage] = useState("");
   const [started, setStarted] = useState(false);
   const [state, setState] = useState<GameState>(MakeEmptyState());
+  const [scores, setScores] = useState<Record<string, number>>({});
 
   const code = auth?.code;
   const token = auth?.token;
@@ -74,6 +77,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     setMessage("");
     setStarted(false);
     setState(MakeEmptyState());
+    setScores({});
 
     const reconnectToken = readStoredToken(code);
     const socket = io({
@@ -122,6 +126,12 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
       setState(gameState);
       console.log(gameState);
     });
+    socket.on(
+      "player_scored",
+      ({ playerId: scorerId, total }: { playerId: string; total: number }) => {
+        setScores((current) => ({ ...current, [scorerId]: total }));
+      },
+    );
 
     return () => {
       socket.disconnect();
@@ -129,5 +139,14 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     };
   }, [code, name, token]);
 
-  return { socketRef, players, playerId, status, message, started, state };
+  return {
+    socketRef,
+    players,
+    playerId,
+    status,
+    message,
+    started,
+    state,
+    scores,
+  };
 }

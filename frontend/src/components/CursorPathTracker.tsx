@@ -69,10 +69,10 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
           <polyline
             fill="none"
             points={points.map(({ x, y }) => `${x},${y}`).join(" ")}
-            stroke="rgb(34 211 238)"
+            stroke="#1F4FD8"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="5"
+            strokeWidth="6"
           />
         )}
       </svg>

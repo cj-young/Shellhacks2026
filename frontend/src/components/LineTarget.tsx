@@ -180,12 +180,26 @@ export function LineTarget({
         y1={origin.y}
         x2={end.x}
         y2={end.y}
-        stroke={matches ? "rgb(74 222 128)" : "rgb(148 163 184)"}
+        stroke={matches ? "#3CB54A" : "rgba(43,42,107,.28)"}
         strokeLinecap="round"
         strokeWidth={radius * 2}
       />
-      <circle cx={origin.x} cy={origin.y} fill="white" r="4" />
-      <circle cx={end.x} cy={end.y} fill="white" r="4" />
+      <circle
+        cx={origin.x}
+        cy={origin.y}
+        fill="#fff"
+        stroke="#2B2A6B"
+        strokeWidth="3"
+        r="6"
+      />
+      <circle
+        cx={end.x}
+        cy={end.y}
+        fill="#fff"
+        stroke="#2B2A6B"
+        strokeWidth="3"
+        r="6"
+      />
     </svg>
   );
 }

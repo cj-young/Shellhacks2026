@@ -9,9 +9,8 @@ const stickerFilter = (size: number) => {
 };
 
 /**
- * Menu ingredients (src/data/menu.json) render from their asset files, so final art can be
- * dropped into public/assets. Anything else falls back to the design handoff's inline art,
- * which the design mockups in the dev switcher still use.
+ * `id` can be a menu ingredient (renders its public/assets file), an image URL starting
+ * with "/" or "http", or a design-handoff kind (inline art, used by the dev mockups).
  */
 export function IngredientIcon({
   id,
@@ -28,7 +27,8 @@ export function IngredientIcon({
   silhouette?: boolean;
   style?: React.CSSProperties;
 }) {
-  if (!isMenuIngredient(id)) {
+  const isImageUrl = id.startsWith("/") || id.startsWith("http");
+  if (!isImageUrl && !isMenuIngredient(id)) {
     return (
       <Ingredient
         kind={id as IngredientKind}
@@ -42,8 +42,10 @@ export function IngredientIcon({
   }
   return (
     <img
-      src={ingredientAsset(id, silhouette)}
-      alt={silhouette ? "Mystery ingredient" : ingredientName(id)}
+      src={isImageUrl ? id : ingredientAsset(id, silhouette)}
+      alt={
+        silhouette ? "Mystery ingredient" : isImageUrl ? "" : ingredientName(id)
+      }
       width={size}
       height={size}
       draggable={false}
@@ -51,6 +53,7 @@ export function IngredientIcon({
         display: "inline-block",
         width: size,
         height: size,
+        objectFit: "contain",
         filter: sticker ? stickerFilter(size) : undefined,
         transform: rotate ? `rotate(${rotate}deg)` : undefined,
         pointerEvents: "none",

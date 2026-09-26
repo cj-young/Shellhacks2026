@@ -4,6 +4,11 @@ import { MobileJoinNew } from "./screens/MobileJoinNew";
 import { MobileWaitingNew } from "./screens/MobileWaitingNew";
 import { HostVictoryNew } from "./screens/HostVictoryNew";
 import { HostRaceStacks } from "./screens/HostRaceStacks";
+import { TimesUpPreview } from "./screens/TimesUp";
+import {
+  LeaderboardPreview,
+  LeaderboardSoloPreview,
+} from "./screens/RoundLeaderboard";
 import {
   RacePhoneChop,
   RacePhonePlating,
@@ -42,6 +47,17 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
         id: "host-race-stacks",
         label: "Gameplay · card stacks",
         component: HostRaceStacks,
+      },
+      { id: "host-times-up", label: "Time's up", component: TimesUpPreview },
+      {
+        id: "host-leaderboard",
+        label: "Leaderboard · 4 chefs",
+        component: LeaderboardPreview,
+      },
+      {
+        id: "host-leaderboard-solo",
+        label: "Leaderboard · solo",
+        component: LeaderboardSoloPreview,
       },
       {
         id: "host-round-clear",

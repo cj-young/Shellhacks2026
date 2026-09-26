@@ -78,9 +78,21 @@ export function GestureRecipe({
           src={stage.image}
         />
       )}
-      <p className="absolute top-0 left-0 bottom-0 right-0 m-auto w-fit h-fit z-50 text-white">
-        {matches ? "Success!" : "Failure"}
-      </p>
+      {matches && (
+        <p
+          className="absolute top-0 left-0 bottom-0 right-0 m-auto w-fit h-fit z-50"
+          style={{
+            background: "#3CB54A",
+            border: "4px solid #2B2A6B",
+            borderRadius: 22,
+            padding: "4px 16px",
+            font: "400 26px 'Lilita One'",
+            color: "#2B2A6B",
+          }}
+        >
+          Success!
+        </p>
+      )}
       {stageLines.map((line, index) => (
         <LineTarget
           key={`${stageKey}:${index}`}

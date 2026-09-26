@@ -12,6 +12,7 @@ import type {
 
 const SOCKET_PATH = "/socket.io/";
 const MAX_BUFFER_BYTES = 16 * 1024;
+const POINTS_PER_RECIPE = 100;
 
 type GameServer = Server<
   ClientToServerEvents,
@@ -55,6 +56,9 @@ export function createSocketIoGateway(
       );
     },
   });
+
+  // In-memory running totals, keyed by game code then player id.
+  const scores = new Map<string, Map<string, number>>();
 
   io.on("connection", (socket) => {
     void handleConnection(socket);
@@ -122,6 +126,19 @@ export function createSocketIoGateway(
       io.to(room).emit("game_started", { gameCode: startResult.gameCode });
       io.to(room).emit("update_state", startResult.state);
     }
+
+    socket.on("recipe_completed", () => {
+      if (player.isHost) return;
+      const gameScores = scores.get(gameCode) ?? new Map<string, number>();
+      const total = (gameScores.get(player.id) ?? 0) + POINTS_PER_RECIPE;
+      gameScores.set(player.id, total);
+      scores.set(gameCode, gameScores);
+      io.to(room).emit("player_scored", {
+        playerId: player.id,
+        points: POINTS_PER_RECIPE,
+        total,
+      });
+    });
 
     socket.on("disconnect", () => {
       void handleDisconnect();

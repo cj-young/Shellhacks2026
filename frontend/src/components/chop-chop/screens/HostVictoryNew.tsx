@@ -67,7 +67,7 @@ const RESULTS: {
 ];
 
 // Same seeded generator as the design file, so the confetti layout matches exactly.
-const CONFETTI = (() => {
+export const CONFETTI = (() => {
   const cols = [
     ROYAL,
     "#4FB3F0",
@@ -121,7 +121,13 @@ function Star({ size, style }: { size: number; style?: React.CSSProperties }) {
 
 const statLabel = { font: nunito(900, 20) };
 
-export function HostVictoryNew() {
+export function HostVictoryNew({
+  onLobby,
+  onNextRound,
+}: {
+  onLobby?: () => void;
+  onNextRound?: () => void;
+} = {}) {
   return (
     <div
       style={{
@@ -450,6 +456,8 @@ export function HostVictoryNew() {
         }}
       >
         <div
+          onClick={onLobby}
+          role={onLobby ? "button" : undefined}
           style={{
             height: 104,
             padding: "0 44px",
@@ -466,6 +474,8 @@ export function HostVictoryNew() {
           Lobby
         </div>
         <div
+          onClick={onNextRound}
+          role={onNextRound ? "button" : undefined}
           style={{
             position: "relative",
             height: 124,
