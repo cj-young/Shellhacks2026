@@ -8,20 +8,32 @@ export function getRandomIntInclusive(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function generateRecipeOrder(length: number) {
-  const chosen: number[] = [];
-  const res: Recipe[] = [];
-  let i = 0;
+export function generateRecipeOrder(length: number): Recipe[] {
+  const sanitizedRecipes: Recipe[] = recipes.map((recipe) => ({
+    name: recipe.name,
+    stages: recipe.stages.map((stage) => ({
+      ...stage,
+      ingredientsConsumed: new Map(
+        Object.entries(stage.ingredientsConsumed).map(([a, b]) => [
+          Number(a),
+          b,
+        ]),
+      ),
+    })),
+  }));
 
-  while (i < length) {
-    const select = getRandomIntInclusive(0, recipes.length - 1);
-    if (!chosen.includes(select)) {
-      res.push(recipes[select]);
-      i++;
-    }
+  length = Math.min(length, recipes.length);
+
+  // Shuffle the first <length> elements to get <length> random ones
+  for (let i = 0; i < length; i++) {
+    const idx = getRandomIntInclusive(0, sanitizedRecipes.length - 1);
+    [sanitizedRecipes[idx], sanitizedRecipes[i]] = [
+      sanitizedRecipes[i],
+      sanitizedRecipes[idx],
+    ];
   }
 
-  return res;
+  return sanitizedRecipes.slice(0, length);
 }
 
 /** Ingredient ids are positional indexes into the ingredients catalogue. */
