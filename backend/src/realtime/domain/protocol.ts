@@ -53,6 +53,7 @@ export interface ClientToServerEvents {
   send_recipe_order: (order: number[]) => void; //order of recipe IDs
   purchase_items: (items: PurchaseItem[]) => void;
   consume_ingredients: (items: PurchaseItem[]) => void;
+  finish_stage: () => void;
 }
 
 export interface InterServerEvents {}

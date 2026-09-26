@@ -141,6 +141,20 @@ channels:
     messages:
       consumeIngredients:
         $ref: '#/components/messages/ConsumeIngredients'
+  finishStage:
+    address: finish_stage
+    title: Finish stage
+    description: |
+      Sent by a player when they complete the current recipe stage. The server advances the
+      player's stage progress; completing the last stage of a recipe awards points, subtracts a
+      waste penalty for leftover inventory, clears the inventory, and moves to the next recipe.
+      On success the server broadcasts `update_state`; on failure the sender receives
+      `game_error` with `GAME_NOT_ACTIVE`, `PLAYER_NOT_FOUND` or `ALREADY_FINISHED`.
+    x-socketio:
+      event: finish_stage
+    messages:
+      finishStage:
+        $ref: '#/components/messages/FinishStage'
   timerSync:
     address: timer_sync
     title: Timer sync
@@ -207,6 +221,11 @@ operations:
     summary: Receive a request to consume ingredients for a recipe stage.
     channel:
       $ref: '#/channels/consumeIngredients'
+  receiveFinishStage:
+    action: receive
+    summary: Receive a stage-completion request from a player.
+    channel:
+      $ref: '#/channels/finishStage'
   sendTimerSync:
     action: send
     summary: Send the round end time and the server clock once.
@@ -259,6 +278,10 @@ components:
       title: Consume ingredients
       payload:
         $ref: '#/components/schemas/PurchaseItemsPayload'
+    FinishStage:
+      name: finish_stage
+      title: Finish stage
+      description: No payload.
     TimerSync:
       name: timer_sync
       title: Timer sync
@@ -280,6 +303,9 @@ components:
         - isHost
         - connected
         - inventory
+        - recipeIndex
+        - recipeStageIndex
+        - score
       properties:
         id:
           type: string
@@ -308,7 +334,22 @@ components:
           additionalProperties:
             type: integer
           examples:
-            - { "1": 2 }
+            - { "0": 2 }
+        recipeIndex:
+          type: integer
+          description: Index of the player's current recipe within the recipe order.
+          examples:
+            - 0
+        recipeStageIndex:
+          type: integer
+          description: Index of the current stage within the player's current recipe.
+          examples:
+            - 0
+        score:
+          type: integer
+          description: Current score (may be negative after waste penalties).
+          examples:
+            - 100
     JoinedPayload:
       type: object
       additionalProperties: false
@@ -437,6 +478,8 @@ components:
             - GAME_NOT_ACTIVE
             - PLAYER_NOT_FOUND
             - INVALID_ITEM
+            - INSUFFICIENT_INVENTORY
+            - ALREADY_FINISHED
             - NOT_HOST
             - ALREADY_STARTED
             - INTERNAL_ERROR

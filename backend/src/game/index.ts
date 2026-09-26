@@ -21,11 +21,15 @@ export {
   GameService,
   MAX_ITEM_COUNT,
   MAX_PLAYERS,
+  POINTS_PER_RECIPE,
+  WASTE_PENALTY_PER_ITEM,
 } from "./application/game-service.ts";
 export { InMemoryGameStore } from "./infrastructure/in-memory-game-store.ts";
 export type {
   AddItemsResult,
+  ConsumeItemsResult,
   EndRoundResult,
+  FinishStageResult,
   JoinPlayerInput,
   JoinPlayerResult,
   StartGameOptions,

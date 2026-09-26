@@ -8,6 +8,9 @@ export interface PlayerSummary {
   readonly joinedAt: number;
   readonly connected: boolean;
   readonly inventory: Inventory;
+  readonly recipeIndex: number;
+  readonly recipeStageIndex: number;
+  readonly score: number;
 }
 
 export function toPlayerSummary(player: Player): PlayerSummary {
@@ -18,5 +21,8 @@ export function toPlayerSummary(player: Player): PlayerSummary {
     joinedAt: player.joinedAt,
     connected: player.connected,
     inventory: player.inventory,
+    recipeIndex: player.recipeIndex,
+    recipeStageIndex: player.recipeStageIndex,
+    score: player.score,
   };
 }

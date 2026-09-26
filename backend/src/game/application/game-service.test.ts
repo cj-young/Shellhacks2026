@@ -5,7 +5,12 @@ import ingredients from "../../data/ingredients.json" with { type: "json" };
 import type { Game } from "../domain/game.ts";
 import { InMemoryGameStore } from "../infrastructure/in-memory-game-store.ts";
 import type { GameStore } from "../ports/game-store.ts";
-import { GameService, MAX_PLAYERS } from "./game-service.ts";
+import {
+  GameService,
+  MAX_PLAYERS,
+  POINTS_PER_RECIPE,
+  WASTE_PENALTY_PER_ITEM,
+} from "./game-service.ts";
 
 const ITEM_ID = ingredients[0].id;
 
@@ -426,4 +431,134 @@ test("endRound rejects a lobby game", async () => {
     assert.fail("expected end to fail");
   }
   assert.equal(result.code, "GAME_NOT_ACTIVE");
+});
+
+test("finishStage advances the stage without scoring", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  const result = await service.finishStage(game.code, joined.player.id);
+
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    assert.fail("expected finish to succeed");
+  }
+  const player = result.game.state.players[0];
+  assert.equal(player?.recipeStageIndex, 1);
+  assert.equal(player?.recipeIndex, 0);
+  assert.equal(player?.score, 0);
+});
+
+test("finishStage completes a recipe and applies the waste penalty", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+  await service.addItemsToInventory(game.code, joined.player.id, [
+    { id: ITEM_ID, count: 2 },
+  ]);
+
+  const stored = await service.getGame(game.code);
+  const totalStages = stored?.state.recipeOrder[0]?.stages.length ?? 0;
+  for (let index = 0; index < totalStages; index += 1) {
+    const result = await service.finishStage(game.code, joined.player.id);
+    assert.equal(result.ok, true);
+  }
+
+  const player = (await service.getGame(game.code))?.state.players[0];
+  assert.equal(player?.score, POINTS_PER_RECIPE - 2 * WASTE_PENALTY_PER_ITEM);
+  assert.deepEqual(player?.inventory, {});
+  assert.equal(player?.recipeIndex, 1);
+  assert.equal(player?.recipeStageIndex, 0);
+});
+
+test("finishStage can push the score below zero", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+  await service.addItemsToInventory(game.code, joined.player.id, [
+    { id: ITEM_ID, count: 20 },
+  ]);
+
+  const totalStages =
+    (await service.getGame(game.code))?.state.recipeOrder[0]?.stages.length ??
+    0;
+  for (let index = 0; index < totalStages; index += 1) {
+    await service.finishStage(game.code, joined.player.id);
+  }
+
+  const player = (await service.getGame(game.code))?.state.players[0];
+  assert.equal(player?.score, POINTS_PER_RECIPE - 20 * WASTE_PENALTY_PER_ITEM);
+  assert.ok((player?.score ?? 0) < 0);
+});
+
+test("finishStage returns ALREADY_FINISHED once all recipes are complete", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  const order = (await service.getGame(game.code))?.state.recipeOrder ?? [];
+  const totalStages = order.reduce(
+    (total, recipe) => total + recipe.stages.length,
+    0,
+  );
+  for (let index = 0; index < totalStages; index += 1) {
+    const result = await service.finishStage(game.code, joined.player.id);
+    assert.equal(result.ok, true);
+  }
+
+  const result = await service.finishStage(game.code, joined.player.id);
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected finish to fail");
+  }
+  assert.equal(result.code, "ALREADY_FINISHED");
+});
+
+test("finishStage rejects a lobby game", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+
+  const result = await service.finishStage(game.code, joined.player.id);
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected finish to fail");
+  }
+  assert.equal(result.code, "GAME_NOT_ACTIVE");
+});
+
+test("finishStage rejects an unknown player", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  await service.startGame(game.code);
+
+  const result = await service.finishStage(game.code, "nobody");
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected finish to fail");
+  }
+  assert.equal(result.code, "PLAYER_NOT_FOUND");
 });

@@ -19,6 +19,8 @@ import type { GameStore } from "../ports/game-store.ts";
 const MAX_CODE_ATTEMPTS = 5;
 export const MAX_PLAYERS = 5;
 export const MAX_ITEM_COUNT = 99;
+export const POINTS_PER_RECIPE = 100;
+export const WASTE_PENALTY_PER_ITEM = 10;
 
 export type StartGameResult =
   | { ok: true; game: Game }
@@ -63,6 +65,17 @@ export type ConsumeItemsResult =
         | "PLAYER_NOT_FOUND"
         | "INVALID_ITEM"
         | "INSUFFICIENT_INVENTORY";
+    };
+
+export type FinishStageResult =
+  | { ok: true; game: Game }
+  | {
+      ok: false;
+      code:
+        | "GAME_NOT_FOUND"
+        | "GAME_NOT_ACTIVE"
+        | "PLAYER_NOT_FOUND"
+        | "ALREADY_FINISHED";
     };
 
 export class GameService {
@@ -305,6 +318,46 @@ export class GameService {
     return { ok: true, game: next };
   }
 
+  async finishStage(
+    code: string,
+    playerId: string,
+  ): Promise<FinishStageResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+    if (!game) return { ok: false, code: "GAME_NOT_FOUND" };
+    if (game.status !== "active") return { ok: false, code: "GAME_NOT_ACTIVE" };
+
+    const player = game.state.players.find((entry) => entry.id === playerId);
+    if (!player) return { ok: false, code: "PLAYER_NOT_FOUND" };
+
+    const recipe = game.state.recipeOrder[player.recipeIndex];
+    if (!recipe) return { ok: false, code: "ALREADY_FINISHED" };
+
+    const isLastStage = player.recipeStageIndex + 1 >= recipe.stages.length;
+
+    const updated: Player = isLastStage
+      ? {
+          ...player,
+          score:
+            player.score +
+            POINTS_PER_RECIPE -
+            countInventory(player.inventory) * WASTE_PENALTY_PER_ITEM,
+          recipeIndex: player.recipeIndex + 1,
+          recipeStageIndex: 0,
+          inventory: {},
+        }
+      : { ...player, recipeStageIndex: player.recipeStageIndex + 1 };
+
+    const next = this.#withPlayers(
+      game,
+      game.state.players.map((entry) =>
+        entry.id === updated.id ? updated : entry,
+      ),
+    );
+    await this.#store.save(next);
+
+    return { ok: true, game: next };
+  }
+
   #withPlayers(game: Game, players: Player[]): Game {
     return { ...game, state: { ...game.state, players } };
   }
@@ -317,4 +370,8 @@ function isValidPurchaseItem(item: PurchaseItem): boolean {
     item.count >= 1 &&
     item.count <= MAX_ITEM_COUNT
   );
+}
+
+function countInventory(inventory: Inventory): number {
+  return Object.values(inventory).reduce((total, count) => total + count, 0);
 }

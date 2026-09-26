@@ -61,10 +61,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   ): boolean {
     const available = new Map<number, number>();
     for (const ingredient of [...inventory, ...additionalIngredients]) {
-      available.set(
-        ingredient.id,
-        (available.get(ingredient.id) ?? 0) + 1,
-      );
+      available.set(ingredient.id, (available.get(ingredient.id) ?? 0) + 1);
     }
 
     const ingredientsConsumed =
@@ -94,10 +91,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
 
     const available = new Map<number, number>();
     for (const ingredient of inventory) {
-      available.set(
-        ingredient.id,
-        (available.get(ingredient.id) ?? 0) + 1,
-      );
+      available.set(ingredient.id, (available.get(ingredient.id) ?? 0) + 1);
     }
     if (items.some(({ id, count }) => (available.get(id) ?? 0) < count)) {
       return;

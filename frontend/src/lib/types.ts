@@ -12,6 +12,9 @@ export type PlayerSummary = {
   joinedAt: number;
   connected: boolean;
   inventory: Record<number, number>;
+  recipeIndex: number;
+  recipeStageIndex: number;
+  score: number;
 };
 
 export type GameState = {

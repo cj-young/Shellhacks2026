@@ -64,6 +64,15 @@ export interface PurchaseInput {
 export type ConsumeIngredientsInput = PurchaseInput;
 export type ConsumeIngredientsResult = PurchaseResult;
 
+export type FinishStageResult =
+  | { ok: true; gameCode: string; state: ClientGameState }
+  | { ok: false; code: string; message: string };
+
+export interface FinishStageInput {
+  code: string;
+  playerId: string;
+}
+
 const JOIN_MESSAGES: Record<string, string> = {
   GAME_NOT_FOUND: "No game found for that code",
   GAME_STARTED: "This game has already started",
@@ -80,10 +89,17 @@ const PURCHASE_MESSAGES: Record<string, string> = {
 const CONSUME_MESSAGES: Record<string, string> = {
   ...PURCHASE_MESSAGES,
   INSUFFICIENT_INVENTORY: "You do not have enough ingredients for this step",
-}
+};
 const END_MESSAGES: Record<string, string> = {
   GAME_NOT_FOUND: "No game found for that code",
   GAME_NOT_ACTIVE: "The game is not active",
+};
+
+const FINISH_MESSAGES: Record<string, string> = {
+  GAME_NOT_FOUND: "No game found for that code",
+  GAME_NOT_ACTIVE: "The game is not active",
+  PLAYER_NOT_FOUND: "Player not found in this game",
+  ALREADY_FINISHED: "This player has already finished all recipes",
 };
 
 export class GameSession {
@@ -205,6 +221,28 @@ export class GameSession {
       state: toClientGameState(result.game.state),
     };
   }
+
+  async finishStage(input: FinishStageInput): Promise<FinishStageResult> {
+    const result = await this.#gameService.finishStage(
+      input.code,
+      input.playerId,
+    );
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message: FINISH_MESSAGES[result.code] ?? "Unable to finish the stage",
+      };
+    }
+
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+    };
+  }
+
   async endRound(input: EndRoundInput): Promise<EndRoundResult> {
     const result = await this.#gameService.endRound(input.code);
 
@@ -216,7 +254,6 @@ export class GameSession {
           CONSUME_MESSAGES[result.code] ?? "Unable to consume ingredients",
       };
     }
-        
 
     const results: PlayerResult[] = [...result.game.state.players]
       .sort((a, b) => b.score - a.score)
