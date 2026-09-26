@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#E9E1D2;color:#2B2850;font-family:Nunito,sans-serif}
+a{color:#4C63D2}a:hover{color:#2B2850}
+</style>
+</helmet>
+<section style="padding:100px;display:flex;flex-direction:column;gap:40px;width:max-content">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font:400 64px 'Titan One';color:#2B2850">Host · Main gameplay — lineless chibi</div>
+<div style="font:800 24px Nunito;max-width:1500px">1920×1080 TV view. Top: orders (12%). Middle: kitchen diorama (63%). Bottom: player tabs (25%). Food flows left → right: Pantry → Prep → Stove → Plating.</div>
+</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<sc-for list="{{ variants }}" as="v" hint-placeholder-count="2">
+<div id="{{ v.id }}" style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:center;gap:16px">
+<span style="background:#2B2850;color:#FDF6EC;border-radius:14px;padding:4px 14px;font:900 24px Nunito">{{ v.id }}</span>
+<span style="font:400 36px 'Titan One'">{{ v.title }}</span>
+</div>
+
+<div data-screen-label="{{ v.label }}" style="width:1920px;height:1080px;position:relative;overflow:hidden;background:#FDF6EC;border-radius:28px">
+
+<div style="position:absolute;left:24px;right:24px;top:10px;height:118px;display:flex;align-items:center;gap:22px">
+<div style="flex:1;display:flex;align-items:center;gap:18px;min-width:0">
+<sc-for list="{{ v.tickets }}" as="t" hint-placeholder-count="5">
+<div style="width:262px;height:102px;flex-shrink:0;background:#FFFFFF;border-radius:24px;box-shadow:0 7px 0 #EADBC2;transform:rotate({{ t.rot }}deg);padding:10px 14px 10px 10px;box-sizing:border-box;display:flex;align-items:center;gap:12px">
+<div style="width:82px;height:82px;flex-shrink:0;border-radius:50%;background:{{ t.tint }};display:flex;align-items:center;justify-content:center"><dc-import name="Food Flat" kind="{{ t.dish }}" size="66" hint-size="66px,66px"></dc-import></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+<span style="font:900 19px/1.05 Nunito;white-space:nowrap">{{ t.name }}</span>
+<div style="display:flex;gap:5px">
+<sc-for list="{{ t.chips }}" as="c" hint-placeholder-count="3">
+<span style="width:28px;height:28px;border-radius:50%;background:{{ c.tint }};display:flex;align-items:center;justify-content:center"><dc-import name="Kitchen Icon" kind="{{ c.icon }}" size="17" hint-size="17px,17px"></dc-import></span>
+</sc-for>
+</div>
+<div style="display:flex;align-items:center;gap:6px">
+<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="{{ t.fill }}"></circle><circle cx="8.5" cy="10" r="1.8" fill="#2B2850"></circle><circle cx="15.5" cy="10" r="1.8" fill="#2B2850"></circle><path d="{{ t.mouth }}" fill="#2B2850"></path></svg>
+<div style="flex:1;height:12px;border-radius:6px;background:#EFE3CF;overflow:hidden"><div style="height:100%;width:{{ t.pct }}%;background:{{ t.fill }};border-radius:6px"></div></div>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="height:96px;padding:0 24px;border-radius:28px;background:#A8D94A;display:flex;flex-direction:column;justify-content:center;flex-shrink:0">
+<span style="font:900 15px Nunito;letter-spacing:.12em">TEAM SCORE</span>
+<span style="display:flex;align-items:baseline;gap:10px"><span style="font:400 44px/1 'Titan One'">{{ v.score }}</span><span style="background:#1F9E6E;color:#fff;border-radius:12px;padding:1px 9px;font:900 18px Nunito">{{ v.plus }}</span></span>
+</div>
+<div style="width:108px;height:108px;flex-shrink:0;margin-right:8px;border-radius:50%;background:#4C63D2;box-shadow:0 0 0 7px #6B7FE0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff">
+<span style="font:900 14px Nunito;letter-spacing:.16em">TIME</span>
+<span style="font:400 40px/1 'Titan One'">{{ v.timer }}</span>
+</div>
+</div>
+
+<div style="position:absolute;left:24px;top:138px;width:1872px;height:668px;border-radius:36px;overflow:hidden;background:#F5D8AE">
+<div style="position:absolute;left:0;top:0;width:1872px;height:420px;background:repeating-linear-gradient(90deg,#F5D8AE 0 46px,#F1CF9F 46px 92px)"></div>
+
+<div style="position:absolute;left:40px;top:96px;width:300px;height:14px;border-radius:7px;background:#D98E4A"></div>
+<div style="position:absolute;left:64px;top:42px;width:36px;height:12px;border-radius:6px;background:#7FB23A"></div>
+<div style="position:absolute;left:60px;top:50px;width:44px;height:46px;border-radius:14px;background:#A8D94A"></div>
+<div style="position:absolute;left:122px;top:32px;width:32px;height:12px;border-radius:6px;background:#D97416"></div>
+<div style="position:absolute;left:118px;top:40px;width:40px;height:56px;border-radius:14px;background:#F28A1E"></div>
+<div style="position:absolute;left:176px;top:48px;width:38px;height:12px;border-radius:6px;background:#E67AA6"></div>
+<div style="position:absolute;left:170px;top:56px;width:50px;height:40px;border-radius:14px;background:#F39BC0"></div>
+<div style="position:absolute;left:232px;top:14px;width:30px;height:50px;border-radius:50%;background:#1F9E6E;transform:rotate(-24deg)"></div>
+<div style="position:absolute;left:262px;top:10px;width:30px;height:54px;border-radius:50%;background:#7FB23A;transform:rotate(18deg)"></div>
+<div style="position:absolute;left:244px;top:56px;width:52px;height:40px;border-radius:8px 8px 18px 18px;background:#E4502F"></div>
+<div style="position:absolute;left:520px;top:14px;width:78px;height:78px;border-radius:50%;background:#FFFDF6"></div>
+<div style="position:absolute;left:556px;top:28px;width:7px;height:28px;border-radius:4px;background:#2B2850"></div>
+<div style="position:absolute;left:556px;top:49px;width:26px;height:7px;border-radius:4px;background:#2B2850"></div>
+<div style="position:absolute;left:1560px;top:10px;width:200px;height:10px;border-radius:5px;background:#D98E4A"></div>
+<div style="position:absolute;left:1600px;top:18px;width:12px;height:34px;border-radius:6px;background:#2F3A94"></div>
+<div style="position:absolute;left:1576px;top:46px;width:60px;height:60px;border-radius:50%;background:#4C63D2"></div>
+<div style="position:absolute;left:1588px;top:58px;width:36px;height:36px;border-radius:50%;background:#6B7FE0"></div>
+<div style="position:absolute;left:1690px;top:18px;width:12px;height:26px;border-radius:6px;background:#17835B"></div>
+<div style="position:absolute;left:1670px;top:40px;width:52px;height:52px;border-radius:50%;background:#1F9E6E"></div>
+<div style="position:absolute;left:1681px;top:51px;width:30px;height:30px;border-radius:50%;background:#45B58A"></div>
+<sc-if value="{{ confetti }}" hint-placeholder-val="{{ true }}">
+<dc-import name="Confetti Flat" kind="star" color="#F6C84C" size="30" hint-size="30px,30px" style="position:absolute;left:420px;top:30px"></dc-import>
+<dc-import name="Confetti Flat" kind="flower" color="#F39BC0" size="28" hint-size="28px,28px" style="position:absolute;left:680px;top:62px"></dc-import>
+<dc-import name="Confetti Flat" kind="maple" color="#F28A1E" size="30" rotate="-14" hint-size="30px,30px" style="position:absolute;left:1470px;top:30px"></dc-import>
+<dc-import name="Confetti Flat" kind="circles" color="#7FB23A" size="30" hint-size="30px,30px" style="position:absolute;left:380px;top:66px"></dc-import>
+<dc-import name="Confetti Flat" kind="leaf" color="#1F9E6E" size="24" rotate="30" hint-size="24px,24px" style="position:absolute;left:1790px;top:40px"></dc-import>
+</sc-if>
+
+<div style="position:absolute;left:20px;top:176px;width:1620px;height:18px;border-radius:9px;background:#D98E4A"></div>
+<div style="position:absolute;left:20px;top:190px;width:1620px;height:8px;border-radius:0 0 8px 8px;background:#C07A3A"></div>
+<div style="position:absolute;left:34px;top:136px;display:flex;align-items:center;gap:8px;background:#FDF6EC;border-radius:16px;padding:4px 14px;font:900 16px Nunito;letter-spacing:.12em">THE PASS<dc-import name="Kitchen Icon" kind="check" size="0" hint-size="0px,0px" style="display:none"></dc-import></div>
+<sc-for list="{{ arrows }}" as="a" hint-placeholder-count="3">
+<div style="position:absolute;left:{{ a }}px;top:134px;width:40px;height:40px;border-radius:50%;background:#F28A1E;display:flex;align-items:center;justify-content:center"><svg width="18" height="20" viewBox="0 0 18 20"><path d="M3 2 Q2 1 4 1.5 L16 9 Q17.5 10 16 11 L4 18.5 Q2 19 3 18Z" fill="#FFFFFF"></path></svg></div>
+</sc-for>
+<sc-for list="{{ v.pass }}" as="p" hint-placeholder-count="2">
+<dc-import name="Food Flat" kind="{{ p.kind }}" size="58" rotate="{{ p.rot }}" hint-size="58px,58px" style="position:absolute;left:{{ p.x }}px;top:120px"></dc-import>
+</sc-for>
+
+<div style="position:absolute;left:1660px;top:150px;width:192px;height:250px;border-radius:26px 26px 0 0;background:#D98E4A"></div>
+<div style="position:absolute;left:1675px;top:196px;width:162px;height:204px;border-radius:18px 18px 0 0;background:#2F3A94"></div>
+<div style="position:absolute;left:1700px;top:230px;width:30px;height:30px;border-radius:50%;background:#4C63D2"></div>
+<div style="position:absolute;left:1776px;top:252px;width:22px;height:22px;border-radius:50%;background:#4C63D2"></div>
+<div style="position:absolute;left:1706px;top:158px;background:#F6C84C;border-radius:14px;padding:4px 16px;font:900 17px Nunito;letter-spacing:.1em">PICK-UP</div>
+
+<div style="position:absolute;left:262px;top:284px;width:180px;height:12px;border-radius:6px;background:#D98E4A"></div>
+<div style="position:absolute;left:276px;top:236px;width:40px;height:48px;border-radius:14px;background:#6B7FE0"></div>
+<div style="position:absolute;left:280px;top:228px;width:32px;height:12px;border-radius:6px;background:#4C63D2"></div>
+<div style="position:absolute;left:328px;top:250px;width:44px;height:34px;border-radius:12px;background:#F6C84C"></div>
+<div style="position:absolute;left:332px;top:242px;width:36px;height:12px;border-radius:6px;background:#E6A93A"></div>
+<div style="position:absolute;left:384px;top:232px;width:40px;height:52px;border-radius:14px;background:#A8D94A"></div>
+<div style="position:absolute;left:388px;top:224px;width:32px;height:12px;border-radius:6px;background:#7FB23A"></div>
+
+<div style="position:absolute;left:706px;top:208px;width:218px;height:166px;border-radius:24px;background:#FFFDF6"></div>
+<div style="position:absolute;left:720px;top:222px;width:190px;height:136px;border-radius:14px;background:#6B7FE0"></div>
+<div style="position:absolute;left:846px;top:236px;width:38px;height:38px;border-radius:50%;background:#F6C84C"></div>
+<div style="position:absolute;left:740px;top:296px;width:34px;height:34px;border-radius:50%;background:#FFFFFF"></div>
+<div style="position:absolute;left:762px;top:282px;width:44px;height:44px;border-radius:50%;background:#FFFFFF"></div>
+<div style="position:absolute;left:796px;top:300px;width:30px;height:30px;border-radius:50%;background:#FFFFFF"></div>
+<div style="position:absolute;left:810px;top:222px;width:10px;height:136px;background:#FFFDF6"></div>
+<div style="position:absolute;left:690px;top:198px;width:58px;height:96px;border-radius:0 0 40px 40px;background:#F39BC0"></div>
+<div style="position:absolute;left:882px;top:198px;width:58px;height:96px;border-radius:0 0 40px 40px;background:#F39BC0"></div>
+<div style="position:absolute;left:686px;top:194px;width:258px;height:14px;border-radius:7px;background:#E67AA6"></div>
+
+<div style="position:absolute;left:1150px;top:204px;width:236px;height:80px;background:#C4CAEE;clip-path:polygon(18% 0,82% 0,100% 100%,0 100%)"></div>
+<div style="position:absolute;left:1146px;top:276px;width:244px;height:18px;border-radius:9px;background:#AEB6E6"></div>
+
+<sc-if value="{{ v.slam }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:970px;top:210px;width:430px;height:200px;border-radius:60px;box-shadow:0 0 90px 40px rgba(242,138,30,.42)"></div>
+</sc-if>
+
+<sc-if value="{{ v.minaHome }}" hint-placeholder-val="{{ true }}">
+<dc-import name="Chef Flat" animal="kid" hat="frilly" color="#A8D94A" expr="{{ v.minaExpr }}" size="180" hint-size="180px,238px" style="position:absolute;left:60px;top:205px"></dc-import>
+</sc-if>
+<sc-if value="{{ v.slam }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:112px;top:238px;width:6px;height:40px;background:#C07A3A;transform:rotate(-20deg)"></div>
+<div style="position:absolute;left:182px;top:238px;width:6px;height:40px;background:#C07A3A;transform:rotate(20deg)"></div>
+<div style="position:absolute;left:80px;top:272px;transform:rotate(-5deg);display:flex;align-items:center;gap:10px;background:#FFFDF6;border-radius:20px;padding:10px 20px;font:400 28px 'Titan One'"><dc-import name="Kitchen Icon" kind="heart" color="#E67AA6" size="26" hint-size="26px,26px"></dc-import>Back soon!</div>
+</sc-if>
+<dc-import name="Chef Flat" animal="bunny" hat="toque" color="#4C63D2" expr="{{ v.junExpr }}" size="180" hint-size="180px,238px" style="position:absolute;left:528px;top:205px"></dc-import>
+<dc-import name="Chef Flat" animal="bear" hat="bandana" color="#F28A1E" mitts="true" expr="{{ v.boriExpr }}" size="180" hint-size="180px,238px" style="position:absolute;left:996px;top:205px"></dc-import>
+<sc-if value="{{ v.slam }}" hint-placeholder-val="{{ false }}">
+<dc-import name="Chef Flat" animal="kid" hat="frilly" color="#A8D94A" expr="focused" size="160" hint-size="160px,212px" style="position:absolute;left:1240px;top:210px"></dc-import>
+<div style="position:absolute;left:1150px;top:248px;width:54px;height:54px;border-radius:50%;background:#EFECF8"></div>
+<div style="position:absolute;left:1180px;top:222px;width:42px;height:42px;border-radius:50%;background:#EFECF8"></div>
+<div style="position:absolute;left:1196px;top:262px;width:44px;height:44px;border-radius:50%;background:#E2DEF0"></div>
+<div style="position:absolute;left:1166px;top:290px;width:36px;height:36px;border-radius:50%;background:#EFECF8"></div>
+<div style="position:absolute;left:1212px;top:206px;width:22px;height:22px;border-radius:50%;background:#E2DEF0"></div>
+</sc-if>
+<dc-import name="Chef Flat" animal="cat" hat="beret" color="#F39BC0" expr="{{ v.taeExpr }}" size="180" hint-size="180px,238px" style="position:absolute;left:1464px;top:205px"></dc-import>
+
+<dc-import name="Food Flat" kind="tomato" size="54" hint-size="54px,54px" style="position:absolute;left:280px;top:312px"></dc-import>
+<dc-import name="Food Flat" kind="carrot" size="56" rotate="22" hint-size="56px,56px" style="position:absolute;left:328px;top:300px"></dc-import>
+<dc-import name="Food Flat" kind="onion" size="50" hint-size="50px,50px" style="position:absolute;left:378px;top:312px"></dc-import>
+<div style="position:absolute;left:268px;top:346px;width:164px;height:56px;border-radius:8px 8px 28px 28px;background:#E7A55A;display:flex;justify-content:space-evenly;padding:0 8px;box-sizing:border-box"><span style="width:10px;height:100%;background:#D98E4A"></span><span style="width:10px;height:100%;background:#D98E4A"></span><span style="width:10px;height:100%;background:#D98E4A"></span><span style="width:10px;height:100%;background:#D98E4A"></span></div>
+
+<div style="position:absolute;left:712px;top:384px;width:196px;height:28px;border-radius:14px;background:#E7B77A"></div>
+<div style="position:absolute;left:872px;top:390px;width:14px;height:14px;border-radius:50%;background:#D49E5E"></div>
+<dc-import name="Food Flat" kind="{{ v.prepItem }}" size="66" rotate="-4" hint-size="66px,66px" style="position:absolute;left:730px;top:328px"></dc-import>
+<div style="position:absolute;left:808px;top:382px;width:14px;height:12px;border-radius:6px;background:{{ v.bitColor }}"></div>
+<div style="position:absolute;left:826px;top:386px;width:12px;height:10px;border-radius:5px;background:{{ v.bitColor }}"></div>
+<div style="position:absolute;left:842px;top:380px;width:14px;height:12px;border-radius:6px;background:{{ v.bitColor }}"></div>
+<div style="position:absolute;left:846px;top:326px;width:18px;height:50px;border-radius:10px 10px 4px 4px;background:#DDE0F0;transform:rotate(28deg)"></div>
+<div style="position:absolute;left:864px;top:364px;width:13px;height:26px;border-radius:6px;background:#4C63D2;transform:rotate(28deg)"></div>
+
+<div style="position:absolute;left:1116px;top:342px;width:56px;height:13px;border-radius:7px;background:#C9402A;transform:rotate(10deg)"></div>
+<div style="position:absolute;left:1160px;top:324px;width:124px;height:44px;border-radius:50%;background:#E4502F"></div>
+<div style="position:absolute;left:1172px;top:330px;width:100px;height:30px;border-radius:50%;background:#C9402A"></div>
+<dc-import name="Food Flat" kind="dumpling" size="46" hint-size="46px,46px" style="position:absolute;left:1180px;top:306px"></dc-import>
+<dc-import name="Food Flat" kind="dumpling" size="44" face="false" hint-size="44px,44px" style="position:absolute;left:1224px;top:310px"></dc-import>
+<sc-if value="{{ v.normal }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:1296px;top:318px;width:82px;height:48px;border-radius:10px 10px 18px 18px;background:#1F9E6E"></div>
+<div style="position:absolute;left:1290px;top:308px;width:94px;height:18px;border-radius:9px;background:#45B58A"></div>
+<div style="position:absolute;left:1328px;top:298px;width:30px;height:14px;border-radius:7px;background:#45B58A"></div>
+</sc-if>
+<dc-import name="Kitchen Icon" kind="flame" color="#F28A1E" size="24" hint-size="24px,24px" style="position:absolute;left:1188px;top:350px"></dc-import>
+<dc-import name="Kitchen Icon" kind="flame" color="#F6C84C" size="22" hint-size="22px,22px" style="position:absolute;left:1214px;top:352px"></dc-import>
+<dc-import name="Kitchen Icon" kind="flame" color="#F28A1E" size="24" hint-size="24px,24px" style="position:absolute;left:1240px;top:350px"></dc-import>
+<div style="position:absolute;left:1150px;top:364px;width:240px;height:38px;border-radius:12px 12px 0 0;background:#2F3A94"></div>
+
+<dc-import name="Food Flat" kind="{{ v.plateDish }}" size="88" hint-size="88px,88px" style="position:absolute;left:1672px;top:316px"></dc-import>
+<div style="position:absolute;left:1780px;top:364px;width:46px;height:28px;border-radius:23px 23px 4px 4px;background:#F6C84C"></div>
+<div style="position:absolute;left:1798px;top:356px;width:10px;height:10px;border-radius:50%;background:#E6A93A"></div>
+<div style="position:absolute;left:1772px;top:390px;width:62px;height:10px;border-radius:5px;background:#E6A93A"></div>
+
+<div style="position:absolute;left:0;top:400px;width:1872px;height:36px;background:#FFF9EF"></div>
+<div style="position:absolute;left:0;top:436px;width:1872px;height:94px;background:#1F9E6E"></div>
+<sc-for list="{{ counter }}" as="c" hint-placeholder-count="4">
+<div style="position:absolute;left:{{ c.door1 }}px;top:450px;width:120px;height:66px;border-radius:14px;background:#1A8A60"></div>
+<div style="position:absolute;left:{{ c.door2 }}px;top:450px;width:120px;height:66px;border-radius:14px;background:#1A8A60"></div>
+<div style="position:absolute;left:{{ c.pill }}px;top:458px;width:196px;height:50px;border-radius:25px;background:#FDF6EC;display:flex;align-items:center;gap:10px;padding:0 16px 0 8px;box-sizing:border-box">
+<span style="width:36px;height:36px;border-radius:50%;background:{{ c.color }};display:flex;align-items:center;justify-content:center"><dc-import name="Kitchen Icon" kind="{{ c.icon }}" size="22" color="{{ c.ink }}" hint-size="22px,22px"></dc-import></span>
+<span style="font:400 24px 'Titan One'">{{ c.name }}</span>
+</div>
+</sc-for>
+<div style="position:absolute;left:0;top:530px;width:1872px;height:138px;background:repeating-conic-gradient(#F3E4CA 0 25%,#FDF6EC 0 50%);background-size:68px 68px"></div>
+<div style="position:absolute;left:0;top:530px;width:1872px;height:10px;background:#17835B"></div>
+
+<sc-for list="{{ v.trays }}" as="tr" hint-placeholder-count="0">
+<div style="position:absolute;left:{{ tr.left }}px;top:540px;width:212px;height:118px">
+<div style="position:absolute;left:0;right:0;bottom:8px;height:26px;border-radius:13px;background:#E3C99D"></div>
+<sc-for list="{{ tr.items }}" as="it" hint-placeholder-count="1">
+<dc-import name="Food Flat" kind="{{ it.kind }}" size="58" rotate="{{ it.rot }}" hint-size="58px,58px" style="position:absolute;left:{{ it.x }}px;bottom:{{ it.b }}px"></dc-import>
+</sc-for>
+<div style="position:absolute;right:-18px;bottom:-4px;width:48px;height:48px;border-radius:50%;background:{{ tr.color }};display:flex;align-items:center;justify-content:center;font:400 28px 'Titan One';color:#2B2850">{{ tr.count }}</div>
+</div>
+</sc-for>
+
+<sc-if value="{{ v.slam }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:760px;top:8px;transform:rotate(-3deg);background:#2F3A94;border-radius:32px;padding:10px 40px 16px;display:flex;align-items:center;gap:2px;font:400 78px/1 'Titan One';white-space:nowrap">
+<sc-for list="{{ banner }}" as="l" hint-placeholder-count="17">
+<span style="display:inline-block;min-width:{{ l.w }}px;transform:translateY({{ l.dy }}px) rotate({{ l.rot }}deg);color:{{ l.color }}">{{ l.ch }}</span>
+</sc-for>
+<dc-import name="Kitchen Icon" kind="flame" color="#F28A1E" size="70" rotate="-18" hint-size="70px,70px" style="position:absolute;left:-40px;top:-30px"></dc-import>
+<dc-import name="Kitchen Icon" kind="flame" color="#F6C84C" size="40" rotate="-8" hint-size="40px,40px" style="position:absolute;left:-6px;top:52px"></dc-import>
+<dc-import name="Kitchen Icon" kind="flame" color="#F28A1E" size="54" rotate="16" hint-size="54px,54px" style="position:absolute;right:-30px;top:-26px"></dc-import>
+<dc-import name="Confetti Flat" kind="star" color="#F6C84C" size="34" hint-size="34px,34px" style="position:absolute;right:-50px;bottom:0px"></dc-import>
+</div>
+</sc-if>
+</div>
+
+<div style="position:absolute;left:24px;right:24px;bottom:0;height:258px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;align-items:end">
+<sc-for list="{{ v.tabs }}" as="t" hint-placeholder-count="4">
+<div style="position:relative;display:flex;flex-direction:column;transform:{{ t.transform }};z-index:{{ t.z }}">
+<div style="align-self:flex-start;margin-left:22px;display:flex;align-items:center;gap:8px;height:38px;padding:0 20px 0 6px;border-radius:18px 18px 0 0;background:{{ t.color }}">
+<span style="width:28px;height:28px;border-radius:50%;background:#FDF6EC;display:flex;align-items:center;justify-content:center"><dc-import name="Kitchen Icon" kind="{{ t.icon }}" size="18" hint-size="18px,18px"></dc-import></span>
+<span style="font:900 18px Nunito;letter-spacing:.12em;color:{{ t.lipInk }}">{{ t.station }}</span>
+</div>
+<div style="height:220px;border-radius:28px 28px 0 0;background:{{ t.tint }};box-shadow:{{ t.glow }};padding:16px 20px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:18px;align-items:center">
+<div style="width:120px;height:120px;flex-shrink:0;border-radius:50%;background:{{ t.color }};overflow:hidden;display:flex;align-items:flex-end;justify-content:center">
+<dc-import name="Chef Flat" animal="{{ t.animal }}" hat="{{ t.hat }}" color="{{ t.shirt }}" expr="{{ t.expr }}" bust="true" size="112" hint-size="112px,123px"></dc-import>
+</div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+<span style="font:400 34px/1 'Titan One'">{{ t.name }}</span>
+<span style="font:800 21px Nunito;white-space:nowrap">{{ t.task }}</span>
+<div style="height:16px;border-radius:8px;background:#FFFFFF;overflow:hidden;margin-top:4px"><div style="height:100%;width:{{ t.pct }}%;border-radius:8px;background:{{ t.bar }}"></div></div>
+</div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="display:flex;flex-wrap:wrap-reverse;gap:3px;width:48px">
+<sc-for list="{{ t.dots }}" as="d" hint-placeholder-count="1">
+<span style="width:14px;height:14px;border-radius:50%;background:#2B2850"></span>
+</sc-for>
+</div>
+<span style="font:800 19px Nunito">{{ t.waiting }}</span>
+</div>
+<div style="display:flex;align-items:center;gap:8px;height:40px;padding:0 16px 0 8px;border-radius:20px;background:{{ t.status.bg }};color:{{ t.status.fg }};font:900 18px Nunito;white-space:nowrap">
+<span style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center"><dc-import name="Kitchen Icon" kind="{{ t.status.icon }}" color="{{ t.status.fg }}" size="18" hint-size="18px,18px"></dc-import></span>{{ t.status.label }}
+</div>
+</div>
+</div>
+<sc-if value="{{ t.assist }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;right:16px;top:-4px;transform:rotate(7deg);display:flex;align-items:center;gap:6px;background:#F6C84C;border-radius:20px;padding:6px 16px 6px 8px;font:400 24px 'Titan One'"><span style="width:26px;height:26px;border-radius:50%;background:#FDF6EC;display:flex;align-items:center;justify-content:center"><dc-import name="Kitchen Icon" kind="plus" size="16" hint-size="16px,16px"></dc-import></span>Assist?</div>
+</sc-if>
+<sc-if value="{{ t.wiggle }}" hint-placeholder-val="{{ false }}">
+<span style="position:absolute;left:-16px;top:70px;width:8px;height:26px;border-radius:4px;background:#F28A1E;transform:rotate(-20deg)"></span>
+<span style="position:absolute;left:-12px;top:104px;width:8px;height:18px;border-radius:4px;background:#F28A1E;transform:rotate(-10deg)"></span>
+<span style="position:absolute;right:-16px;top:70px;width:8px;height:26px;border-radius:4px;background:#F28A1E;transform:rotate(20deg)"></span>
+<span style="position:absolute;right:-12px;top:104px;width:8px;height:18px;border-radius:4px;background:#F28A1E;transform:rotate(10deg)"></span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ v.slam }}" hint-placeholder-val="{{ false }}">
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" style="position:absolute;left:0;top:0;pointer-events:none;z-index:5">
+<path d="M400 852 C 470 700, 900 800, 1180 730" fill="none" stroke="#4C63D2" stroke-width="13" stroke-linecap="round" stroke-dasharray="0 26"></path>
+<polygon points="-8,-19 24,0 -8,19" fill="#4C63D2" transform="translate(1196 726) rotate(-14)"></polygon>
+</svg>
+<div style="position:absolute;left:560px;top:700px;z-index:6;transform:rotate(-4deg);display:flex;align-items:center;gap:10px;background:#4C63D2;border-radius:28px;padding:6px 22px 6px 6px;font:400 30px 'Titan One';color:#FFFFFF;white-space:nowrap">
+<span style="width:50px;height:50px;border-radius:50%;background:#A8D94A;overflow:hidden;display:flex;align-items:flex-end;justify-content:center"><dc-import name="Chef Flat" animal="kid" hat="frilly" color="#A8D94A" expr="happy" bust="true" size="48" hint-size="48px,53px"></dc-import></span>Mina is helping!</div>
+</sc-if>
+
+<sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}">
+<svg width="1920" height="1080" style="position:absolute;left:0;top:0;pointer-events:none;opacity:.09;mix-blend-mode:multiply;z-index:9"><filter id="paperGrain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"></feTurbulence><feColorMatrix values="0 0 0 0 0.35  0 0 0 0 0.28  0 0 0 0 0.2  0 0 0 1 0"></feColorMatrix></filter><rect width="1920" height="1080" filter="url(#paperGrain)"></rect></svg>
+</sc-if>
+</div>
+<div style="font:800 22px Nunito;max-width:1900px">{{ v.caption }}</div>
+</div>
+</sc-for>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;confetti&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const S = {
+      pantry: { station: 'PANTRY', icon: 'basket', color: '#A8D94A', tint: '#E8F3CF', lipInk: '#2B2850', bar: '#7FB23A', animal: 'kid', hat: 'frilly' },
+      prep: { station: 'PREP', icon: 'knife', color: '#4C63D2', tint: '#DFE3FA', lipInk: '#FFFFFF', bar: '#4C63D2', animal: 'bunny', hat: 'toque' },
+      stove: { station: 'STOVE', icon: 'pan', color: '#F28A1E', tint: '#FDE4C8', lipInk: '#2B2850', bar: '#F28A1E', animal: 'bear', hat: 'bandana' },
+      plate: { station: 'PLATING', icon: 'cloche', color: '#F39BC0', tint: '#FCE2ED', lipInk: '#2B2850', bar: '#E67AA6', animal: 'cat', hat: 'beret' }
+    };
+    const ST = {
+      cooking: { label: 'Cooking!', bg: '#1F9E6E', fg: '#FFFFFF', icon: 'check' },
+      idle: { label: 'Idle — can assist', bg: '#4C63D2', fg: '#FFFFFF', icon: 'plus' },
+      backed: { label: 'Backed up!', bg: '#E4502F', fg: '#FFFFFF', icon: 'flame' },
+      helping: { label: 'Helping Stove!', bg: '#A8D94A', fg: '#2B2850', icon: 'heart' }
+    };
+    const tab = (name, st, expr, task, pct, n, status, o = {}) => ({
+      ...S[st], shirt: S[st].color, name, expr, task, pct, dots: Array.from({ length: n }, (_, i) => i),
+      waiting: n ? `${n} waiting` : 'Nothing queued', status: ST[status], assist: !!o.assist, wiggle: !!o.lift,
+      transform: o.lift ? 'translateY(-18px) rotate(-1.2deg)' : 'none',
+      glow: o.lift ? '0 0 0 6px #F6C84C, 0 0 46px 16px rgba(228,80,47,.5)' : 'none', z: o.lift ? 3 : 1
+    });
+    const tint = { noodles: '#DFE3FA', pie: '#FDE4C8', dumpling: '#E8F3CF', tomato: '#FCE2ED', egg: '#FFF1C9' };
+    const tk = (dish, name, st, pct, rot) => {
+      const m = pct >= 60 ? ['#1F9E6E', 'M7 13.5 Q12 20 17 13.5Z'] : pct >= 35 ? ['#F6C84C', 'M8 14.5 H16 V17 H8Z'] : ['#E4502F', 'M7 18.5 Q12 12 17 18.5Z'];
+      return { dish, name, rot, pct, tint: tint[dish], fill: m[0], mouth: m[1], chips: st.map(s => ({ icon: S[s].icon, tint: S[s].tint })) };
+    };
+    const tray = (st, left, items) => ({ left, color: S[st].color, count: items.length, items });
+    const L = 'STOVE IS SLAMMED!'.split('');
+    const banner = L.map((ch, i) => ({ ch: ch === ' ' ? '\u00a0' : ch, w: ch === ' ' ? 18 : 0, rot: [-6, 4, -3, 7, -5, 3, -8, 5][i % 8], dy: [0, -4, 3, -2, 4, -3][i % 6], color: ['#F28A1E', '#F6C84C', '#A8D94A'][i % 3] }));
+    const variants = [
+      {
+        id: '2a', title: 'Cooking along', label: 'Host · Gameplay', slam: false, normal: true, minaHome: true,
+        timer: '1:42', score: '1,240', plus: '+80', minaExpr: 'happy', junExpr: 'focused', boriExpr: 'focused', taeExpr: 'happy',
+        prepItem: 'onion', bitColor: '#F6C84C', plateDish: 'noodles',
+        caption: 'Normal flow — dishes ride the pass, small stacks on the floor show each queue. Mina (Pantry) is idle, so her tab offers “Assist?”.',
+        pass: [{ kind: 'carrot', x: 330, rot: -6 }, { kind: 'tomato', x: 800, rot: 5 }, { kind: 'dumpling', x: 1270, rot: -3 }],
+        trays: [tray('prep', 718, [{ kind: 'carrot', x: 18, b: 22, rot: -10 }, { kind: 'tomato', x: 86, b: 22, rot: 6 }]), tray('stove', 1186, [{ kind: 'dumpling', x: 40, b: 22, rot: 0 }]), tray('plate', 1560, [{ kind: 'dumpling', x: 40, b: 22, rot: 4 }])],
+        tickets: [tk('noodles', 'Noodle Bowl', ['prep', 'stove', 'plate'], 84, -3), tk('pie', 'Berry Pie', ['pantry', 'stove', 'plate'], 66, 2), tk('dumpling', 'Dumplings', ['prep', 'stove'], 46, -2), tk('tomato', 'Tomato Salad', ['prep', 'plate'], 90, 3), tk('egg', 'Sunny Egg', ['stove', 'plate'], 96, -1.5)],
+        tabs: [tab('Mina', 'pantry', 'happy', 'Waiting for orders', 0, 0, 'idle', { assist: true }), tab('Jun', 'prep', 'focused', 'Chopping onion', 62, 2, 'cooking'), tab('Bori', 'stove', 'focused', 'Frying dumplings', 45, 1, 'cooking'), tab('Tae', 'plate', 'happy', 'Plating noodle bowl', 80, 1, 'cooking')]
+      },
+      {
+        id: '2b', title: 'Bottleneck — Stove slammed', label: 'Host · Stove slammed', slam: true, normal: false, minaHome: false,
+        timer: '0:58', score: '1,610', plus: '+40', minaExpr: 'focused', junExpr: 'focused', boriExpr: 'panicked', taeExpr: 'happy',
+        prepItem: 'tomato', bitColor: '#E4502F', plateDish: 'plate',
+        caption: 'Bottleneck — the banner names the station, not the player. Stove glows, smokes and piles up; its tab lifts with a warm glow. Mina has left the Pantry to help, and Tae (idle) is offered “Assist?”.',
+        pass: [{ kind: 'onion', x: 560, rot: -6 }, { kind: 'tomato', x: 630, rot: 8 }],
+        trays: [tray('stove', 1186, [{ kind: 'dumpling', x: 4, b: 22, rot: -6 }, { kind: 'tomato', x: 70, b: 22, rot: 4 }, { kind: 'onion', x: 136, b: 22, rot: -3 }, { kind: 'dumpling', x: 36, b: 70, rot: 8 }, { kind: 'carrot', x: 102, b: 70, rot: -14 }, { kind: 'dumpling', x: 70, b: 118, rot: -4 }])],
+        tickets: [tk('dumpling', 'Dumplings', ['prep', 'stove'], 22, -3), tk('pie', 'Berry Pie', ['pantry', 'stove', 'plate'], 40, 2), tk('noodles', 'Noodle Bowl', ['prep', 'stove', 'plate'], 68, -2), tk('egg', 'Sunny Egg', ['stove', 'plate'], 82, 3), tk('tomato', 'Tomato Salad', ['prep', 'plate'], 94, -1.5)],
+        tabs: [tab('Mina', 'pantry', 'focused', 'Frying at Stove', 55, 0, 'helping'), tab('Jun', 'prep', 'focused', 'Chopping tomato', 35, 0, 'cooking'), tab('Bori', 'stove', 'panicked', 'Frying dumplings', 30, 6, 'backed', { lift: true }), tab('Tae', 'plate', 'happy', 'Waiting on Stove', 0, 0, 'idle', { assist: true })]
+      }
+    ];
+    const counter = ['pantry', 'prep', 'stove', 'plate'].map((s, i) => ({ door1: i * 468 + 14, door2: i * 468 + 334, pill: i * 468 + 136, color: S[s].color, icon: S[s].icon, name: S[s].station, ink: S[s].lipInk }));
+    return {
+      variants, banner, counter, arrows: [448, 916, 1384],
+      grain: this.props.grain ?? true, confetti: this.props.confetti ?? true
+    };
+  }
+}
+</script>
+</body>
+</html>

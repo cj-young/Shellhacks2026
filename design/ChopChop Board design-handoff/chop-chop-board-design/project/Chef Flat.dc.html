@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:inline-block;line-height:0;width:{{ w }}px;height:{{ h }}px;transform:rotate({{ rot }}deg)">
+<svg width="{{ w }}" height="{{ h }}" viewBox="{{ vb }}" style="overflow:visible">
+<g display="{{ sh.bunny }}">
+<ellipse cx="54" cy="16" rx="14" ry="32" transform="rotate(-14 54 16)" fill="{{ fur }}"></ellipse>
+<ellipse cx="54" cy="18" rx="6" ry="22" transform="rotate(-14 54 18)" fill="#F39BC0"></ellipse>
+<ellipse cx="106" cy="16" rx="14" ry="32" transform="rotate(14 106 16)" fill="{{ fur }}"></ellipse>
+<ellipse cx="106" cy="18" rx="6" ry="22" transform="rotate(14 106 18)" fill="#F39BC0"></ellipse>
+</g>
+<g display="{{ sh.bear }}">
+<circle cx="36" cy="42" r="17" fill="{{ fur }}"></circle><circle cx="36" cy="42" r="9" fill="{{ detail }}"></circle>
+<circle cx="124" cy="42" r="17" fill="{{ fur }}"></circle><circle cx="124" cy="42" r="9" fill="{{ detail }}"></circle>
+</g>
+<g display="{{ sh.cat }}">
+<path d="M30 66 Q26 16 46 18 Q62 28 72 42Z" fill="{{ fur }}"></path><path d="M38 52 Q37 30 47 30 Q56 36 60 42Z" fill="#F39BC0"></path>
+<path d="M130 66 Q134 16 114 18 Q98 28 88 42Z" fill="{{ fur }}"></path><path d="M122 52 Q123 30 113 30 Q104 36 100 42Z" fill="#F39BC0"></path>
+</g>
+<g display="{{ sh.kid }}"><circle cx="28" cy="94" r="9" fill="{{ fur }}"></circle><circle cx="132" cy="94" r="9" fill="{{ fur }}"></circle></g>
+<g display="{{ sh.body }}">
+<ellipse cx="64" cy="188" rx="12" ry="6" fill="#2B2850"></ellipse><ellipse cx="96" cy="188" rx="12" ry="6" fill="#2B2850"></ellipse>
+<rect x="46" y="122" width="68" height="64" rx="26" fill="{{ color }}"></rect>
+<path d="M58 130 H102 V172 Q80 184 58 172Z" fill="#FFFDF6"></path>
+<rect x="70" y="150" width="20" height="12" rx="5" fill="#EFE6D6"></rect>
+<circle cx="95" cy="139" r="4.5" fill="#F6C84C"></circle>
+</g>
+<g display="{{ sh.bustBody }}">
+<rect x="42" y="122" width="76" height="70" rx="28" fill="{{ color }}"></rect>
+<path d="M58 128 H102 V180 H58Z" fill="#FFFDF6"></path>
+</g>
+<circle cx="80" cy="84" r="52" fill="{{ fur }}"></circle>
+<g display="{{ sh.bear }}"><ellipse cx="80" cy="106" rx="20" ry="15" fill="#EDC79E"></ellipse><ellipse cx="80" cy="99" rx="7" ry="5" fill="#2B2850"></ellipse></g>
+<g display="{{ sh.cat }}">
+<ellipse cx="34" cy="84" rx="9" ry="3.5" fill="{{ detail }}"></ellipse><ellipse cx="36" cy="94" rx="8" ry="3" fill="{{ detail }}"></ellipse>
+<ellipse cx="126" cy="84" rx="9" ry="3.5" fill="{{ detail }}"></ellipse><ellipse cx="124" cy="94" rx="8" ry="3" fill="{{ detail }}"></ellipse>
+<ellipse cx="80" cy="107" rx="18" ry="12" fill="#FBE3C2"></ellipse><ellipse cx="80" cy="100" rx="4.5" ry="3.2" fill="#E67AA6"></ellipse>
+</g>
+<g display="{{ sh.bunny }}"><ellipse cx="80" cy="107" rx="16" ry="11" fill="#F7F5FE"></ellipse><ellipse cx="80" cy="100" rx="4.5" ry="3.2" fill="#E67AA6"></ellipse></g>
+<g display="{{ sh.kid }}">
+<path d="M28 86 Q24 30 80 30 Q136 30 132 86 Q124 60 104 58 Q92 46 80 56 Q68 46 56 58 Q36 60 28 86Z" fill="#6B3E2E"></path>
+<ellipse cx="80" cy="102" rx="3.5" ry="2.5" fill="#EFB18F"></ellipse>
+</g>
+<ellipse cx="48" cy="104" rx="9" ry="6" fill="#F39BC0"></ellipse>
+<ellipse cx="112" cy="104" rx="9" ry="6" fill="#F39BC0"></ellipse>
+<g display="{{ sh.arcEyes }}" fill="#2B2850">
+<path d="M54 94 Q62 79 70 94 Q62 87 54 94Z"></path><path d="M90 94 Q98 79 106 94 Q98 87 90 94Z"></path>
+</g>
+<g display="{{ sh.happy }}"><path d="M73 109 Q80 119 87 109Z" fill="#2B2850"></path></g>
+<g display="{{ sh.focused }}">
+<ellipse cx="62" cy="91" rx="5" ry="6.5" fill="#2B2850"></ellipse><ellipse cx="98" cy="91" rx="5" ry="6.5" fill="#2B2850"></ellipse>
+<rect x="52" y="74" width="19" height="5" rx="2.5" transform="rotate(12 61 76)" fill="{{ brow }}"></rect>
+<rect x="89" y="74" width="19" height="5" rx="2.5" transform="rotate(-12 99 76)" fill="{{ brow }}"></rect>
+<rect x="74" y="110" width="12" height="4.5" rx="2.25" fill="#2B2850"></rect>
+</g>
+<g display="{{ sh.panicked }}">
+<ellipse cx="62" cy="91" rx="7" ry="8.5" fill="#2B2850"></ellipse><ellipse cx="98" cy="91" rx="7" ry="8.5" fill="#2B2850"></ellipse>
+<rect x="51" y="70" width="19" height="5" rx="2.5" transform="rotate(-16 60 72)" fill="{{ brow }}"></rect>
+<rect x="90" y="70" width="19" height="5" rx="2.5" transform="rotate(16 100 72)" fill="{{ brow }}"></rect>
+<path d="M70 114 Q73 107 76 111 Q80 115 84 109 Q87 107 90 114 Q80 119 70 114Z" fill="#2B2850"></path>
+</g>
+<g display="{{ sh.celebrating }}"><path d="M68 104 Q80 127 92 104Z" fill="#2B2850"></path><ellipse cx="80" cy="115" rx="6" ry="3.5" fill="#E67AA6"></ellipse></g>
+<g display="{{ sh.puppy }}">
+<ellipse cx="32" cy="86" rx="14" ry="28" transform="rotate(16 32 86)" fill="#C98552"></ellipse>
+<ellipse cx="128" cy="86" rx="14" ry="28" transform="rotate(-16 128 86)" fill="#C98552"></ellipse>
+<ellipse cx="80" cy="101" rx="7" ry="5" fill="#2B2850"></ellipse>
+</g>
+<g display="{{ sh.toque }}">
+<circle cx="58" cy="24" r="18" fill="#FFFFFF"></circle><circle cx="102" cy="24" r="18" fill="#FFFFFF"></circle><circle cx="80" cy="12" r="22" fill="#FFFFFF"></circle>
+<rect x="52" y="20" width="56" height="28" rx="6" fill="#FFFFFF"></rect>
+<ellipse cx="70" cy="24" rx="3" ry="9" fill="#EEE8DC"></ellipse><ellipse cx="90" cy="24" rx="3" ry="9" fill="#EEE8DC"></ellipse>
+<rect x="50" y="40" width="60" height="13" rx="6.5" fill="{{ color }}"></rect>
+</g>
+<g display="{{ sh.bandana }}">
+<path d="M28 78 Q28 30 80 30 Q132 30 132 78 Q80 60 28 78Z" fill="#E4502F"></path>
+<circle cx="56" cy="50" r="4" fill="#FFFDF6"></circle><circle cx="80" cy="40" r="4" fill="#FFFDF6"></circle><circle cx="104" cy="50" r="4" fill="#FFFDF6"></circle><circle cx="68" cy="60" r="3.2" fill="#FFFDF6"></circle><circle cx="92" cy="60" r="3.2" fill="#FFFDF6"></circle>
+<ellipse cx="142" cy="58" rx="12" ry="6.5" transform="rotate(-30 142 58)" fill="#C63F22"></ellipse>
+<ellipse cx="143" cy="74" rx="12" ry="6.5" transform="rotate(24 143 74)" fill="#C63F22"></ellipse>
+<circle cx="132" cy="66" r="7.5" fill="#C63F22"></circle>
+</g>
+<g display="{{ sh.beret }}">
+<ellipse cx="80" cy="46" rx="44" ry="8" fill="#3E53BF"></ellipse>
+<ellipse cx="76" cy="36" rx="52" ry="17" transform="rotate(-8 76 36)" fill="#4C63D2"></ellipse>
+<rect x="66" y="14" width="9" height="11" rx="4.5" fill="#3E53BF"></rect>
+<path d="M108 14 Q122 12 122 26 Q120 40 108 44 Q96 40 94 26 Q94 12 108 14Z" fill="#E4502F"></path>
+<ellipse cx="102" cy="13" rx="7" ry="3.5" transform="rotate(-20 102 13)" fill="#7FB23A"></ellipse>
+<ellipse cx="114" cy="13" rx="7" ry="3.5" transform="rotate(20 114 13)" fill="#7FB23A"></ellipse>
+<circle cx="103" cy="25" r="1.8" fill="#F6C84C"></circle><circle cx="113" cy="25" r="1.8" fill="#F6C84C"></circle><circle cx="108" cy="33" r="1.8" fill="#F6C84C"></circle>
+</g>
+<g display="{{ sh.frilly }}">
+<ellipse cx="80" cy="36" rx="48" ry="24" fill="#FFFFFF"></ellipse>
+<circle cx="34" cy="56" r="9" fill="#FFFFFF"></circle><circle cx="47" cy="52" r="9" fill="#FFFFFF"></circle><circle cx="61" cy="50" r="9" fill="#FFFFFF"></circle><circle cx="75" cy="49" r="9" fill="#FFFFFF"></circle><circle cx="89" cy="49" r="9" fill="#FFFFFF"></circle><circle cx="103" cy="50" r="9" fill="#FFFFFF"></circle><circle cx="117" cy="52" r="9" fill="#FFFFFF"></circle><circle cx="128" cy="56" r="9" fill="#FFFFFF"></circle>
+<ellipse cx="80" cy="42" rx="38" ry="5" fill="#EEE8DC"></ellipse>
+<ellipse cx="68" cy="22" rx="12" ry="7" transform="rotate(25 68 22)" fill="#F39BC0"></ellipse>
+<ellipse cx="92" cy="22" rx="12" ry="7" transform="rotate(-25 92 22)" fill="#F39BC0"></ellipse>
+<circle cx="80" cy="23" r="5.5" fill="#E67AA6"></circle>
+</g>
+<g display="{{ sh.armLDown }}"><ellipse cx="44" cy="146" rx="11" ry="15" fill="{{ arm }}"></ellipse></g>
+<g display="{{ sh.armRDown }}"><ellipse cx="116" cy="146" rx="11" ry="15" fill="{{ arm }}"></ellipse></g>
+<g display="{{ sh.armLUp }}"><ellipse cx="28" cy="114" rx="11" ry="16" transform="rotate(30 28 114)" fill="{{ arm }}"></ellipse></g>
+<g display="{{ sh.armRUp }}"><ellipse cx="132" cy="114" rx="11" ry="16" transform="rotate(-30 132 114)" fill="{{ arm }}"></ellipse></g>
+<g display="{{ sh.panicked }}">
+<path d="M142 44 Q153 60 142 66 Q131 60 142 44Z" fill="#6B7FE0"></path>
+<path d="M18 58 Q26 70 18 74 Q10 70 18 58Z" fill="#6B7FE0"></path>
+</g>
+</svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:200,&quot;height&quot;:260},&quot;animal&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;bunny&quot;,&quot;bear&quot;,&quot;cat&quot;,&quot;kid&quot;,&quot;puppy&quot;],&quot;default&quot;:&quot;bunny&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;hat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;toque&quot;,&quot;bandana&quot;,&quot;beret&quot;,&quot;frilly&quot;],&quot;default&quot;:&quot;toque&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;expr&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;focused&quot;,&quot;panicked&quot;,&quot;celebrating&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;pose&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;down&quot;,&quot;up&quot;,&quot;wave&quot;],&quot;default&quot;:&quot;down&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;color&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#4C63D2&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:160,&quot;tsType&quot;:&quot;number&quot;},&quot;bust&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;mitts&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;rotate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const a = p.animal ?? 'bunny', hat = p.hat ?? 'toque', expr = p.expr ?? 'happy';
+    const bust = p.bust === true || p.bust === 'true';
+    const mitts = p.mitts === true || p.mitts === 'true';
+    const pose = p.pose ?? (expr === 'celebrating' ? 'up' : 'down');
+    const w = Number(p.size ?? 160), vbH = bust ? 175 : 212;
+    const on = c => c ? 'inline' : 'none';
+    const F = { bunny: ['#E6E3F7', '#C9C3EE'], bear: ['#C98552', '#A96A3C'], cat: ['#F2B36B', '#DE9650'], kid: ['#FFD9BF', '#6B3E2E'], puppy: ['#F6E1C0', '#C98552'] }[a] || ['#fff', '#ddd'];
+    return {
+      w, h: Math.round(w * vbH / 160), vb: `0 -20 160 ${vbH}`, rot: p.rotate ?? 0,
+      fur: F[0], detail: F[1], brow: a === 'kid' ? '#6B3E2E' : (a === 'bunny' ? '#A59CE0' : F[1]),
+      color: p.color ?? '#4C63D2', arm: mitts ? '#E4502F' : F[0],
+      sh: {
+        bunny: on(a === 'bunny'), bear: on(a === 'bear'), cat: on(a === 'cat'), kid: on(a === 'kid'), puppy: on(a === 'puppy'),
+        body: on(!bust), bustBody: on(bust),
+        arcEyes: on(expr === 'happy' || expr === 'celebrating'), happy: on(expr === 'happy'), focused: on(expr === 'focused'), panicked: on(expr === 'panicked'), celebrating: on(expr === 'celebrating'),
+        toque: on(hat === 'toque'), bandana: on(hat === 'bandana'), beret: on(hat === 'beret'), frilly: on(hat === 'frilly'),
+        armLDown: on(!bust && pose !== 'up'), armLUp: on(!bust && pose === 'up'),
+        armRDown: on(!bust && pose === 'down'), armRUp: on(!bust && (pose === 'up' || pose === 'wave'))
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

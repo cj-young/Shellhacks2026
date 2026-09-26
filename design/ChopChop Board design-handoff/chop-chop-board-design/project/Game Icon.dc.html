@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:inline-block;line-height:0;width:{{ s }}px;height:{{ s }}px;filter:{{ filter }};transform:rotate({{ rot }}deg)">
+<svg width="{{ s }}" height="{{ s }}" viewBox="0 0 100 100" fill="none" stroke="#2B2A6B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" style="overflow:visible">
+<g display="{{ sh.chop }}">
+<ellipse cx="72" cy="84" rx="10" ry="6" fill="#3CB54A"></ellipse><ellipse cx="88" cy="78" rx="8" ry="5" fill="#3CB54A"></ellipse>
+<g transform="rotate(-32 50 50)">
+<rect x="2" y="54" width="26" height="16" rx="6" fill="#1F4FD8"></rect>
+<path d="M28 52 L66 52 Q86 52 94 36 Q96 70 66 72 L28 72Z" fill="#fff"></path>
+<path d="M36 60 L60 60" stroke="#CFE6FB" stroke-width="4"></path>
+</g>
+<path d="M18 86 L30 80 M24 94 L38 90" stroke-width="4"></path>
+</g>
+<g display="{{ sh.stir }}">
+<path d="M58 50 L74 8" stroke-width="12"></path><path d="M58 50 L74 8" stroke="#E9A866" stroke-width="5"></path>
+<rect x="8" y="44" width="84" height="12" rx="6" fill="#1F4FD8"></rect>
+<path d="M14 56 H86 L80 82 Q78 90 70 90 H30 Q22 90 20 82Z" fill="#4FB3F0"></path>
+<path d="M40 30 A26 10 0 1 0 22 22" stroke-width="5"></path>
+<path d="M14 16 L24 22 L16 30" stroke-width="5"></path>
+</g>
+<g display="{{ sh.flip }}">
+<path d="M70 76 L96 70" stroke-width="12"></path><path d="M70 76 L96 70" stroke="#F2553D" stroke-width="5"></path>
+<ellipse cx="42" cy="78" rx="32" ry="11" fill="#4A4F8C"></ellipse>
+<ellipse cx="46" cy="30" rx="24" ry="9" transform="rotate(-18 46 30)" fill="#F2BE63"></ellipse>
+<path d="M14 62 Q8 40 22 24" stroke-width="5"></path>
+<path d="M14 26 L23 22 L26 32" stroke-width="5"></path>
+<path d="M72 42 L80 36 M76 52 L86 50" stroke-width="4"></path>
+</g>
+<g display="{{ sh.steal }}">
+<path d="M34 72 L66 72 L70 98 L30 98Z" fill="#2B2A6B"></path>
+<path d="M32 82 L68 82 M31 90 L69 90" stroke="#fff" stroke-width="4"></path>
+<path d="M30 52 Q30 40 40 38 L66 38 Q76 40 76 52 L74 66 Q72 76 60 76 L42 76 Q30 76 30 64Z" fill="#FFD9B8"></path>
+<path d="M36 44 Q30 22 38 14 Q46 10 47 22 L48 40" fill="#FFD9B8"></path>
+<path d="M48 40 L50 12 Q52 4 58 6 Q63 9 61 18 L60 40" fill="#FFD9B8"></path>
+<path d="M60 40 L66 16 Q69 9 74 12 Q78 16 76 22 L70 44" fill="#FFD9B8"></path>
+<path d="M30 58 Q16 50 12 38 Q14 30 22 34 L32 46" fill="#FFD9B8"></path>
+<path d="M82 20 L92 14 M84 32 L96 30" stroke-width="4"></path>
+</g>
+<g display="{{ sh.blackout }}">
+<path d="M50 8 Q78 8 80 36 Q80 50 68 60 L66 70 L34 70 L32 60 Q20 50 20 36 Q22 8 50 8Z" fill="#9AA3C7"></path>
+<path d="M40 50 L46 40 L54 50 L60 40" stroke-width="4"></path>
+<rect x="34" y="70" width="32" height="16" rx="4" fill="#D5E0F2"></rect>
+<path d="M36 78 H64" stroke-width="3.5"></path>
+<path d="M42 92 H58"></path>
+<path d="M86 10 L14 90" stroke="#fff" stroke-width="14"></path>
+<path d="M86 10 L14 90" stroke-width="7"></path>
+</g>
+<g display="{{ sh.basket }}">
+<path d="M30 42 Q30 12 50 12 Q70 12 70 42" stroke-width="7"></path>
+<path d="M14 46 H86 L78 84 Q76 90 70 90 H30 Q24 90 22 84Z" fill="#E9A866"></path>
+<path d="M36 54 L38 84 M50 54 L50 86 M64 54 L62 84 M18 66 H82" stroke-width="3.5"></path>
+<rect x="8" y="38" width="84" height="12" rx="6" fill="#C9803F"></rect>
+</g>
+</svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:140,&quot;height&quot;:140},&quot;kind&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;chop&quot;,&quot;stir&quot;,&quot;flip&quot;,&quot;steal&quot;,&quot;blackout&quot;,&quot;basket&quot;],&quot;default&quot;:&quot;chop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:80,&quot;tsType&quot;:&quot;number&quot;},&quot;sticker&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;rotate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const k = p.kind ?? 'chop';
+    const s = Number(p.size ?? 80);
+    const sticker = !(p.sticker === false || p.sticker === 'false');
+    const sh = {};
+    ['chop','stir','flip','steal','blackout','basket'].forEach(n => sh[n] = n === k ? 'inline' : 'none');
+    const d = Math.max(2, Math.round(s / 26));
+    return { s, sh, rot: p.rotate ?? 0,
+      filter: sticker ? `drop-shadow(${d}px 0 0 #fff) drop-shadow(-${d}px 0 0 #fff) drop-shadow(0 ${d}px 0 #fff) drop-shadow(0 -${d}px 0 #fff)` : 'none' };
+  }
+}
+</script>
+</body>
+</html>

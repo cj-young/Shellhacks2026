@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EEF3FB;color:#2B2A6B;font-family:Nunito,sans-serif}
+a{color:#1F4FD8}a:hover{color:#2B2A6B}
+</style>
+</helmet>
+
+<div style="padding:120px;display:flex;flex-direction:column;gap:150px;width:max-content;background-color:#EEF3FB;background-image:radial-gradient(#D5E0F2 2.5px, transparent 3px);background-size:40px 40px">
+
+<header style="display:flex;align-items:flex-end;gap:48px">
+<div style="font:400 120px/0.9 'Lilita One';color:#FFC928;-webkit-text-stroke:12px #2B2A6B;paint-order:stroke fill;text-shadow:0 10px 0 #2B2A6B;transform:rotate(-3deg)">Chop Chop!</div>
+<div style="display:flex;flex-direction:column;gap:8px;padding-bottom:10px">
+<div style="font:400 44px 'Lilita One'">Recipe Race — free-for-all, 4 players</div>
+<div style="font:700 26px Nunito;max-width:1300px">Same recipes for everyone, raced at your own pace. The recipe card only lives on the host — phones are for shopping and cooking from memory.</div>
+</div>
+</header>
+
+<section data-screen-label="06 Phone screens" style="display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;align-items:baseline;gap:24px"><span style="font:400 72px 'Lilita One'">06 · Phone screens</span><span style="font:800 26px Nunito">Top-down counter. Shared top bar, basket and trash; the recipe never appears on the phone.</span></div>
+<div style="display:flex;gap:56px;align-items:flex-start">
+
+<!-- STORE -->
+<div style="display:flex;flex-direction:column;gap:20px;width:410px">
+<div style="width:410px;height:864px;background:#2B2A6B;border-radius:62px;padding:10px;box-sizing:border-box;box-shadow:0 24px 50px rgba(43,42,107,.25)">
+<div data-screen-label="Phone · Store v2" style="width:390px;height:844px;border-radius:52px;overflow:hidden;position:relative;background-color:#DCE6FF;background-image:radial-gradient(#B3C6F2 2px, transparent 2.5px);background-size:26px 26px">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 38px;font:800 16px Nunito"><span>9:41</span><span style="width:26px;height:13px;border:2px solid #2B2A6B;border-radius:4px"></span></div>
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:34px;border-radius:17px;background:#2B2A6B"></div>
+<div style="position:absolute;top:58px;left:18px;right:18px;height:66px;display:flex;align-items:center;gap:12px">
+<div style="width:62px;height:62px;flex-shrink:0;border-radius:50%;background:#1F4FD8;border:4px solid #2B2A6B;box-shadow:0 0 0 4px #fff,0 0 0 8px #1F4FD8,0 8px 0 8px rgba(43,42,107,.16);box-sizing:border-box"><svg width="54" height="54" viewBox="0 0 58 58" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"><circle cx="20" cy="25" r="3.5" fill="#fff" stroke="none"></circle><circle cx="38" cy="25" r="3.5" fill="#fff" stroke="none"></circle><path d="M19 34 Q29 44 39 34"></path></svg></div>
+<div style="flex:1;height:28px;border:4px solid #2B2A6B;border-radius:14px;background:#fff;overflow:hidden;box-sizing:border-box;position:relative"><div style="height:100%;width:20%;background:#1F4FD8;border-right:4px solid #2B2A6B;box-sizing:border-box"></div></div>
+<div style="display:flex;align-items:center;gap:6px;background:#FFC928;border:4px solid #2B2A6B;border-radius:22px;padding:2px 14px 2px 8px;box-shadow:0 6px 0 rgba(43,42,107,.16);font:400 28px/1.2 'Lilita One'"><svg width="22" height="22" viewBox="0 0 100 100"><polygon points="50,6 62,36 94,38 69,58 78,90 50,72 22,90 31,58 6,38 38,36" fill="#fff" stroke="#2B2A6B" stroke-width="9" stroke-linejoin="round"></polygon></svg>1800</div>
+</div>
+
+<div style="position:absolute;top:138px;left:18px;right:18px;height:404px;background:#F7F9FE;border:5px solid #2B2A6B;border-radius:34px;box-shadow:0 0 0 6px #1F4FD8,0 14px 0 6px rgba(43,42,107,.16);box-sizing:border-box;padding:10px 14px 12px;display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;justify-content:space-between;height:58px">
+<div style="width:52px;height:52px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 5px 0 rgba(43,42,107,.16);box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:400 36px/1 'Lilita One';padding-bottom:4px">‹</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font:400 40px/1 'Lilita One';letter-spacing:.04em">DAIRY</span><span style="display:flex;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#D5E0F2"></span><span style="width:18px;height:8px;border-radius:4px;background:#2B2A6B"></span><span style="width:8px;height:8px;border-radius:50%;background:#D5E0F2"></span><span style="width:8px;height:8px;border-radius:50%;background:#D5E0F2"></span><span style="width:8px;height:8px;border-radius:50%;background:#D5E0F2"></span><span style="width:8px;height:8px;border-radius:50%;background:#D5E0F2"></span></span></div>
+<div style="width:52px;height:52px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 5px 0 rgba(43,42,107,.16);box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:400 36px/1 'Lilita One';padding-bottom:4px">›</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-around">
+<div style="display:flex;flex-direction:column"><div style="display:flex;justify-content:space-evenly;align-items:flex-end;height:88px"><dc-import name="Ingredient" kind="cheese" size="84" rotate="-4" hint-size="84px,84px"></dc-import><div style="width:78px;height:78px;border-radius:50%;border:4px dashed #2B2A6B;opacity:.3;box-sizing:border-box"></div></div><div style="height:16px;border-radius:8px;background:#E9A866;border:4px solid #2B2A6B;box-shadow:0 6px 0 rgba(43,42,107,.14)"></div></div>
+<div style="display:flex;flex-direction:column"><div style="display:flex;justify-content:space-evenly;align-items:flex-end;height:88px"><dc-import name="Ingredient" kind="milk" size="84" rotate="3" hint-size="84px,84px"></dc-import><dc-import name="Ingredient" kind="cream" size="80" rotate="-3" hint-size="80px,80px"></dc-import></div><div style="height:16px;border-radius:8px;background:#E9A866;border:4px solid #2B2A6B;box-shadow:0 6px 0 rgba(43,42,107,.14)"></div></div>
+<div style="display:flex;flex-direction:column"><div style="display:flex;justify-content:space-evenly;align-items:flex-end;height:88px"><dc-import name="Ingredient" kind="yogurt" size="80" rotate="-3" hint-size="80px,80px"></dc-import><dc-import name="Ingredient" kind="egg" size="78" rotate="6" hint-size="78px,78px"></dc-import></div><div style="height:16px;border-radius:8px;background:#E9A866;border:4px solid #2B2A6B;box-shadow:0 6px 0 rgba(43,42,107,.14)"></div></div>
+</div>
+</div>
+
+<svg width="160" height="300" viewBox="0 0 160 300" style="position:absolute;left:150px;top:250px"><path d="M110 20 Q140 140 60 270" fill="none" stroke="#2B2A6B" stroke-width="4" stroke-dasharray="4 12" stroke-linecap="round"></path></svg>
+<div style="position:absolute;left:168px;top:510px;z-index:4;filter:drop-shadow(0 16px 10px rgba(43,42,107,.28))"><dc-import name="Ingredient" kind="butter" size="100" rotate="-10" hint-size="100px,100px"></dc-import></div>
+<div style="position:absolute;left:198px;top:572px;z-index:5;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.45);border:4px solid #fff;box-shadow:0 0 0 3px #2B2A6B"></div>
+
+<div style="position:absolute;top:566px;left:84px"><dc-import name="Basket" items="tomato,garlic,bread" width="296" height="148" token="62" hint-size="296px,148px"></dc-import></div>
+<div style="position:absolute;left:18px;top:650px;width:60px;height:60px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 6px 0 rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="30" height="34" viewBox="0 0 34 38"><rect x="3" y="7" width="28" height="6" rx="3" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="3"></rect><path d="M13 7 V4 H21 V7" fill="none" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M6 13 L8 34 Q8 36 10 36 L24 36 Q26 36 26 34 L28 13Z" fill="#D5E0F2" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M13 18 V31 M21 18 V31" stroke="#2B2A6B" stroke-width="3" stroke-linecap="round"></path></svg></div>
+
+<div style="position:absolute;left:22px;right:22px;bottom:30px;height:78px;border-radius:39px;background:#3CB54A;border:4px solid #2B2A6B;box-shadow:inset 0 -8px 0 rgba(43,42,107,.18),0 0 0 6px #fff,0 10px 0 6px rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;font:400 40px 'Lilita One'"><span style="position:absolute;left:32px;top:12px;width:44px;height:11px;border-radius:6px;background:#fff;opacity:.6"></span>Leave store ›</div>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#2B2A6B;opacity:.5"></div>
+</div>
+</div>
+<div style="font:800 22px Nunito">1 · Store — arrows flip shelves; drag down into the basket. Avatar: happy.</div>
+</div>
+
+<!-- CHOP -->
+<div style="display:flex;flex-direction:column;gap:20px;width:410px">
+<div style="width:410px;height:864px;background:#2B2A6B;border-radius:62px;padding:10px;box-sizing:border-box;box-shadow:0 24px 50px rgba(43,42,107,.25)">
+<div data-screen-label="Phone · Chop v2" style="width:390px;height:844px;border-radius:52px;overflow:hidden;position:relative;background-color:#DCE6FF;background-image:radial-gradient(#B3C6F2 2px, transparent 2.5px);background-size:26px 26px">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 38px;font:800 16px Nunito"><span>9:41</span><span style="width:26px;height:13px;border:2px solid #2B2A6B;border-radius:4px"></span></div>
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:34px;border-radius:17px;background:#2B2A6B"></div>
+<div style="position:absolute;top:58px;left:18px;right:18px;height:66px;display:flex;align-items:center;gap:12px">
+<div style="width:62px;height:62px;flex-shrink:0;border-radius:50%;background:#1F4FD8;border:4px solid #2B2A6B;box-shadow:0 0 0 4px #fff,0 0 0 8px #1F4FD8,0 8px 0 8px rgba(43,42,107,.16);box-sizing:border-box"><svg width="54" height="54" viewBox="0 0 58 58" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"><path d="M14 18 L24 22 M44 18 L34 22"></path><circle cx="20" cy="28" r="3" fill="#fff" stroke="none"></circle><circle cx="38" cy="28" r="3" fill="#fff" stroke="none"></circle><path d="M23 39 L35 39"></path></svg></div>
+<div style="flex:1;height:28px;border:4px solid #2B2A6B;border-radius:14px;background:#fff;overflow:hidden;box-sizing:border-box"><div style="height:100%;width:45%;background:#1F4FD8;border-right:4px solid #2B2A6B;box-sizing:border-box"></div></div>
+<div style="display:flex;align-items:center;gap:6px;background:#FFC928;border:4px solid #2B2A6B;border-radius:22px;padding:2px 14px 2px 8px;box-shadow:0 6px 0 rgba(43,42,107,.16);font:400 28px/1.2 'Lilita One'"><svg width="22" height="22" viewBox="0 0 100 100"><polygon points="50,6 62,36 94,38 69,58 78,90 50,72 22,90 31,58 6,38 38,36" fill="#fff" stroke="#2B2A6B" stroke-width="9" stroke-linejoin="round"></polygon></svg>1800</div>
+</div>
+<div style="position:absolute;top:138px;left:18px"><dc-import name="Basket" items="steak,garlic,chicken,bread" width="354" height="126" token="58" hint-size="354px,126px"></dc-import></div>
+
+<div style="position:absolute;top:282px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:12px">
+<div style="width:50px;height:50px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Ingredient" kind="tomato" size="36" sticker="false" hint-size="36px,36px"></dc-import></div>
+<div style="width:50px;height:50px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Ingredient" kind="tomato" size="36" sticker="false" hint-size="36px,36px"></dc-import></div>
+<div style="width:64px;height:64px;border-radius:50%;background:#FFC928;border:5px solid #2B2A6B;box-shadow:0 0 0 5px #fff,0 6px 0 5px rgba(43,42,107,.16);box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Ingredient" kind="carrot" size="46" sticker="false" hint-size="46px,46px"></dc-import></div>
+<div style="width:50px;height:50px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Ingredient" kind="onion" size="36" sticker="false" hint-size="36px,36px"></dc-import></div>
+</div>
+
+<div style="position:absolute;top:366px;left:26px;right:26px;height:366px;border-radius:46px;background-color:#E9A866;background-image:repeating-linear-gradient(8deg,transparent 0 30px,rgba(201,128,63,.5) 30px 34px);border:5px solid #2B2A6B;box-shadow:inset 0 -12px 0 rgba(43,42,107,.12),0 0 0 6px #1F4FD8,0 14px 0 6px rgba(43,42,107,.16);box-sizing:border-box">
+<span style="position:absolute;right:26px;top:22px;width:30px;height:30px;border-radius:50%;background:#EEF3FB;border:5px solid #2B2A6B;box-sizing:border-box"></span>
+<div style="position:absolute;left:66px;top:84px"><dc-import name="Ingredient" kind="carrot" size="200" rotate="-72" hint-size="200px,200px"></dc-import></div>
+<span style="position:absolute;left:40px;top:250px;width:40px;height:40px;border-radius:50%;background:#FF9A3C;border:4px solid #2B2A6B;box-sizing:border-box;box-shadow:inset 0 0 0 6px #FFB870"></span>
+<span style="position:absolute;left:78px;top:270px;width:34px;height:34px;border-radius:50%;background:#FF9A3C;border:4px solid #2B2A6B;box-sizing:border-box;box-shadow:inset 0 0 0 5px #FFB870"></span>
+<svg width="170" height="200" viewBox="0 0 170 200" style="position:absolute;right:10px;top:10px"><g transform="rotate(28 85 100)"><rect x="72" y="4" width="26" height="70" rx="10" fill="#1F4FD8" stroke="#2B2A6B" stroke-width="5"></rect><circle cx="85" cy="24" r="3.5" fill="#fff"></circle><circle cx="85" cy="50" r="3.5" fill="#fff"></circle><path d="M66 74 L104 74 L104 170 Q104 190 86 196 L66 196Z" fill="#fff" stroke="#2B2A6B" stroke-width="5" stroke-linejoin="round"></path><path d="M76 90 L76 176" stroke="#CFE6FB" stroke-width="5" stroke-linecap="round"></path></g></svg>
+<svg width="90" height="200" viewBox="0 0 90 200" style="position:absolute;left:236px;top:150px"><path d="M45 12 L45 170" stroke="#fff" stroke-width="22" stroke-linecap="round"></path><path d="M45 12 L45 170 M20 146 L45 176 L70 146" fill="none" stroke="#2B2A6B" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+
+<div style="position:absolute;left:22px;bottom:30px;width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 0 0 5px #1F4FD8,0 8px 0 5px rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="38" height="38" viewBox="0 0 34 34"><path d="M5 14 V30 H29 V14" fill="#fff" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="19" width="8" height="11" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="2.5"></rect><path d="M3 8 L6 3 H28 L31 8 V10 Q31 14 27 14 Q23.5 14 23.5 10 Q23.5 14 20 14 Q17 14 17 10 Q17 14 14 14 Q10.5 14 10.5 10 Q10.5 14 7 14 Q3 14 3 10Z" fill="#F2553D" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M14 4 L13 13 M20 4 L21 13" stroke="#fff" stroke-width="2.5"></path></svg></div>
+<div style="position:absolute;right:22px;bottom:30px;width:60px;height:60px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 6px 0 rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="30" height="34" viewBox="0 0 34 38"><rect x="3" y="7" width="28" height="6" rx="3" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="3"></rect><path d="M13 7 V4 H21 V7" fill="none" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M6 13 L8 34 Q8 36 10 36 L24 36 Q26 36 26 34 L28 13Z" fill="#D5E0F2" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M13 18 V31 M21 18 V31" stroke="#2B2A6B" stroke-width="3" stroke-linecap="round"></path></svg></div>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#2B2A6B;opacity:.5"></div>
+</div>
+</div>
+<div style="font:800 22px Nunito">2 · Chop — queue under the basket, current item highlighted. Swipe down to chop. Avatar: focused.</div>
+</div>
+
+<!-- STOVE -->
+<div style="display:flex;flex-direction:column;gap:20px;width:410px">
+<div style="width:410px;height:864px;background:#2B2A6B;border-radius:62px;padding:10px;box-sizing:border-box;box-shadow:0 24px 50px rgba(43,42,107,.25)">
+<div data-screen-label="Phone · Stove v2" style="width:390px;height:844px;border-radius:52px;overflow:hidden;position:relative;background-color:#DCE6FF;background-image:radial-gradient(#B3C6F2 2px, transparent 2.5px);background-size:26px 26px">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 38px;font:800 16px Nunito"><span>9:41</span><span style="width:26px;height:13px;border:2px solid #2B2A6B;border-radius:4px"></span></div>
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:34px;border-radius:17px;background:#2B2A6B"></div>
+<div style="position:absolute;top:58px;left:18px;right:18px;height:66px;display:flex;align-items:center;gap:12px">
+<div style="width:62px;height:62px;flex-shrink:0;border-radius:50%;background:#1F4FD8;border:4px solid #2B2A6B;box-shadow:0 0 0 4px #fff,0 0 0 8px #1F4FD8,0 8px 0 8px rgba(43,42,107,.16);box-sizing:border-box"><svg width="54" height="54" viewBox="0 0 58 58" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"><path d="M14 22 L24 18 M44 22 L34 18"></path><circle cx="20" cy="28" r="3" fill="#fff" stroke="none"></circle><circle cx="38" cy="28" r="3" fill="#fff" stroke="none"></circle><path d="M20 40 Q24 36 29 40 Q34 44 38 40"></path><path d="M47 10 Q51 17 49 20 Q47 22 45 20 Q43 17 47 10Z" fill="#4FB3F0" stroke-width="2.5"></path></svg></div>
+<div style="flex:1;height:28px;border:4px solid #2B2A6B;border-radius:14px;background:#fff;overflow:hidden;box-sizing:border-box"><div style="height:100%;width:70%;background:#1F4FD8;border-right:4px solid #2B2A6B;box-sizing:border-box"></div></div>
+<div style="display:flex;align-items:center;gap:6px;background:#FFC928;border:4px solid #2B2A6B;border-radius:22px;padding:2px 14px 2px 8px;box-shadow:0 6px 0 rgba(43,42,107,.16);font:400 28px/1.2 'Lilita One'"><svg width="22" height="22" viewBox="0 0 100 100"><polygon points="50,6 62,36 94,38 69,58 78,90 50,72 22,90 31,58 6,38 38,36" fill="#fff" stroke="#2B2A6B" stroke-width="9" stroke-linejoin="round"></polygon></svg>2150</div>
+</div>
+<div style="position:absolute;top:138px;left:18px"><dc-import name="Basket" items="chicken,bread,lemon" width="354" height="126" token="58" hint-size="354px,126px"></dc-import></div>
+
+<div style="position:absolute;top:304px;left:20px;width:350px;height:350px;border-radius:50%;background:#3E4380;border:6px solid #2B2A6B;box-shadow:0 0 0 6px #1F4FD8,0 14px 0 6px rgba(43,42,107,.18);box-sizing:border-box">
+<div style="position:absolute;inset:22px;border-radius:50%;border:8px dashed #F2553D;opacity:.9"></div>
+</div>
+<div style="position:absolute;top:338px;left:54px;width:282px;height:282px;border-radius:50%;background:#5E64A8;border:6px solid #2B2A6B;box-shadow:inset 0 0 0 16px #6E75BE;box-sizing:border-box"></div>
+<div style="position:absolute;left:278px;top:584px;width:120px;height:40px;border-radius:20px;background:#F2553D;border:5px solid #2B2A6B;box-sizing:border-box;transform:rotate(42deg);transform-origin:0 50%"><span style="position:absolute;right:12px;top:10px;width:12px;height:12px;border-radius:50%;background:#EEF3FB;border:3px solid #2B2A6B"></span></div>
+<div style="position:absolute;top:378px;left:94px;width:202px;height:202px;border-radius:50%;background:#4A4F8C;border:4px solid #2B2A6B;box-sizing:border-box"></div>
+<div style="position:absolute;left:118px;top:398px"><dc-import name="Ingredient" kind="steak" size="130" rotate="-10" sticker="false" hint-size="130px,130px"></dc-import></div>
+<div style="position:absolute;left:108px;top:488px"><dc-import name="Ingredient" kind="garlic" size="66" rotate="10" sticker="false" hint-size="66px,66px"></dc-import></div>
+<div style="position:absolute;left:210px;top:490px"><dc-import name="Ingredient" kind="tomato" size="66" rotate="-8" sticker="false" hint-size="66px,66px"></dc-import></div>
+<svg width="282" height="282" viewBox="0 0 282 282" style="position:absolute;top:338px;left:54px"><path d="M58 90 A104 104 0 1 0 108 42" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round"></path><path d="M58 90 A104 104 0 1 0 108 42" fill="none" stroke="#2B2A6B" stroke-width="6" stroke-linecap="round"></path><path d="M90 26 L114 40 L94 62" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"></path><path d="M90 26 L114 40 L94 62" fill="none" stroke="#2B2A6B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span style="position:absolute;left:40px;top:318px;width:22px;height:8px;border-radius:4px;background:#FFC928;border:3px solid #2B2A6B;transform:rotate(-40deg)"></span>
+<span style="position:absolute;left:330px;top:350px;width:22px;height:8px;border-radius:4px;background:#FFC928;border:3px solid #2B2A6B;transform:rotate(40deg)"></span>
+
+<div style="position:absolute;left:22px;bottom:30px;width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 0 0 5px #1F4FD8,0 8px 0 5px rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="38" height="38" viewBox="0 0 34 34"><path d="M5 14 V30 H29 V14" fill="#fff" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="19" width="8" height="11" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="2.5"></rect><path d="M3 8 L6 3 H28 L31 8 V10 Q31 14 27 14 Q23.5 14 23.5 10 Q23.5 14 20 14 Q17 14 17 10 Q17 14 14 14 Q10.5 14 10.5 10 Q10.5 14 7 14 Q3 14 3 10Z" fill="#F2553D" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M14 4 L13 13 M20 4 L21 13" stroke="#fff" stroke-width="2.5"></path></svg></div>
+<div style="position:absolute;right:22px;bottom:30px;width:60px;height:60px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 6px 0 rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="30" height="34" viewBox="0 0 34 38"><rect x="3" y="7" width="28" height="6" rx="3" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="3"></rect><path d="M13 7 V4 H21 V7" fill="none" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M6 13 L8 34 Q8 36 10 36 L24 36 Q26 36 26 34 L28 13Z" fill="#D5E0F2" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M13 18 V31 M21 18 V31" stroke="#2B2A6B" stroke-width="3" stroke-linecap="round"></path></svg></div>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#2B2A6B;opacity:.5"></div>
+</div>
+</div>
+<div style="font:800 22px Nunito">3 · Stove — pan on the burner, handle to bottom-right. Circle to stir. Avatar: worried (it's hot).</div>
+</div>
+
+<!-- PLATING -->
+<div style="display:flex;flex-direction:column;gap:20px;width:410px">
+<div style="width:410px;height:864px;background:#2B2A6B;border-radius:62px;padding:10px;box-sizing:border-box;box-shadow:0 24px 50px rgba(43,42,107,.25)">
+<div data-screen-label="Phone · Plating v2" style="width:390px;height:844px;border-radius:52px;overflow:hidden;position:relative;background-color:#DCE6FF;background-image:radial-gradient(#B3C6F2 2px, transparent 2.5px);background-size:26px 26px">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 38px;font:800 16px Nunito"><span>9:41</span><span style="width:26px;height:13px;border:2px solid #2B2A6B;border-radius:4px"></span></div>
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:34px;border-radius:17px;background:#2B2A6B"></div>
+<div style="position:absolute;top:58px;left:18px;right:18px;height:66px;display:flex;align-items:center;gap:12px">
+<div style="width:62px;height:62px;flex-shrink:0;border-radius:50%;background:#1F4FD8;border:4px solid #2B2A6B;box-shadow:0 0 0 4px #fff,0 0 0 8px #1F4FD8,0 8px 0 8px rgba(43,42,107,.16);box-sizing:border-box"><svg width="54" height="54" viewBox="0 0 58 58" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"><path d="M15 27 Q20 21 25 27 M33 27 Q38 21 43 27"></path><path d="M18 34 Q29 46 40 34 Z" fill="#fff"></path></svg></div>
+<div style="flex:1;height:28px;border:4px solid #2B2A6B;border-radius:14px;background:#fff;overflow:hidden;box-sizing:border-box"><div style="height:100%;width:94%;background:#1F4FD8;border-right:4px solid #2B2A6B;box-sizing:border-box"></div></div>
+<div style="display:flex;align-items:center;gap:6px;background:#FFC928;border:4px solid #2B2A6B;border-radius:22px;padding:2px 14px 2px 8px;box-shadow:0 6px 0 rgba(43,42,107,.16);font:400 28px/1.2 'Lilita One'"><svg width="22" height="22" viewBox="0 0 100 100"><polygon points="50,6 62,36 94,38 69,58 78,90 50,72 22,90 31,58 6,38 38,36" fill="#fff" stroke="#2B2A6B" stroke-width="9" stroke-linejoin="round"></polygon></svg>2400</div>
+</div>
+<div style="position:absolute;top:138px;left:18px"><dc-import name="Basket" items="garlic" width="354" height="126" token="58" hint-size="354px,126px"></dc-import></div>
+
+<div style="position:absolute;top:300px;left:25px;width:340px;height:340px;border-radius:50%;background:#fff;border:6px solid #2B2A6B;box-shadow:inset 0 0 0 26px #F2F4FF,inset 0 0 0 30px #D5E0F2,0 0 0 7px #1F4FD8,0 14px 0 7px rgba(43,42,107,.16);box-sizing:border-box"></div>
+<svg width="250" height="250" viewBox="0 0 240 240" style="position:absolute;top:345px;left:70px" fill="none" stroke-linecap="round">
+<g stroke="#2B2A6B" stroke-width="14"><ellipse cx="120" cy="124" rx="88" ry="74"></ellipse><ellipse cx="116" cy="120" rx="62" ry="80" transform="rotate(30 116 120)"></ellipse><path d="M40 128 Q70 54 140 66 Q206 84 192 150 Q170 204 108 196 Q52 186 62 136"></path><ellipse cx="124" cy="118" rx="50" ry="40"></ellipse></g>
+<g stroke="#F2BE63" stroke-width="7"><ellipse cx="120" cy="124" rx="88" ry="74"></ellipse><ellipse cx="116" cy="120" rx="62" ry="80" transform="rotate(30 116 120)"></ellipse><path d="M40 128 Q70 54 140 66 Q206 84 192 150 Q170 204 108 196 Q52 186 62 136"></path><ellipse cx="124" cy="118" rx="50" ry="40"></ellipse></g>
+<path d="M86 96 Q100 72 128 80 Q160 84 162 112 Q164 146 130 152 Q96 158 84 132 Q78 112 86 96Z" fill="#F2553D" stroke="#2B2A6B" stroke-width="5"></path>
+<circle cx="104" cy="104" r="15" fill="#C9803F" stroke="#2B2A6B" stroke-width="5"></circle><circle cx="140" cy="100" r="14" fill="#C9803F" stroke="#2B2A6B" stroke-width="5"></circle><circle cx="124" cy="134" r="15" fill="#C9803F" stroke="#2B2A6B" stroke-width="5"></circle>
+<circle cx="99" cy="99" r="4" fill="#fff"></circle><circle cx="119" cy="129" r="4" fill="#fff"></circle>
+<ellipse cx="150" cy="130" rx="10" ry="6" transform="rotate(-30 150 130)" fill="#3CB54A" stroke="#2B2A6B" stroke-width="4"></ellipse><ellipse cx="96" cy="136" rx="9" ry="5.5" transform="rotate(25 96 136)" fill="#3CB54A" stroke="#2B2A6B" stroke-width="4"></ellipse>
+</svg>
+<dc-import name="Sparkle" kind="star" color="#FFC928" size="40" hint-size="40px,40px" style="position:absolute;left:36px;top:300px"></dc-import>
+<dc-import name="Sparkle" kind="plus" color="#F48FB7" size="26" hint-size="26px,26px" style="position:absolute;right:36px;top:620px"></dc-import>
+
+<div style="position:absolute;left:22px;bottom:40px;width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 0 0 5px #1F4FD8,0 8px 0 5px rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="38" height="38" viewBox="0 0 34 34"><path d="M5 14 V30 H29 V14" fill="#fff" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="19" width="8" height="11" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="2.5"></rect><path d="M3 8 L6 3 H28 L31 8 V10 Q31 14 27 14 Q23.5 14 23.5 10 Q23.5 14 20 14 Q17 14 17 10 Q17 14 14 14 Q10.5 14 10.5 10 Q10.5 14 7 14 Q3 14 3 10Z" fill="#F2553D" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M14 4 L13 13 M20 4 L21 13" stroke="#fff" stroke-width="2.5"></path></svg></div>
+<div style="position:absolute;right:22px;bottom:40px;width:64px;height:64px;border-radius:50%;background:#fff;border:4px dashed #2B2A6B;box-shadow:0 6px 0 rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="32" height="36" viewBox="0 0 34 38"><rect x="3" y="7" width="28" height="6" rx="3" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="3"></rect><path d="M13 7 V4 H21 V7" fill="none" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M6 13 L8 34 Q8 36 10 36 L24 36 Q26 36 26 34 L28 13Z" fill="#D5E0F2" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M13 18 V31 M21 18 V31" stroke="#2B2A6B" stroke-width="3" stroke-linecap="round"></path></svg></div>
+<div style="position:absolute;left:50%;transform:translateX(-50%);bottom:30px;width:176px;height:84px;border-radius:42px;background:#3CB54A;border:4px solid #2B2A6B;box-shadow:inset 0 -8px 0 rgba(43,42,107,.18),0 0 0 6px #fff,0 10px 0 6px rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;font:400 46px 'Lilita One'"><span style="position:absolute;left:28px;top:12px;width:40px;height:11px;border-radius:6px;background:#fff;opacity:.6"></span>Serve!</div>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#2B2A6B;opacity:.5"></div>
+</div>
+</div>
+<div style="font:800 22px Nunito">4 · Plating — dish done, Serve! centred. Leftover garlic → trash (food waste). Avatar: happy.</div>
+</div>
+
+<!-- ROBBED -->
+<div style="display:flex;flex-direction:column;gap:20px;width:410px">
+<div style="width:410px;height:864px;background:#2B2A6B;border-radius:62px;padding:10px;box-sizing:border-box;box-shadow:0 24px 50px rgba(43,42,107,.25)">
+<div data-screen-label="Phone · Robbed" style="width:390px;height:844px;border-radius:52px;overflow:hidden;position:relative;background-color:#DCE6FF;background-image:radial-gradient(#B3C6F2 2px, transparent 2.5px);background-size:26px 26px">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 38px;font:800 16px Nunito"><span>9:41</span><span style="width:26px;height:13px;border:2px solid #2B2A6B;border-radius:4px"></span></div>
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:34px;border-radius:17px;background:#2B2A6B"></div>
+<div style="position:absolute;top:58px;left:18px;right:18px;height:66px;display:flex;align-items:center;gap:12px">
+<div style="width:62px;height:62px;flex-shrink:0;border-radius:50%;background:#1F4FD8;border:4px solid #2B2A6B;box-shadow:0 0 0 4px #F2553D,0 6px 0 4px rgba(43,42,107,.16);box-sizing:border-box;transform:rotate(-8deg)"><svg width="54" height="54" viewBox="0 0 58 58" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 14 L22 18 M46 14 L36 18"></path><circle cx="19" cy="26" r="6.5" fill="#fff"></circle><circle cx="39" cy="26" r="6.5" fill="#fff"></circle><circle cx="19" cy="27" r="2.6" fill="#2B2A6B" stroke="none"></circle><circle cx="39" cy="27" r="2.6" fill="#2B2A6B" stroke="none"></circle><ellipse cx="29" cy="43" rx="6" ry="7" fill="#2B2A6B"></ellipse><path d="M50 30 Q54 37 52 40 Q50 42 48 40 Q46 37 50 30Z" fill="#4FB3F0" stroke-width="2.5"></path></svg></div>
+<div style="flex:1;height:28px;border:4px solid #2B2A6B;border-radius:14px;background:#fff;overflow:hidden;box-sizing:border-box"><div style="height:100%;width:60%;background:#1F4FD8;border-right:4px solid #2B2A6B;box-sizing:border-box"></div></div>
+<div style="display:flex;align-items:center;gap:6px;background:#FFC928;border:4px solid #2B2A6B;border-radius:22px;padding:2px 14px 2px 8px;box-shadow:0 6px 0 rgba(43,42,107,.16);font:400 28px/1.2 'Lilita One'"><svg width="22" height="22" viewBox="0 0 100 100"><polygon points="50,6 62,36 94,38 69,58 78,90 50,72 22,90 31,58 6,38 38,36" fill="#fff" stroke="#2B2A6B" stroke-width="9" stroke-linejoin="round"></polygon></svg>2150</div>
+</div>
+<div style="position:absolute;top:138px;left:18px"><dc-import name="Basket" items="chicken,tomato,bread" gone="1" width="354" height="126" token="58" hint-size="354px,126px"></dc-import></div>
+
+<div style="position:absolute;top:366px;left:30px;width:330px;height:330px;border-radius:50%;background:#3E4380;border:6px solid #2B2A6B;box-shadow:0 0 0 6px #1F4FD8,0 14px 0 6px rgba(43,42,107,.18);box-sizing:border-box"><div style="position:absolute;inset:20px;border-radius:50%;border:8px dashed #F2553D;opacity:.9"></div></div>
+<div style="position:absolute;top:398px;left:62px;width:266px;height:266px;border-radius:50%;background:#5E64A8;border:6px solid #2B2A6B;box-shadow:inset 0 0 0 16px #6E75BE;box-sizing:border-box"></div>
+<div style="position:absolute;left:276px;top:632px;width:110px;height:38px;border-radius:19px;background:#F2553D;border:5px solid #2B2A6B;box-sizing:border-box;transform:rotate(42deg);transform-origin:0 50%"></div>
+<div style="position:absolute;top:436px;left:100px;width:190px;height:190px;border-radius:50%;background:#4A4F8C;border:4px solid #2B2A6B;box-sizing:border-box"></div>
+<div style="position:absolute;left:130px;top:460px"><dc-import name="Ingredient" kind="steak" size="130" rotate="14" sticker="false" hint-size="130px,130px"></dc-import></div>
+<svg width="200" height="120" viewBox="0 0 200 120" style="position:absolute;left:96px;top:400px"><path d="M40 100 Q60 16 150 30" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round"></path><path d="M40 100 Q60 16 150 30" fill="none" stroke="#2B2A6B" stroke-width="6" stroke-linecap="round"></path><path d="M130 12 L154 30 L132 50" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"></path><path d="M130 12 L154 30 L132 50" fill="none" stroke="#2B2A6B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+
+<div style="position:absolute;top:282px;left:26px;right:26px;z-index:7;transform:rotate(-3deg);background:#FFC928;border:5px solid #2B2A6B;border-radius:28px;box-shadow:0 0 0 6px #fff,0 12px 0 6px rgba(43,42,107,.18);padding:8px 14px 10px 10px;display:flex;align-items:center;gap:10px">
+<div style="width:44px;height:44px;flex-shrink:0;border-radius:50%;background:#F2553D;border:4px solid #2B2A6B;box-sizing:border-box"></div>
+<span style="flex:1;font:400 29px/1.05 'Lilita One'">Jun stole your tomato!</span>
+</div>
+
+<svg width="70" height="150" viewBox="0 0 70 150" style="position:absolute;left:92px;top:0;z-index:6"><path d="M50 10 L30 40 M60 50 L34 70 M56 96 L30 110" stroke="#2B2A6B" stroke-width="5" stroke-linecap="round"></path></svg>
+<svg width="70" height="150" viewBox="0 0 70 150" style="position:absolute;left:288px;top:0;z-index:6"><path d="M20 10 L40 40 M10 50 L36 70 M14 96 L40 110" stroke="#2B2A6B" stroke-width="5" stroke-linecap="round"></path></svg>
+<svg width="180" height="230" viewBox="0 0 180 230" style="position:absolute;left:125px;top:-14px;z-index:6" stroke="#2B2A6B" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<path d="M52 0 L128 0 L122 100 L58 100Z" fill="#F2553D"></path>
+<path d="M55 30 L125 30 M57 62 L123 62" stroke="#fff" stroke-width="9"></path>
+<rect x="48" y="94" width="84" height="22" rx="10" fill="#fff"></rect>
+<path d="M50 116 Q46 160 72 176 L110 176 Q136 160 130 116Z" fill="#FFD9B8"></path>
+</svg>
+<div style="position:absolute;left:162px;top:128px;z-index:6"><dc-import name="Ingredient" kind="tomato" size="100" rotate="-14" hint-size="100px,100px"></dc-import></div>
+<svg width="180" height="230" viewBox="0 0 180 230" style="position:absolute;left:125px;top:-14px;z-index:6" stroke="#2B2A6B" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
+<rect x="58" y="152" width="17" height="48" rx="8.5" fill="#FFD9B8"></rect>
+<rect x="77" y="156" width="17" height="54" rx="8.5" fill="#FFD9B8"></rect>
+<rect x="96" y="156" width="17" height="52" rx="8.5" fill="#FFD9B8"></rect>
+<rect x="115" y="150" width="16" height="42" rx="8" fill="#FFD9B8"></rect>
+<path d="M50 130 Q30 156 46 186" stroke-width="18" fill="none"></path><path d="M50 130 Q30 156 46 186" stroke="#FFD9B8" stroke-width="9" fill="none"></path>
+</svg>
+<div style="position:absolute;right:14px;top:150px;z-index:8;transform:rotate(12deg);width:96px;height:96px;display:flex;align-items:center;justify-content:center">
+<svg width="96" height="96" viewBox="0 0 100 100" style="position:absolute;inset:0"><polygon points="50,2 60,24 84,12 76,38 98,50 76,62 84,88 60,76 50,98 40,76 16,88 24,62 2,50 24,38 16,12 40,24" fill="#fff" stroke="#2B2A6B" stroke-width="5" stroke-linejoin="round"></polygon></svg>
+<span style="position:relative;font:400 22px/1 'Lilita One';color:#F2553D;-webkit-text-stroke:5px #2B2A6B;paint-order:stroke fill">Yoink!</span>
+</div>
+
+<div style="position:absolute;left:22px;bottom:30px;width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 0 0 5px #1F4FD8,0 8px 0 5px rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="38" height="38" viewBox="0 0 34 34"><path d="M5 14 V30 H29 V14" fill="#fff" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="19" width="8" height="11" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="2.5"></rect><path d="M3 8 L6 3 H28 L31 8 V10 Q31 14 27 14 Q23.5 14 23.5 10 Q23.5 14 20 14 Q17 14 17 10 Q17 14 14 14 Q10.5 14 10.5 10 Q10.5 14 7 14 Q3 14 3 10Z" fill="#F2553D" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M14 4 L13 13 M20 4 L21 13" stroke="#fff" stroke-width="2.5"></path></svg></div>
+<div style="position:absolute;right:22px;bottom:30px;width:60px;height:60px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-shadow:0 6px 0 rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><svg width="30" height="34" viewBox="0 0 34 38"><rect x="3" y="7" width="28" height="6" rx="3" fill="#4FB3F0" stroke="#2B2A6B" stroke-width="3"></rect><path d="M13 7 V4 H21 V7" fill="none" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M6 13 L8 34 Q8 36 10 36 L24 36 Q26 36 26 34 L28 13Z" fill="#D5E0F2" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path><path d="M13 18 V31 M21 18 V31" stroke="#2B2A6B" stroke-width="3" stroke-linecap="round"></path></svg></div>
+<div style="position:absolute;inset:0;border-radius:52px;pointer-events:none;box-shadow:inset 0 0 0 8px rgba(242,85,61,.85)"></div>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#2B2A6B;opacity:.5"></div>
+</div>
+</div>
+<div style="font:800 22px Nunito">5 · Robbed — Jun's sleeve swoops in and grabs the tomato; empty slot left behind. Flip hint on the pan. Avatar: panicked.</div>
+</div>
+
+</div>
+</section>
+
+<section data-screen-label="05b Race gameplay v2" style="display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;align-items:baseline;gap:24px"><span style="font:400 72px 'Lilita One'">05b · Race gameplay — card stacks</span><span style="font:800 26px Nunito">Timer on top, one recipe deck per player, folder tabs along the bottom edge.</span></div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div data-screen-label="Host · Race gameplay v2" style="width:1920px;height:1080px;position:relative;overflow:hidden;background-color:#EEF3FB;background-image:radial-gradient(#D5E0F2 2.5px, transparent 3px);background-size:40px 40px;border:5px solid #2B2A6B;border-radius:32px;box-sizing:border-box">
+
+<div style="position:absolute;top:22px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:22px">
+<svg width="92" height="124" viewBox="0 0 92 124" style="transform:rotate(-10deg);filter:drop-shadow(0 8px 0 rgba(43,42,107,.16))">
+<rect x="6" y="6" width="80" height="16" rx="8" fill="#1F4FD8" stroke="#2B2A6B" stroke-width="5"></rect>
+<rect x="6" y="102" width="80" height="16" rx="8" fill="#1F4FD8" stroke="#2B2A6B" stroke-width="5"></rect>
+<path d="M16 22 H76 Q76 50 52 62 Q76 74 76 102 H16 Q16 74 40 62 Q16 50 16 22Z" fill="#fff" stroke="#2B2A6B" stroke-width="5" stroke-linejoin="round"></path>
+<path d="M28 40 H64 Q60 52 46 58 Q32 52 28 40Z" fill="#FFC928"></path>
+<path d="M46 66 L46 80" stroke="#FFC928" stroke-width="4" stroke-linecap="round"></path>
+<path d="M24 98 Q46 80 68 98Z" fill="#FFC928" stroke="#2B2A6B" stroke-width="3" stroke-linejoin="round"></path>
+</svg>
+<div style="width:240px;height:156px;border-radius:46% 54% 50% 50% / 56% 48% 52% 44%;background:#FFC928;border:6px solid #2B2A6B;box-shadow:0 0 0 10px #fff,0 18px 0 10px rgba(43,42,107,.16);box-sizing:border-box;display:flex;align-items:center;justify-content:center;transform:rotate(2deg);position:relative">
+<span style="position:absolute;left:34px;top:20px;width:44px;height:13px;border-radius:7px;background:#fff;opacity:.7;transform:rotate(-14deg)"></span>
+<span style="font:400 132px/1 'Lilita One';color:#2B2A6B;padding-top:6px">60</span>
+</div>
+</div>
+
+<div style="position:absolute;left:40px;right:40px;top:208px;height:732px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))">
+<sc-for list="{{ stacks }}" as="s" hint-placeholder-count="4">
+<div style="position:relative;width:392px;height:732px;justify-self:center">
+<div style="position:absolute;top:0;left:34px;right:34px;height:220px;background:{{ s.tint }};border:5px solid #2B2A6B;border-radius:32px;transform:rotate(-3deg);box-shadow:0 10px 0 rgba(43,42,107,.12);padding:10px 20px;box-sizing:border-box"><span style="font:400 26px 'Lilita One';opacity:.45">{{ s.next2 }}</span></div>
+<div style="position:absolute;top:22px;left:16px;right:16px;height:220px;background:{{ s.tint }};border:5px solid #2B2A6B;border-radius:32px;transform:rotate(2.5deg);box-shadow:0 10px 0 rgba(43,42,107,.12);padding:10px 20px;box-sizing:border-box;display:flex;justify-content:flex-end"><span style="font:400 26px 'Lilita One';opacity:.45">{{ s.next1 }}</span></div>
+
+<div style="position:absolute;top:52px;left:0;right:0;bottom:0;background:#F7F9FE;border:5px solid #2B2A6B;border-radius:38px;box-shadow:0 0 0 9px {{ s.color }},0 18px 0 9px rgba(43,42,107,.16);padding:22px 24px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px">
+
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:8px;background:{{ s.badgeBg }};border:4px solid #2B2A6B;border-radius:26px;padding:2px 18px 2px 6px;transform:rotate(-3deg);box-shadow:0 6px 0 rgba(43,42,107,.16);font:400 30px/1.2 'Lilita One'">
+<dc-import name="Game Icon" kind="{{ s.badgeIcon }}" size="40" sticker="false" hint-size="40px,40px"></dc-import>{{ s.badge }}</div>
+<span style="font:400 28px/1 'Lilita One'">{{ s.recipe }}<span style="opacity:.5"> / 5</span></span>
+</div>
+<div style="font:900 24px/1.15 Nunito;margin-top:-4px">{{ s.recipeName }}</div>
+
+<sc-if value="{{ s.isShop }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:18px;min-height:0">
+<sc-for list="{{ s.items }}" as="it" hint-placeholder-count="4">
+<div style="position:relative;border-radius:30px;background:{{ it.bg }};border:4px solid {{ it.border }};box-sizing:border-box;display:flex;align-items:center;justify-content:center">
+<dc-import name="Ingredient" kind="{{ it.kind }}" size="124" rotate="{{ it.rot }}" hint-size="124px,124px"></dc-import>
+<sc-if value="{{ it.done }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;right:-12px;top:-12px;width:62px;height:62px;border-radius:50%;background:#3CB54A;border:5px solid #2B2A6B;box-shadow:0 0 0 5px #fff;box-sizing:border-box;display:flex;align-items:center;justify-content:center;transform:rotate(8deg)"><svg width="34" height="34" viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" stroke="#2B2A6B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></sc-if>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:10px;font:900 26px Nunito"><dc-import name="Game Icon" kind="basket" size="38" sticker="false" hint-size="38px,38px"></dc-import>{{ s.count }}</div>
+</sc-if>
+
+<sc-if value="{{ s.isPrep }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;justify-content:center;gap:12px;height:72px">
+<sc-for list="{{ s.tokens }}" as="t" hint-placeholder-count="5">
+<div style="width:{{ t.size }}px;height:{{ t.size }}px;border-radius:50%;background:{{ t.bg }};border:{{ t.bw }}px solid #2B2A6B;box-shadow:{{ t.shadow }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;opacity:{{ t.op }}">
+<span style="display:{{ t.numDisp }};font:400 {{ t.fs }}px/1 'Lilita One';color:{{ t.fg }};-webkit-text-stroke:{{ t.stroke }}px #2B2A6B;paint-order:stroke fill">{{ t.n }}</span>
+<svg width="26" height="26" viewBox="0 0 12 12" style="display:{{ t.tickDisp }}"><path d="M2 6 L5 9 L10 3" stroke="#2B2A6B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+</sc-for>
+</div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+<div style="position:relative;width:270px;height:270px;border-radius:50%;background:{{ s.tint }};border:5px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center">
+<sc-if value="{{ s.isChop }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:34px;right:34px;bottom:52px;height:62px;border-radius:18px;background:#E9A866;border:5px solid #2B2A6B;box-sizing:border-box"><span style="position:absolute;right:14px;top:16px;width:14px;height:14px;border-radius:50%;border:4px solid #2B2A6B"></span></div></sc-if>
+<dc-import name="Game Icon" kind="{{ s.gesture }}" size="200" hint-size="200px,200px" style="position:relative"></dc-import>
+<sc-if value="{{ s.isChop }}" hint-placeholder-val="{{ false }}"><svg width="250" height="50" viewBox="0 0 250 50" style="position:absolute;left:10px;bottom:-26px"><path d="M30 25 H220" stroke="#fff" stroke-width="16" stroke-linecap="round"></path><path d="M30 25 H220 M42 10 L24 25 L42 40 M208 10 L226 25 L208 40" fill="none" stroke="#2B2A6B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+</div>
+</div>
+<div style="text-align:center;font:400 84px/0.9 'Lilita One';color:{{ s.color }};-webkit-text-stroke:10px #2B2A6B;paint-order:stroke fill;text-shadow:0 7px 0 #2B2A6B;transform:rotate(-2deg)">{{ s.gestureName }}</div>
+<div style="text-align:center;font:900 22px Nunito">{{ s.stepLabel }}</div>
+</sc-if>
+
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="position:absolute;left:40px;right:40px;bottom:-8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))">
+<sc-for list="{{ stacks }}" as="s" hint-placeholder-count="4">
+<div style="justify-self:center;width:392px;height:122px;background:{{ s.tint }};border:5px solid #2B2A6B;border-bottom:none;border-radius:38px 38px 0 0;box-sizing:border-box;padding:0 22px 8px;display:flex;align-items:center;gap:16px">
+<div style="width:80px;height:80px;flex-shrink:0;border-radius:50%;background:{{ s.color }};border:5px solid #2B2A6B;box-shadow:0 0 0 5px #fff;box-sizing:border-box"></div>
+<div style="flex:1;min-width:0;background:#fff;border:5px solid #2B2A6B;border-radius:34px;box-shadow:0 0 0 5px {{ s.color }};padding:4px 20px;box-sizing:border-box;font:400 44px/1.1 'Lilita One';text-align:center">{{ s.name }}</div>
+</div>
+</sc-for>
+</div>
+
+</div>
+<div style="font:800 24px Nunito">Host · Card stacks — Mina (Stir, step 3) and Leo (Chop, step 2) are prepping; Jun and Ari are still shopping. Checks are stickers + tint, never tint alone.</div>
+</div>
+</section>
+
+<section data-screen-label="05 Race gameplay" style="display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;align-items:baseline;gap:24px"><span style="font:400 72px 'Lilita One'">05 · Race gameplay</span><span style="font:800 26px Nunito">Host lanes + the store phone. Lanes show every phase at once: Store, Prep, Back to store.</span></div>
+<div style="display:flex;gap:72px;align-items:flex-start">
+
+<div style="display:flex;flex-direction:column;gap:20px">
+<div data-screen-label="Host · Race gameplay" style="width:1920px;height:1080px;position:relative;overflow:hidden;background-color:#EEF3FB;background-image:radial-gradient(#D5E0F2 2.5px, transparent 3px);background-size:40px 40px;border:5px solid #2B2A6B;border-radius:32px;box-sizing:border-box;padding:28px 44px 44px;display:flex;flex-direction:column;gap:34px">
+
+<div style="height:150px;flex-shrink:0;display:flex;align-items:center;gap:40px">
+<div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:470px">
+<div style="font:400 84px/0.95 'Lilita One';color:#FFC928;-webkit-text-stroke:10px #2B2A6B;paint-order:stroke fill;text-shadow:0 8px 0 #2B2A6B;transform:rotate(-3deg)">Chop Chop!</div>
+<div style="margin-left:14px;transform:rotate(2deg);background:#1F4FD8;border:4px solid #2B2A6B;border-radius:24px;padding:2px 20px;box-shadow:0 0 0 5px #FFC928;font:400 26px 'Lilita One';color:#fff;letter-spacing:.06em">RECIPE RACE</div>
+</div>
+
+<div style="flex:1;display:flex;justify-content:center">
+<div style="position:relative;display:flex;align-items:center;gap:18px;height:128px;padding:0 44px 0 22px;border-radius:64px;background:#FFC928;border:5px solid #2B2A6B;box-shadow:0 0 0 10px #fff,0 16px 0 10px rgba(43,42,107,.16);transform:rotate(-1.5deg)">
+<div style="width:84px;height:84px;border-radius:50%;background:#fff;border:5px solid #2B2A6B;box-sizing:border-box;position:relative">
+<span style="position:absolute;left:34px;top:14px;width:6px;height:26px;border-radius:3px;background:#2B2A6B"></span>
+<span style="position:absolute;left:36px;top:34px;width:22px;height:6px;border-radius:3px;background:#2B2A6B;transform:rotate(30deg);transform-origin:0 50%"></span>
+</div>
+<div style="display:flex;flex-direction:column;line-height:1"><span style="font:400 92px/0.9 'Lilita One'">2:14</span></div>
+<span style="font:900 22px Nunito;letter-spacing:.12em;align-self:flex-end;padding-bottom:26px">LEFT</span>
+</div>
+</div>
+
+<div style="width:760px;background:#F7F9FE;border:4px solid #2B2A6B;border-radius:32px;box-shadow:0 12px 0 rgba(43,42,107,.14);padding:12px 22px 14px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:900 18px Nunito;letter-spacing:.14em">LEADERBOARD</span><span style="font:800 18px Nunito">recipes done</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+<sc-for list="{{ leaders }}" as="p" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:8px;background:#fff;border:3px solid #2B2A6B;border-radius:24px;padding:5px 12px 5px 5px">
+<span style="width:34px;height:34px;flex-shrink:0;border-radius:50%;background:{{ p.rankBg }};border:3px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:400 22px/1 'Lilita One'">{{ p.rank }}</span>
+<span style="width:24px;height:24px;flex-shrink:0;border-radius:50%;background:{{ p.color }};border:3px solid #2B2A6B;box-sizing:border-box"></span>
+<span style="flex:1;font:400 28px/1 'Lilita One';min-width:0">{{ p.name }}</span>
+<span style="font:400 34px/1 'Lilita One'">{{ p.done }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+
+<div style="flex:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:40px;min-height:0">
+<sc-for list="{{ lanes }}" as="l" hint-placeholder-count="4">
+<div style="position:relative;display:flex;flex-direction:column;gap:16px;background:#F7F9FE;border:4px solid #2B2A6B;border-radius:38px;box-shadow:0 0 0 8px {{ l.color }},0 18px 0 8px rgba(43,42,107,.16);padding:22px 18px 18px;min-width:0">
+
+<div style="position:absolute;top:-30px;right:-18px;z-index:3;transform:rotate({{ l.badgeRot }}deg);display:flex;align-items:center;gap:8px;background:{{ l.badgeBg }};border:4px solid #2B2A6B;border-radius:30px;padding:4px 20px 4px 8px;box-shadow:0 0 0 5px #fff,0 9px 0 5px rgba(43,42,107,.16);font:400 34px/1.1 'Lilita One';color:{{ l.badgeFg }};-webkit-text-stroke:6px #2B2A6B;paint-order:stroke fill;white-space:nowrap">
+<dc-import name="Game Icon" kind="{{ l.badgeIcon }}" size="44" sticker="false" hint-size="44px,44px"></dc-import>{{ l.badge }}</div>
+
+<div style="display:flex;align-items:center;gap:14px">
+<div style="width:96px;height:96px;flex-shrink:0;border-radius:50%;background:{{ l.color }};border:4px solid #2B2A6B;box-shadow:0 0 0 5px #fff;box-sizing:border-box"></div>
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0">
+<div style="background:#fff;border:4px solid #2B2A6B;border-radius:28px;padding:2px 20px;box-shadow:0 0 0 4px {{ l.color }};font:400 38px/1.1 'Lilita One'">{{ l.name }}</div>
+<div style="display:flex;align-items:baseline;gap:8px;padding-left:4px"><span style="font:900 20px Nunito;letter-spacing:.1em">RECIPE</span><span style="font:400 34px/1 'Lilita One'">{{ l.recipe }}</span><span style="font:400 24px/1 'Lilita One';opacity:.55">/ 5</span></div>
+</div>
+</div>
+
+<div style="flex:1;min-height:0;display:flex;flex-direction:column;background:#fff;border:4px solid #2B2A6B;border-radius:28px;overflow:hidden">
+<div style="background:{{ l.tint }};border-bottom:4px solid #2B2A6B;padding:10px 18px 12px;display:flex;flex-direction:column;gap:2px">
+<span style="font:900 17px Nunito;letter-spacing:.14em">{{ l.kicker }}</span>
+<span style="font:400 36px/1.05 'Lilita One'">{{ l.recipeName }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;padding:12px">
+
+<sc-if value="{{ l.isList }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ l.items }}" as="r" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:14px;height:84px;padding:0 12px 0 6px;border-radius:24px;background:{{ r.bg }};border:3px solid {{ r.border }};box-sizing:border-box">
+<dc-import name="Ingredient" kind="{{ r.kind }}" size="68" hint-size="68px,68px"></dc-import>
+<span style="flex:1;min-width:0;font:900 29px/1.1 Nunito">{{ r.label }}</span>
+<sc-if value="{{ r.isMissing }}" hint-placeholder-val="{{ false }}"><span style="transform:rotate(4deg);background:#F2553D;border:3px solid #2B2A6B;border-radius:18px;padding:2px 12px;font:400 24px/1.2 'Lilita One';color:#fff;-webkit-text-stroke:5px #2B2A6B;paint-order:stroke fill">Missing!</span></sc-if>
+<sc-if value="{{ r.isCheck }}" hint-placeholder-val="{{ true }}"><span style="width:48px;height:48px;flex-shrink:0;border-radius:50%;background:{{ r.checkBg }};border:4px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 12 12" style="display:{{ r.tick }}"><path d="M2 6 L5 9 L10 3" stroke="#2B2A6B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></sc-if>
+</div>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{ l.isSteps }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ l.steps }}" as="r" hint-placeholder-count="4">
+<div style="position:relative;display:flex;align-items:center;gap:14px;height:{{ r.h }}px;padding:0 12px 0 8px;border-radius:24px;background:{{ r.bg }};border:{{ r.bw }}px solid {{ r.border }};box-sizing:border-box;opacity:{{ r.op }}">
+<div style="width:{{ r.icon }}px;height:{{ r.icon }}px;flex-shrink:0;border-radius:50%;background:#fff;border:3px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Game Icon" kind="{{ r.g }}" size="{{ r.glyph }}" sticker="false" hint-size="52px,52px"></dc-import></div>
+<span style="flex:1;min-width:0;font:900 {{ r.fs }}px/1.1 Nunito">{{ r.label }}</span>
+<sc-if value="{{ r.isNow }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:-14px;top:-16px;transform:rotate(-8deg);background:#fff;border:3px solid #2B2A6B;border-radius:14px;padding:0 10px;font:400 22px/1.3 'Lilita One'">NOW</span></sc-if>
+<span style="width:48px;height:48px;flex-shrink:0;border-radius:50%;background:{{ r.checkBg }};border:4px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 12 12" style="display:{{ r.tick }}"><path d="M2 6 L5 9 L10 3" stroke="#2B2A6B" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+</div>
+</sc-for>
+</sc-if>
+
+</div>
+</div>
+
+<sc-if value="{{ l.isSpoil }}" hint-placeholder-val="{{ false }}">
+<div style="position:relative;background:#FFE1DA;border:4px solid #2B2A6B;border-radius:28px;box-shadow:0 0 0 6px #FFC928;padding:12px 16px 16px;display:flex;flex-direction:column;gap:10px;transform:rotate(-1deg)">
+<div style="display:flex;align-items:center;gap:12px">
+<dc-import name="Ingredient" kind="tomato" mood="worried" size="86" rotate="-8" hint-size="86px,86px"></dc-import>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font:400 46px/1 'Lilita One'">Hurry back!</span><span style="font:900 20px Nunito">Food at the station is spoiling</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:12px">
+<div style="flex:1;height:36px;border:4px solid #2B2A6B;border-radius:18px;background:#fff;overflow:hidden;box-sizing:border-box"><div style="height:100%;width:{{ l.spoilPct }}%;background:repeating-linear-gradient(-45deg,#F2553D 0 14px,#FF7A5C 14px 28px);border-right:4px solid #2B2A6B;box-sizing:border-box"></div></div>
+<span style="font:400 38px/1 'Lilita One'">{{ l.spoilTime }}</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ l.hasFooter }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:12px;padding:0 6px">
+<div style="flex:1;display:flex;gap:6px">
+<sc-for list="{{ l.segs }}" as="sg" hint-placeholder-count="4">
+<span style="flex:1;height:22px;border-radius:11px;background:{{ sg.bg }};border:3px solid #2B2A6B"></span>
+</sc-for>
+</div>
+<span style="font:900 26px Nunito;white-space:nowrap">{{ l.footer }}</span>
+</div>
+</sc-if>
+
+</div>
+</sc-for>
+</div>
+</div>
+<div style="font:800 24px Nunito">Host · Race gameplay — Mina leads on Recipe 3 (Prep); Jun is shopping; Ari ran back for cheese while her station spoils; Leo is on the last step.</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:20px;width:410px">
+<div style="width:410px;height:864px;background:#2B2A6B;border-radius:62px;padding:10px;box-sizing:border-box;box-shadow:0 24px 50px rgba(43,42,107,.25)">
+<div data-screen-label="Phone · Store" style="width:390px;height:844px;border-radius:52px;overflow:hidden;position:relative;background:#EEF3FB">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 38px;font:800 16px Nunito"><span>9:41</span><span style="width:26px;height:13px;border:2px solid #2B2A6B;border-radius:4px"></span></div>
+<div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:34px;border-radius:17px;background:#2B2A6B"></div>
+
+<div style="position:absolute;top:62px;left:22px;right:22px;display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:10px;background:#fff;border:4px solid #2B2A6B;border-radius:40px;padding:4px 20px 4px 4px;box-shadow:0 0 0 5px #F2553D"><div style="width:54px;height:54px;border-radius:50%;background:#F2553D;border:3px solid #2B2A6B;box-sizing:border-box"></div><div style="display:flex;flex-direction:column;line-height:1"><span style="font:400 28px 'Lilita One'">STORE</span><span style="font:800 15px Nunito">Jun</span></div></div>
+<div style="display:flex;align-items:center;gap:8px;background:#fff;border:3px solid #2B2A6B;border-radius:24px;padding:6px 14px 6px 8px">
+<div style="width:34px;height:24px;background:#fff;border:3px solid #2B2A6B;border-radius:6px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:10px;border-radius:2px;background:#BFEBD9"></div></div>
+<span style="font:400 24px/1 'Lilita One'">2</span><span style="font:400 18px/1 'Lilita One';opacity:.55">/ 5</span></div>
+</div>
+
+<div style="position:absolute;top:142px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:center">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+<div style="width:{{ t.size }}px;height:{{ t.size }}px;border-radius:50%;background:{{ t.bg }};border:4px solid #2B2A6B;box-sizing:border-box;box-shadow:{{ t.shadow }};display:flex;align-items:center;justify-content:center">
+<dc-import name="Ingredient" kind="{{ t.kind }}" size="{{ t.icon }}" sticker="false" silhouette="{{ blackout }}" hint-size="36px,36px"></dc-import>
+</div>
+</sc-for>
+</div>
+
+<div style="position:absolute;top:218px;left:18px;right:18px;height:382px;background:#F7F9FE;border:4px solid #2B2A6B;border-radius:32px;box-shadow:0 10px 0 rgba(43,42,107,.14);box-sizing:border-box;padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px"><span style="font:400 30px/1 'Lilita One';opacity:.35">‹</span><span style="font:400 30px/1.1 'Lilita One'">Produce</span><span style="font:400 30px/1 'Lilita One'">›</span></div>
+<sc-for list="{{ shelf }}" as="row" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;align-items:stretch">
+<div style="height:{{ rowH }}px;display:grid;grid-template-columns:repeat(3,1fr);align-items:end;justify-items:center">
+<sc-for list="{{ row.items }}" as="it" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;align-items:center;gap:0">
+<sc-if value="{{ it.here }}" hint-placeholder-val="{{ true }}"><dc-import name="Ingredient" kind="{{ it.kind }}" size="76" rotate="{{ it.rot }}" silhouette="{{ blackout }}" hint-size="76px,76px"></dc-import></sc-if>
+<sc-if value="{{ it.picked }}" hint-placeholder-val="{{ false }}"><div style="width:72px;height:72px;border-radius:50%;border:4px dashed #2B2A6B;opacity:.35;box-sizing:border-box"></div></sc-if>
+<sc-if value="{{ labels }}" hint-placeholder-val="{{ false }}"><span style="font:800 13px Nunito;padding-bottom:2px">{{ it.name }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+<div style="height:14px;border-radius:7px;background:#D5E0F2;border:3px solid #2B2A6B;box-shadow:0 5px 0 rgba(43,42,107,.14)"></div>
+</div>
+</sc-for>
+</div>
+
+<svg width="220" height="300" viewBox="0 0 220 300" style="position:absolute;left:60px;top:290px"><path d="M30 20 Q40 170 160 250" fill="none" stroke="#2B2A6B" stroke-width="4" stroke-dasharray="4 12" stroke-linecap="round"></path></svg>
+<div style="position:absolute;left:176px;top:500px;z-index:4;filter:drop-shadow(0 16px 10px rgba(43,42,107,.28))"><dc-import name="Ingredient" kind="tomato" size="96" rotate="12" silhouette="{{ blackout }}" hint-size="96px,96px"></dc-import></div>
+<div style="position:absolute;left:204px;top:556px;z-index:5;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.45);border:4px solid #fff;box-shadow:0 0 0 3px #2B2A6B"></div>
+
+<div style="position:absolute;top:620px;left:18px;right:18px;height:104px;background-color:#F6DDB0;background-image:repeating-linear-gradient(90deg,transparent 0 22px,rgba(201,128,63,.28) 22px 26px);border:4px solid #2B2A6B;border-radius:28px;box-shadow:0 0 0 6px #FFC928;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:0 16px 0 18px">
+<dc-import name="Ingredient" kind="bread" size="66" rotate="-6" silhouette="{{ blackout }}" hint-size="66px,66px"></dc-import>
+<div style="width:66px;height:66px;border-radius:50%;border:4px dashed #2B2A6B;background:rgba(255,255,255,.6);box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:400 38px/1 'Lilita One'">+</div>
+<div style="margin-left:auto;display:flex;flex-direction:column;align-items:center;line-height:1">
+<div style="width:56px;height:56px;border-radius:50%;background:#fff;border:4px solid #2B2A6B;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:400 32px/1 'Lilita One'">1</div>
+</div>
+<div style="position:absolute;left:22px;top:-18px;display:flex;align-items:center;gap:6px;background:#fff;border:3px solid #2B2A6B;border-radius:16px;padding:1px 10px 1px 4px"><dc-import name="Game Icon" kind="basket" size="26" sticker="false" hint-size="26px,26px"></dc-import><span style="font:900 14px Nunito;letter-spacing:.1em">BASKET</span></div>
+</div>
+
+<div style="position:absolute;left:28px;right:28px;bottom:30px;height:80px;border-radius:40px;background:#3CB54A;border:4px solid #2B2A6B;box-shadow:inset 0 -8px 0 rgba(43,42,107,.18),0 0 0 6px #fff,0 10px 0 6px rgba(43,42,107,.16);display:flex;align-items:center;justify-content:center;gap:10px;font:400 42px 'Lilita One'"><span style="position:absolute;left:32px;top:12px;width:44px;height:11px;border-radius:6px;background:#fff;opacity:.6"></span>Leave store ›</div>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#2B2A6B;opacity:.5"></div>
+</div>
+</div>
+<div style="font:800 22px Nunito">Store — tap a shelf tab or swipe; drag items into the basket. No list here: shop from memory of the host.</div>
+</div>
+
+</div>
+</section>
+
+<section data-screen-label="Assets · Ingredients" style="display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;align-items:baseline;gap:24px"><span style="font:400 72px 'Lilita One'">Assets · Ingredients</span><span style="font:800 26px Nunito">24 stickers, each with a Blackout silhouette. Look-alike pairs first.</span></div>
+<div style="background:#F7F9FE;border:4px solid #2B2A6B;border-radius:40px;padding:48px 56px;display:flex;flex-direction:column;gap:40px;width:2402px;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;gap:18px">
+<span style="font:400 36px 'Lilita One'">Look-alike pairs</span>
+<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:28px">
+<sc-for list="{{ pairs }}" as="pr" hint-placeholder-count="5">
+<div style="background:#fff;border:4px solid #2B2A6B;border-radius:30px;box-shadow:0 10px 0 rgba(43,42,107,.12);padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;justify-items:center">
+<sc-for list="{{ pr.items }}" as="it" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+<div style="display:flex;gap:10px"><dc-import name="Ingredient" kind="{{ it.kind }}" size="96" hint-size="96px,96px"></dc-import><dc-import name="Ingredient" kind="{{ it.kind }}" size="96" silhouette="true" hint-size="96px,96px"></dc-import></div>
+<span style="font:900 22px Nunito">{{ it.name }}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:18px;border-top:4px dashed #D5E0F2;padding-top:36px">
+<span style="font:400 36px 'Lilita One'">Everything else</span>
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:24px">
+<sc-for list="{{ others }}" as="it" hint-placeholder-count="14">
+<div style="background:#fff;border:4px solid #2B2A6B;border-radius:26px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px">
+<div style="display:flex;gap:10px"><dc-import name="Ingredient" kind="{{ it.kind }}" size="92" hint-size="92px,92px"></dc-import><dc-import name="Ingredient" kind="{{ it.kind }}" size="92" silhouette="true" hint-size="92px,92px"></dc-import></div>
+<span style="font:900 22px Nunito">{{ it.name }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:40px;border-top:4px dashed #D5E0F2;padding-top:36px">
+<span style="font:400 36px 'Lilita One'">Gesture + sabotage icons</span>
+<sc-for list="{{ icons }}" as="ic" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><dc-import name="Game Icon" kind="{{ ic.kind }}" size="110" hint-size="110px,110px"></dc-import><span style="font:900 20px Nunito">{{ ic.name }}</span></div>
+</sc-for>
+<dc-import name="Ingredient" kind="tomato" mood="worried" size="110" hint-size="110px,110px"></dc-import>
+<span style="font:900 20px Nunito">Spoiling (worried)</span>
+</div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;blackout&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Store phone&quot;},&quot;shelfLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Store phone&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const blackout = this.props.blackout === true || this.props.blackout === 'true';
+    const labels = this.props.shelfLabels === true || this.props.shelfLabels === 'true';
+    const Y = '#FFC928', G = '#3CB54A';
+    const it = (kind, label, st) => ({
+      kind, label,
+      bg: st === 'done' ? '#E3F5E8' : st === 'missing' ? '#FFE1DA' : '#F7F9FE',
+      border: st === 'done' ? '#E3F5E8' : st === 'missing' ? '#F2553D' : '#D5E0F2',
+      checkBg: st === 'done' ? G : '#fff', tick: st === 'done' ? 'block' : 'none',
+      isMissing: st === 'missing', isCheck: st !== 'missing'
+    });
+    const stp = (g, label, st) => ({
+      g, label, isNow: st === 'now',
+      h: st === 'now' ? 104 : 80, icon: st === 'now' ? 76 : 60, glyph: st === 'now' ? 58 : 46, fs: st === 'now' ? 32 : 28,
+      bg: st === 'now' ? Y : st === 'done' ? '#E3F5E8' : '#F7F9FE',
+      border: st === 'now' ? '#2B2A6B' : st === 'done' ? '#E3F5E8' : '#D5E0F2', bw: st === 'now' ? 4 : 3,
+      op: st === 'todo' ? 0.5 : 1, checkBg: st === 'done' ? G : '#fff', tick: st === 'done' ? 'block' : 'none'
+    });
+    const segs = (n, done) => Array.from({ length: n }, (_, i) => ({ bg: i < done ? G : i === done ? Y : '#fff' }));
+    const phase = {
+      store: { badge: 'STORE', badgeBg: '#4FB3F0', badgeFg: '#2B2A6B', badgeIcon: 'basket', kicker: 'GRAB THESE' },
+      prep: { badge: 'PREP', badgeBg: Y, badgeFg: '#2B2A6B', badgeIcon: 'chop', kicker: 'COOK IT' },
+      back: { badge: 'Back to store!', badgeBg: '#F2553D', badgeFg: '#fff', badgeIcon: 'basket', kicker: "GRAB WHAT'S MISSING" }
+    };
+    const lane = (o) => Object.assign({ isList: false, isSteps: false, isSpoil: false, hasFooter: true, items: [], steps: [], segs: [] }, phase[o.phase], o);
+    const lanes = [
+      lane({ name: 'Mina', color: '#1F4FD8', tint: '#DCE6FF', recipe: 3, phase: 'prep', badgeRot: 5, recipeName: 'Chicken Stir-fry', isSteps: true,
+        steps: [stp('chop', 'Chop chicken', 'done'), stp('chop', 'Chop pepper', 'now'), stp('stir', 'Stir the wok', 'todo'), stp('flip', 'Toss & flip', 'todo')],
+        segs: segs(4, 1), footer: 'Step 2 of 4' }),
+      lane({ name: 'Jun', color: '#F2553D', tint: '#FFE1DA', recipe: 2, phase: 'store', badgeRot: -4, recipeName: 'Cheesy Tomato Toast', isList: true,
+        items: [it('bread', 'Bread', 'done'), it('tomato', 'Tomato'), it('cheese', 'Cheese'), it('garlic', 'Garlic')],
+        segs: segs(4, 1), footer: '1 of 4 in basket' }),
+      lane({ name: 'Ari', color: '#159A6B', tint: '#D4F1E3', recipe: 2, phase: 'back', badgeRot: 4, recipeName: 'Cheesy Tomato Toast', isList: true, isSpoil: true, hasFooter: false,
+        items: [it('bread', 'Bread', 'done'), it('tomato', 'Tomato', 'done'), it('cheese', 'Cheese', 'missing'), it('garlic', 'Garlic', 'done')],
+        spoilPct: 38, spoilTime: '0:09' }),
+      lane({ name: 'Leo', color: '#F48FB7', tint: '#FFE4EF', recipe: 2, phase: 'prep', badgeRot: -5, recipeName: 'Cheesy Tomato Toast', isSteps: true,
+        steps: [stp('chop', 'Chop tomato', 'done'), stp('chop', 'Chop garlic', 'done'), stp('flip', 'Flip the toast', 'now')],
+        segs: segs(3, 2), footer: 'Step 3 of 3' })
+    ];
+    const leaders = [
+      { rank: 1, name: 'Mina', color: '#1F4FD8', done: 2, rankBg: Y },
+      { rank: 2, name: 'Leo', color: '#F48FB7', done: 1, rankBg: '#fff' },
+      { rank: 2, name: 'Jun', color: '#F2553D', done: 1, rankBg: '#fff' },
+      { rank: 2, name: 'Ari', color: '#159A6B', done: 1, rankBg: '#fff' }
+    ];
+    const tabKinds = ['tomato', 'milk', 'chicken', 'flour', 'chili', 'bread'];
+    const tabs = tabKinds.map((kind, i) => i === 0
+      ? { kind, size: 64, icon: 42, bg: Y, shadow: '0 0 0 4px #fff,0 6px 0 4px rgba(43,42,107,.16)' }
+      : { kind, size: 50, icon: 32, bg: '#fff', shadow: 'none' });
+    const P = (kind, name, picked, rot) => ({ kind, name, picked: !!picked, here: !picked, rot: rot || 0 });
+    const shelf = [
+      { items: [P('tomato', 'Tomato', true), P('redpepper', 'Red pepper', false, 5), P('chili', 'Chili', false, -6)] },
+      { items: [P('greenonion', 'Green onion', false, -4), P('leek', 'Leek', false, 4), P('carrot', 'Carrot', false, -8)] },
+      { items: [P('lemon', 'Lemon', false, 6), P('lime', 'Lime', false, -3), P('mushroom', 'Mushroom', false, 4)] }
+    ];
+    const N = { tomato: 'Tomato', redpepper: 'Red pepper', greenonion: 'Green onion', leek: 'Leek', lemon: 'Lemon', lime: 'Lime', butter: 'Butter', cheese: 'Cheese', flour: 'Flour', sugar: 'Sugar',
+      carrot: 'Carrot', mushroom: 'Mushroom', onion: 'Onion', garlic: 'Garlic', chili: 'Chili', salt: 'Salt', egg: 'Egg', milk: 'Milk', chicken: 'Chicken', fish: 'Fish', bacon: 'Bacon', rice: 'Rice', bread: 'Bread', bun: 'Bun' };
+    const mk = k => ({ kind: k, name: N[k] });
+    const pairs = [['tomato', 'redpepper'], ['greenonion', 'leek'], ['lemon', 'lime'], ['butter', 'cheese'], ['flour', 'sugar']].map(p => ({ items: p.map(mk) }));
+    const others = ['carrot', 'mushroom', 'onion', 'garlic', 'chili', 'salt', 'egg', 'milk', 'chicken', 'fish', 'bacon', 'rice', 'bread', 'bun'].map(mk);
+    const icons = [{ kind: 'chop', name: 'Chop' }, { kind: 'stir', name: 'Stir' }, { kind: 'flip', name: 'Flip' }, { kind: 'steal', name: 'Steal' }, { kind: 'blackout', name: 'Blackout' }, { kind: 'basket', name: 'Store' }];
+    const shopItems = (doneSet) => [['garlic', -6], ['steak', 5], ['chicken', -4], ['tomato', 6]].map(([kind, rot]) => {
+      const done = doneSet.includes(kind);
+      return { kind, rot, done, bg: done ? '#E3F5E8' : '#fff', border: done ? '#3CB54A' : '#D5E0F2' };
+    });
+    const tokens = (cur, color, fg) => [1, 2, 3, 4, 5].map(n => {
+      const done = n < cur, now = n === cur;
+      return { n, size: now ? 66 : 50, bg: done ? G : now ? color : '#fff', bw: now ? 5 : 4,
+        shadow: now ? '0 0 0 5px #fff,0 6px 0 5px rgba(43,42,107,.16)' : 'none',
+        numDisp: done ? 'none' : 'inline', tickDisp: done ? 'block' : 'none', fs: now ? 38 : 28, fg: now ? fg : '#2B2A6B', stroke: now && fg === '#fff' ? 6 : 0, op: done || now ? 1 : 0.6 };
+    });
+    const shop = { isShop: true, isPrep: false, badge: 'Shopping', badgeBg: '#4FB3F0', badgeIcon: 'basket' };
+    const prep = { isShop: false, isPrep: true, badge: 'Prep', badgeBg: Y, badgeIcon: 'chop' };
+    const stacks = [
+      Object.assign({ name: 'Mina', color: '#1F4FD8', tint: '#DCE6FF', recipe: 3, next1: '4', next2: '5', recipeName: 'Chicken Stir-fry', gesture: 'stir', isChop: false, gestureName: 'STIR!', stepLabel: 'Circle on your phone', tokens: tokens(3, '#1F4FD8', '#fff') }, prep),
+      Object.assign({ name: 'Jun', color: '#F2553D', tint: '#FFE1DA', recipe: 2, next1: '3', next2: '4', recipeName: 'Garlic Steak & Chicken', items: shopItems(['garlic']), count: '1 of 4 in basket' }, shop),
+      Object.assign({ name: 'Ari', color: '#159A6B', tint: '#D4F1E3', recipe: 2, next1: '3', next2: '4', recipeName: 'Garlic Steak & Chicken', items: shopItems(['garlic', 'steak', 'tomato']), count: '3 of 4 in basket' }, shop),
+      Object.assign({ name: 'Leo', color: '#F48FB7', tint: '#FFE4EF', recipe: 2, next1: '3', next2: '4', recipeName: 'Garlic Steak & Chicken', gesture: 'chop', isChop: true, gestureName: 'CHOP!', stepLabel: 'Swipe on your phone', tokens: tokens(2, '#F48FB7', '#2B2A6B') }, prep)
+    ];
+    return { stacks, lanes, leaders, tabs, shelf, blackout, labels, rowH: labels ? 98 : 88, pairs, others, icons };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:inline-block;line-height:0;width:{{ s }}px;height:{{ s }}px;transform:rotate({{ rot }}deg);pointer-events:none">
+<svg width="{{ s }}" height="{{ s }}" viewBox="0 0 24 24" style="overflow:visible">
+<path display="{{ sh.star }}" d="M12 1 Q13.4 10.6 23 12 Q13.4 13.4 12 23 Q10.6 13.4 1 12 Q10.6 10.6 12 1Z" fill="{{ color }}" stroke="#2B2A6B" stroke-width="1.6" stroke-linejoin="round"></path>
+<path display="{{ sh.plus }}" d="M12 3 V21 M3 12 H21" stroke="{{ color }}" stroke-width="5" stroke-linecap="round"></path>
+<circle display="{{ sh.dot }}" cx="12" cy="12" r="6" fill="{{ color }}"></circle>
+</svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:60,&quot;height&quot;:60},&quot;kind&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;star&quot;,&quot;plus&quot;,&quot;dot&quot;],&quot;default&quot;:&quot;star&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;color&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFC928&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:32,&quot;tsType&quot;:&quot;number&quot;},&quot;rotate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const k = this.props.kind ?? 'star';
+    const on = c => c ? 'inline' : 'none';
+    return { s: Number(this.props.size ?? 32), color: this.props.color ?? '#FFC928', rot: this.props.rotate ?? 0, sh: { star: on(k === 'star'), plus: on(k === 'plus'), dot: on(k === 'dot') } };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:inline-block;line-height:0;width:{{ s }}px;height:{{ s }}px;transform:rotate({{ rot }}deg)">
+<svg width="{{ s }}" height="{{ s }}" viewBox="0 0 100 100" style="overflow:visible">
+<g display="{{ sh.tomato }}">
+<circle cx="50" cy="57" r="36" fill="#E4502F"></circle>
+<path d="M82 46 Q88 84 50 93 Q78 80 82 46Z" fill="#C63F22"></path>
+<ellipse cx="40" cy="26" rx="12" ry="5" transform="rotate(-18 40 26)" fill="#7FB23A"></ellipse>
+<ellipse cx="60" cy="26" rx="12" ry="5" transform="rotate(18 60 26)" fill="#7FB23A"></ellipse>
+<ellipse cx="50" cy="30" rx="5" ry="9" fill="#7FB23A"></ellipse>
+<rect x="47" y="12" width="6" height="12" rx="3" fill="#5E8F2A"></rect>
+</g>
+<g display="{{ sh.onion }}">
+<path d="M50 14 Q56 30 76 44 Q92 62 80 80 Q66 94 50 94 Q34 94 20 80 Q8 62 24 44 Q44 30 50 14Z" fill="#F6C84C"></path>
+<ellipse cx="34" cy="64" rx="4" ry="20" transform="rotate(14 34 64)" fill="#E6A93A"></ellipse>
+<ellipse cx="66" cy="64" rx="4" ry="20" transform="rotate(-14 66 64)" fill="#E6A93A"></ellipse>
+<ellipse cx="44" cy="10" rx="4" ry="10" transform="rotate(-22 44 10)" fill="#A8D94A"></ellipse>
+<ellipse cx="56" cy="8" rx="4" ry="11" transform="rotate(18 56 8)" fill="#7FB23A"></ellipse>
+</g>
+<g display="{{ sh.carrot }}">
+<ellipse cx="40" cy="18" rx="6" ry="14" transform="rotate(-25 40 18)" fill="#7FB23A"></ellipse>
+<ellipse cx="60" cy="18" rx="6" ry="14" transform="rotate(25 60 18)" fill="#A8D94A"></ellipse>
+<ellipse cx="50" cy="14" rx="5" ry="13" fill="#7FB23A"></ellipse>
+<path d="M28 34 Q50 24 72 34 Q68 70 50 96 Q32 70 28 34Z" fill="#F28A1E"></path>
+<rect x="34" y="50" width="12" height="5" rx="2.5" fill="#F7A94E"></rect>
+<rect x="52" y="64" width="11" height="5" rx="2.5" fill="#F7A94E"></rect>
+</g>
+<g display="{{ sh.dumpling }}">
+<ellipse cx="50" cy="76" rx="40" ry="8" fill="#EAD3A8"></ellipse>
+<path d="M8 70 Q10 30 50 28 Q90 30 92 70 Q50 84 8 70Z" fill="#FFF0D2"></path>
+<ellipse cx="36" cy="36" rx="4" ry="8" transform="rotate(-18 36 36)" fill="#EDD7AE"></ellipse>
+<ellipse cx="50" cy="33" rx="4" ry="8" fill="#EDD7AE"></ellipse>
+<ellipse cx="64" cy="36" rx="4" ry="8" transform="rotate(18 64 36)" fill="#EDD7AE"></ellipse>
+</g>
+<g display="{{ sh.pie }}">
+<ellipse cx="50" cy="60" rx="44" ry="34" fill="#D98E4A"></ellipse>
+<ellipse cx="50" cy="56" rx="42" ry="32" fill="#F2B36B"></ellipse>
+<ellipse cx="50" cy="56" rx="33" ry="24" fill="#C63F5A"></ellipse>
+<rect x="31" y="36" width="8" height="40" rx="4" fill="#F2B36B"></rect>
+<rect x="46" y="32" width="8" height="48" rx="4" fill="#F2B36B"></rect>
+<rect x="61" y="36" width="8" height="40" rx="4" fill="#F2B36B"></rect>
+<rect x="20" y="44" width="60" height="7" rx="3.5" fill="#E7A55A"></rect>
+<rect x="20" y="60" width="60" height="7" rx="3.5" fill="#E7A55A"></rect>
+</g>
+<g display="{{ sh.noodles }}">
+<ellipse cx="50" cy="48" rx="38" ry="14" fill="#F6C84C"></ellipse>
+<ellipse cx="38" cy="44" rx="10" ry="4" fill="#E6B236"></ellipse><ellipse cx="60" cy="48" rx="12" ry="4" fill="#E6B236"></ellipse>
+<ellipse cx="66" cy="40" rx="11" ry="8" fill="#FFFDF6"></ellipse><circle cx="66" cy="40" r="4.5" fill="#F28A1E"></circle>
+<circle cx="32" cy="38" r="3.5" fill="#7FB23A"></circle><circle cx="42" cy="36" r="3" fill="#A8D94A"></circle><circle cx="50" cy="42" r="3" fill="#7FB23A"></circle>
+<rect x="56" y="8" width="6" height="42" rx="3" transform="rotate(28 59 29)" fill="#F28A1E"></rect>
+<rect x="66" y="8" width="6" height="42" rx="3" transform="rotate(34 69 29)" fill="#D97416"></rect>
+<path d="M8 50 H92 Q90 92 50 94 Q10 92 8 50Z" fill="#4C63D2"></path>
+<rect x="14" y="62" width="72" height="8" rx="4" fill="#6B7FE0"></rect>
+</g>
+<g display="{{ sh.egg }}">
+<path d="M16 52 Q12 22 44 18 Q80 12 86 42 Q94 72 64 84 Q30 92 18 72 Q10 62 16 52Z" fill="#FFFFFF"></path>
+<circle cx="52" cy="50" r="19" fill="#F6C84C"></circle>
+</g>
+<g display="{{ sh.plate }}">
+<ellipse cx="50" cy="58" rx="46" ry="30" fill="#EEE6D6"></ellipse>
+<ellipse cx="50" cy="54" rx="46" ry="30" fill="#FFFFFF"></ellipse>
+<ellipse cx="50" cy="54" rx="30" ry="18" fill="#F4EFE4"></ellipse>
+</g>
+<g display="{{ sh.face }}">
+<ellipse cx="{{ e1 }}" cy="{{ fy }}" rx="3.6" ry="4.2" fill="#2B2850"></ellipse>
+<ellipse cx="{{ e2 }}" cy="{{ fy }}" rx="3.6" ry="4.2" fill="#2B2850"></ellipse>
+<ellipse cx="{{ b1 }}" cy="{{ by }}" rx="5.5" ry="3.2" fill="#F39BC0"></ellipse>
+<ellipse cx="{{ b2 }}" cy="{{ by }}" rx="5.5" ry="3.2" fill="#F39BC0"></ellipse>
+<path d="{{ mouth }}" fill="#2B2850"></path>
+</g>
+</svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:120,&quot;height&quot;:120},&quot;kind&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tomato&quot;,&quot;onion&quot;,&quot;carrot&quot;,&quot;dumpling&quot;,&quot;pie&quot;,&quot;noodles&quot;,&quot;egg&quot;,&quot;plate&quot;],&quot;default&quot;:&quot;tomato&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:80,&quot;tsType&quot;:&quot;number&quot;},&quot;face&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;rotate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const k = p.kind ?? 'tomato';
+    const s = Number(p.size ?? 80);
+    const fyMap = { tomato: 60, onion: 66, carrot: 48, dumpling: 58, egg: 50 };
+    const fy = fyMap[k];
+    const face = !(p.face === false || p.face === 'false') && fy !== undefined;
+    const on = c => c ? 'inline' : 'none';
+    const sh = { face: on(face) };
+    ['tomato', 'onion', 'carrot', 'dumpling', 'pie', 'noodles', 'egg', 'plate'].forEach(n => sh[n] = on(n === k));
+    const f = fy || 50;
+    return {
+      s, sh, rot: p.rotate ?? 0, fy: f, e1: 41, e2: 59, b1: 31, b2: 69, by: f + 7,
+      mouth: `M45 ${f + 5} Q50 ${f + 11} 55 ${f + 5}Z`
+    };
+  }
+}
+</script>
+</body>
+</html>
