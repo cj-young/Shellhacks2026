@@ -21,7 +21,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const [currentPoints, setCurrentPoints] = useState<CursorPoint[]>([])
 
   function checkoutFromStore(inv: Ingredient[]) {
-    setInventory(inv)
+    setInventory([...inventory, ...inv])
     setInterfaceState("recipe")
   }
 
@@ -45,8 +45,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
                         <img className="w-12 h-12" src={v.image}/>
                     ))}
                 </div>
-                <p>In recipe</p>
-                <div>
+                <p>In recipe {recipeState+1} / {recipeOrder.length}</p>
+                <div className='relative overflow-hidden'>
                     <CursorPathTracker onPointsChange={setCurrentPoints} />
                     <MasterRecipe recipe={recipeOrder[recipeState]} points={currentPoints} 
                     onCompleteChange={(complete)=>{if(complete) {
@@ -55,6 +55,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
                             setRecipeState(recipeState+1)
                     }}} />
                 </div>
+                <button type='button' className='border z-100 cursor-pointer' onClick={()=>setInterfaceState("store")}>Return to Store</button>
                 </>
             )
         }
