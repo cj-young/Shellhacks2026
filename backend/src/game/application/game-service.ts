@@ -7,7 +7,11 @@ import {
   generateReconnectToken,
   normalizeGameCode,
 } from "../domain/code.ts";
-import { MakeEmptyState, type Game } from "../domain/game.ts";
+import {
+  MakeEmptyState,
+  ROUND_DURATION_MS,
+  type Game,
+} from "../domain/game.ts";
 import type { Inventory, PurchaseItem } from "../domain/inventory.ts";
 import { normalizePlayerName, type Player } from "../domain/player.ts";
 import type { GameStore } from "../ports/game-store.ts";
@@ -19,6 +23,14 @@ export const MAX_ITEM_COUNT = 99;
 export type StartGameResult =
   | { ok: true; game: Game }
   | { ok: false; code: "GAME_NOT_FOUND" | "ALREADY_STARTED" };
+
+export interface StartGameOptions {
+  durationMs?: number;
+}
+
+export type EndRoundResult =
+  | { ok: true; game: Game }
+  | { ok: false; code: "GAME_NOT_FOUND" | "GAME_NOT_ACTIVE" };
 
 export interface JoinPlayerInput {
   name?: string;
@@ -39,6 +51,18 @@ export type AddItemsResult =
         | "GAME_NOT_ACTIVE"
         | "PLAYER_NOT_FOUND"
         | "INVALID_ITEM";
+    };
+
+export type ConsumeItemsResult =
+  | { ok: true; game: Game }
+  | {
+      ok: false;
+      code:
+        | "GAME_NOT_FOUND"
+        | "GAME_NOT_ACTIVE"
+        | "PLAYER_NOT_FOUND"
+        | "INVALID_ITEM"
+        | "INSUFFICIENT_INVENTORY";
     };
 
 export class GameService {
@@ -143,7 +167,10 @@ export class GameService {
     await this.#store.save(this.#withPlayers(game, players));
   }
 
-  async startGame(code: string): Promise<StartGameResult> {
+  async startGame(
+    code: string,
+    options: StartGameOptions = {},
+  ): Promise<StartGameResult> {
     const game = await this.#store.get(normalizeGameCode(code));
 
     if (!game) {
@@ -155,15 +182,39 @@ export class GameService {
     }
 
     const order = generateRecipeOrder(3);
+    const durationMs = options.durationMs ?? ROUND_DURATION_MS;
+    const roundStartedAt = Date.now();
 
     const started: Game = {
       ...game,
       status: "active",
-      state: { ...game.state, recipeOrder: order },
+      state: {
+        ...game.state,
+        recipeOrder: order,
+        roundStartedAt,
+        roundEndsAt: roundStartedAt + durationMs,
+      },
     };
     await this.#store.save(started);
 
     return { ok: true, game: started };
+  }
+
+  async endRound(code: string): Promise<EndRoundResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+
+    if (!game) {
+      return { ok: false, code: "GAME_NOT_FOUND" };
+    }
+
+    if (game.status !== "active") {
+      return { ok: false, code: "GAME_NOT_ACTIVE" };
+    }
+
+    const finished: Game = { ...game, status: "finished" };
+    await this.#store.save(finished);
+
+    return { ok: true, game: finished };
   }
 
   async addItemsToInventory(
@@ -187,7 +238,6 @@ export class GameService {
       return { ok: false, code: "PLAYER_NOT_FOUND" };
     }
 
-    console.log("reached up to error")
     if (items.length === 0 || !items.every(isValidPurchaseItem)) {
       return { ok: false, code: "INVALID_ITEM" };
     }
@@ -206,6 +256,52 @@ export class GameService {
     );
     await this.#store.save(next);
 
+    return { ok: true, game: next };
+  }
+
+  async consumeItemsFromInventory(
+    code: string,
+    playerId: string,
+    items: PurchaseItem[],
+  ): Promise<ConsumeItemsResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+    if (!game) return { ok: false, code: "GAME_NOT_FOUND" };
+    if (game.status !== "active") return { ok: false, code: "GAME_NOT_ACTIVE" };
+
+    const player = game.state.players.find((entry) => entry.id === playerId);
+    if (!player) return { ok: false, code: "PLAYER_NOT_FOUND" };
+    if (items.length === 0 || !items.every(isValidPurchaseItem)) {
+      return { ok: false, code: "INVALID_ITEM" };
+    }
+
+    const requested: Inventory = {};
+    for (const item of items) {
+      requested[item.id] = (requested[item.id] ?? 0) + item.count;
+    }
+    if (
+      Object.entries(requested).some(
+        ([id, count]) => (player.inventory[Number(id)] ?? 0) < count,
+      )
+    ) {
+      return { ok: false, code: "INSUFFICIENT_INVENTORY" };
+    }
+
+    const inventory: Inventory = { ...player.inventory };
+    for (const [id, count] of Object.entries(requested)) {
+      const ingredientId = Number(id);
+      const remaining = inventory[ingredientId] - count;
+      if (remaining === 0) delete inventory[ingredientId];
+      else inventory[ingredientId] = remaining;
+    }
+
+    const updated: Player = { ...player, inventory };
+    const next = this.#withPlayers(
+      game,
+      game.state.players.map((entry) =>
+        entry.id === updated.id ? updated : entry,
+      ),
+    );
+    await this.#store.save(next);
     return { ok: true, game: next };
   }
 

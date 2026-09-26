@@ -9,34 +9,29 @@ export function getRandomIntInclusive(min: number, max: number) {
 }
 
 export function generateRecipeOrder(length: number): Recipe[] {
-  const sanitizedRecipes: Recipe[] = recipes.map((recipe) => ({
+  const pool = recipes.map((recipe) => ({
     name: recipe.name,
+    ingredients: recipe.ingredients,
     stages: recipe.stages.map((stage) => ({
-      ...stage,
-      ingredientsConsumed: new Map(
-        Object.entries(stage.ingredientsConsumed).map(([a, b]) => [
-          Number(a),
-          b,
-        ]),
-      ),
+      type: stage.type,
+      image: stage.image,
+      lines: stage.lines,
+      ingredientsConsumed: { ...stage.ingredientsConsumed },
     })),
-  }));
+  })) as Recipe[];
 
-  length = Math.min(length, recipes.length);
+  length = Math.min(length, pool.length);
 
   // Shuffle the first <length> elements to get <length> random ones
   for (let i = 0; i < length; i++) {
-    const idx = getRandomIntInclusive(0, sanitizedRecipes.length - 1);
-    [sanitizedRecipes[idx], sanitizedRecipes[i]] = [
-      sanitizedRecipes[i],
-      sanitizedRecipes[idx],
-    ];
+    const idx = getRandomIntInclusive(0, pool.length - 1);
+    [pool[idx], pool[i]] = [pool[i], pool[idx]];
   }
 
-  return sanitizedRecipes.slice(0, length);
+  return pool.slice(0, length);
 }
 
 /** Ingredient ids are positional indexes into the ingredients catalogue. */
 export function isKnownIngredientId(id: number): boolean {
-  return Number.isInteger(id) && (!!ingredients.find((v)=>v.id == id))
+  return Number.isInteger(id) && !!ingredients.find((v) => v.id == id);
 }

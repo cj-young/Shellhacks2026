@@ -11,8 +11,7 @@ export type PlayerSummary = {
   isHost: boolean;
   joinedAt: number;
   connected: boolean;
-  /** Ingredient id → count, sent by the server after purchases. */
-  inventory?: Record<number, number>;
+  inventory: Record<number, number>;
 };
 
 export type GameState = {
@@ -30,6 +29,7 @@ export type RecipeStage = {
   type: string;
   image?: string;
   lines: LineType[];
+  ingredientsConsumed: Record<number, number>;
 };
 
 export type LineType = {

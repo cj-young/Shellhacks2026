@@ -2,7 +2,6 @@ import type { GameConnection } from "#/lib/use-game-connection";
 import type { Ingredient, Recipe } from "#/lib/types";
 import { useEffect, useState } from "react";
 import ingredients from "../../data/ingredients.json";
-import recipes from "../../data/recipes.json";
 import {
   DEMO_STACKS,
   HostRaceStacks,
@@ -13,33 +12,12 @@ import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
 import { RoundLeaderboard } from "#/components/chop-chop/screens/RoundLeaderboard";
 import { iconIdFor } from "#/components/client/Store";
 
-const DEFAULT_ROUND_SECONDS = 60;
 const TIMES_UP_MS = 3000;
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
-
-/** `/host?round=10` shortens rounds for testing. */
-function roundSeconds() {
-  if (typeof window === "undefined") return DEFAULT_ROUND_SECONDS;
-  const fromUrl = Number(
-    new URLSearchParams(window.location.search).get("round"),
-  );
-  return fromUrl > 0 ? fromUrl : DEFAULT_ROUND_SECONDS;
-}
-
-type RoundPhase = "play" | "timesUp" | "roundEnd";
 
 // Same lookup as the team's original host screen: recipe ingredient ids index into ingredients.json.
 const ingredientById = (id: number): Ingredient | undefined =>
   ingredients.at(id);
-
-/**
- * The server strips `ingredients` when it builds the recipe order, so fall back to the
- * team's recipes.json entry with the same name.
- */
-const neededIngredients = (recipe: Recipe) =>
-  recipe.ingredients ??
-  recipes.find((r) => r.name === recipe.name)?.ingredients ??
-  [];
 
 /** A player's shopping card for a server recipe, ticked off from their inventory. */
 function shoppingStack(
@@ -53,7 +31,7 @@ function shoppingStack(
     recipe: recipeNumber,
     recipeName: recipe.name,
     phase: "shop",
-    items: neededIngredients(recipe).map((needed, i) => {
+    items: recipe.ingredients.map((needed, i) => {
       const ingredient = ingredientById(needed.id);
       return {
         kind: ingredient ? iconIdFor(ingredient) : "",
@@ -69,27 +47,23 @@ interface HostInterfaceProps {
 }
 
 export function HostInterface({ connection }: HostInterfaceProps) {
-  const [secondsLeft, setSecondsLeft] = useState(roundSeconds);
-  const [phase, setPhase] = useState<RoundPhase>("play");
+  const [now, setNow] = useState(() => Date.now());
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const { roundEndsAt, results } = connection;
 
+  // The server owns the round clock (`timer_sync`); tick locally to redraw the countdown.
   useEffect(() => {
-    if (phase !== "play") return;
-    const id = setInterval(
-      () => setSecondsLeft((s) => Math.max(0, s - 1)),
-      1000,
-    );
+    if (results) return;
+    const id = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(id);
-  }, [phase]);
+  }, [results]);
 
+  // When the server ends the game (`game_ended`), show "Time's up!" and then the leaderboard.
   useEffect(() => {
-    if (phase === "play" && secondsLeft === 0) setPhase("timesUp");
-  }, [phase, secondsLeft]);
-
-  useEffect(() => {
-    if (phase !== "timesUp") return;
-    const id = setTimeout(() => setPhase("roundEnd"), TIMES_UP_MS);
+    if (!results) return;
+    const id = setTimeout(() => setShowLeaderboard(true), TIMES_UP_MS);
     return () => clearTimeout(id);
-  }, [phase]);
+  }, [results]);
 
   const players = connection.players
     .filter((player) => !player.isHost)
@@ -99,18 +73,20 @@ export function HostInterface({ connection }: HostInterfaceProps) {
       color: LOBBY_COLORS[i % LOBBY_COLORS.length],
     }));
 
-  if (phase === "roundEnd") {
+  if (results && showLeaderboard) {
+    const scoreFor = (id: string) =>
+      Math.max(
+        results.find((r) => r.playerId === id)?.score ?? 0,
+        connection.scores[id] ?? 0,
+      );
     return (
       <div style={{ width: "100vw", height: "100dvh" }}>
         <RoundLeaderboard
           entries={players.map((player) => ({
             ...player,
-            points: connection.scores[player.id] ?? 0,
+            points: scoreFor(player.id),
           }))}
-          onNextRound={() => {
-            setSecondsLeft(roundSeconds());
-            setPhase("play");
-          }}
+          hideNextRound
           onLobby={() => {
             window.location.href = "/";
           }}
@@ -119,10 +95,15 @@ export function HostInterface({ connection }: HostInterfaceProps) {
     );
   }
 
+  const secondsLeft =
+    results || roundEndsAt === null
+      ? 0
+      : Math.max(0, Math.ceil((roundEndsAt - now) / 1000));
+
   const order = connection.state.recipeOrder;
   // Inventories arrive with each state update (e.g. after a checkout).
   const inventories = new Map(
-    connection.state.players.map((p) => [p.id, p.inventory ?? {}]),
+    connection.state.players.map((p) => [p.id, p.inventory]),
   );
   // Per-player recipe progress isn't sent to clients yet, so every card shows the first recipe.
   const firstRecipe = order.at(0);
@@ -148,7 +129,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
             : undefined
         }
       />
-      {phase === "timesUp" && <TimesUp />}
+      {results && <TimesUp />}
     </div>
   );
 }

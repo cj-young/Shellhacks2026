@@ -33,10 +33,13 @@ export function RoundLeaderboard({
   entries,
   onLobby,
   onNextRound,
+  hideNextRound = false,
 }: {
   entries: LeaderboardEntry[];
   onLobby?: () => void;
   onNextRound?: () => void;
+  /** Hide the Next Round button (e.g. when the server has ended the game). */
+  hideNextRound?: boolean;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
@@ -345,38 +348,40 @@ export function RoundLeaderboard({
               >
                 Lobby
               </div>
-              <div
-                onClick={onNextRound}
-                role={onNextRound ? "button" : undefined}
-                style={{
-                  position: "relative",
-                  height: 124 * s,
-                  padding: `0 ${64 * s}px`,
-                  borderRadius: 62 * s,
-                  background: LEAF,
-                  border: `${5 * s}px solid ${INK}`,
-                  boxSizing: "border-box",
-                  boxShadow: `inset 0 -${10 * s}px 0 rgba(43,42,107,.18),0 0 0 ${10 * s}px #fff,0 ${14 * s}px 0 ${10 * s}px rgba(43,42,107,.15)`,
-                  display: "flex",
-                  alignItems: "center",
-                  font: lilita(70 * s),
-                  cursor: onNextRound ? "pointer" : undefined,
-                }}
-              >
-                <span
+              {!hideNextRound && (
+                <div
+                  onClick={onNextRound}
+                  role={onNextRound ? "button" : undefined}
                   style={{
-                    position: "absolute",
-                    left: px(44),
-                    top: px(16),
-                    width: px(70),
-                    height: px(14),
-                    borderRadius: px(7),
-                    background: "#fff",
-                    opacity: 0.6,
+                    position: "relative",
+                    height: 124 * s,
+                    padding: `0 ${64 * s}px`,
+                    borderRadius: 62 * s,
+                    background: LEAF,
+                    border: `${5 * s}px solid ${INK}`,
+                    boxSizing: "border-box",
+                    boxShadow: `inset 0 -${10 * s}px 0 rgba(43,42,107,.18),0 0 0 ${10 * s}px #fff,0 ${14 * s}px 0 ${10 * s}px rgba(43,42,107,.15)`,
+                    display: "flex",
+                    alignItems: "center",
+                    font: lilita(70 * s),
+                    cursor: onNextRound ? "pointer" : undefined,
                   }}
-                />
-                Next Round!
-              </div>
+                >
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: px(44),
+                      top: px(16),
+                      width: px(70),
+                      height: px(14),
+                      borderRadius: px(7),
+                      background: "#fff",
+                      opacity: 0.6,
+                    }}
+                  />
+                  Next Round!
+                </div>
+              )}
             </div>
           </div>
         </>

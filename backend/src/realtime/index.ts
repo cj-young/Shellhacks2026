@@ -8,11 +8,14 @@ export interface RealtimeModuleOptions {
   server: HttpServer;
   gameService: GameService;
   allowedOrigins?: readonly string[];
+  roundDurationMs?: number;
 }
 
 export interface RealtimeModule {
   close(): Promise<void>;
 }
+
+const ROUND_DURATION_MS_DEFAULT = 180_000;
 
 export function createRealtimeModule(
   options: RealtimeModuleOptions,
@@ -23,16 +26,20 @@ export function createRealtimeModule(
     server: options.server,
     session,
     allowedOrigins: options.allowedOrigins,
+    roundDurationMs: options.roundDurationMs ?? ROUND_DURATION_MS_DEFAULT,
   });
 }
 
 export type {
   ClientGameState,
   ClientToServerEvents,
+  GameEndedPayload,
   GameStartedPayload,
   InterServerEvents,
   JoinedPayload,
+  PlayerResult,
   ServerToClientEvents,
   SocketData,
+  TimerSyncPayload,
 } from "./domain/protocol.ts";
 export type { PlayerSummary } from "./domain/player.ts";

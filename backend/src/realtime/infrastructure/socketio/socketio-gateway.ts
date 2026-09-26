@@ -32,6 +32,7 @@ export interface SocketIoGatewayOptions {
   server: HttpServer;
   session: GameSession;
   allowedOrigins?: readonly string[];
+  roundDurationMs: number;
 }
 
 export interface SocketIoGateway {
@@ -42,6 +43,7 @@ export function createSocketIoGateway(
   options: SocketIoGatewayOptions,
 ): SocketIoGateway {
   const { session } = options;
+  const timers = new Map<string, NodeJS.Timeout>();
   const io: GameServer = new Server(options.server, {
     path: SOCKET_PATH,
     serveClient: false,
@@ -106,15 +108,26 @@ export function createSocketIoGateway(
     });
     socket.to(room).emit("player_joined", player);
 
+    if (result.status === "active") {
+      socket.emit("update_state", result.state);
+
+      if (result.state.roundEndsAt !== null) {
+        socket.emit("timer_sync", {
+          roundEndsAt: result.state.roundEndsAt,
+          serverNow: Date.now(),
+        });
+      }
+    }
+
     socket.on("start_game", () => {
       void handleStartGame();
     });
 
     async function handleStartGame(): Promise<void> {
-      const startResult = await session.start({
-        code: gameCode,
-        isHost: player.isHost,
-      });
+      const startResult = await session.start(
+        { code: gameCode, isHost: player.isHost },
+        options.roundDurationMs,
+      );
 
       if (!startResult.ok) {
         socket.emit("game_error", {
@@ -126,6 +139,10 @@ export function createSocketIoGateway(
 
       io.to(room).emit("game_started", { gameCode: startResult.gameCode });
       io.to(room).emit("update_state", startResult.state);
+
+      if (startResult.state.roundEndsAt !== null) {
+        armRoundTimers(gameCode, startResult.state.roundEndsAt);
+      }
     }
 
     socket.on("recipe_completed", () => {
@@ -143,6 +160,10 @@ export function createSocketIoGateway(
 
     socket.on("purchase_items", (items) => {
       void handlePurchase(items);
+    });
+
+    socket.on("consume_ingredients", (items) => {
+      void handleConsumeIngredients(items);
     });
 
     async function handlePurchase(items: PurchaseItem[]): Promise<void> {
@@ -174,6 +195,33 @@ export function createSocketIoGateway(
       io.to(room).emit("update_state", purchase.state);
     }
 
+    async function handleConsumeIngredients(
+      items: PurchaseItem[],
+    ): Promise<void> {
+      if (!isPurchaseItems(items)) {
+        socket.emit("game_error", {
+          code: "INVALID_ITEM",
+          message: "Invalid ingredient consumption",
+        });
+        return;
+      }
+
+      const consumption = await session.consumeIngredients({
+        code: gameCode,
+        playerId: player.id,
+        items,
+      });
+      if (!consumption.ok) {
+        socket.emit("game_error", {
+          code: consumption.code,
+          message: consumption.message,
+        });
+        return;
+      }
+
+      io.to(room).emit("update_state", consumption.state);
+    }
+
     socket.on("disconnect", () => {
       void handleDisconnect();
     });
@@ -184,7 +232,54 @@ export function createSocketIoGateway(
     }
   }
 
+  function armRoundTimers(gameCode: string, roundEndsAt: number): void {
+    clearRoundTimers(gameCode);
+
+    io.to(roomFor(gameCode)).emit("timer_sync", {
+      roundEndsAt,
+      serverNow: Date.now(),
+    });
+
+    const expiry = setTimeout(
+      () => {
+        void finishRound(gameCode);
+      },
+      Math.max(0, roundEndsAt - Date.now()),
+    );
+    expiry.unref();
+
+    timers.set(gameCode, expiry);
+  }
+
+  function clearRoundTimers(gameCode: string): void {
+    const expiry = timers.get(gameCode);
+
+    if (!expiry) {
+      return;
+    }
+
+    clearTimeout(expiry);
+    timers.delete(gameCode);
+  }
+
+  async function finishRound(gameCode: string): Promise<void> {
+    clearRoundTimers(gameCode);
+    const room = roomFor(gameCode);
+    const result = await session.endRound({ code: gameCode });
+
+    if (!result.ok) {
+      return;
+    }
+
+    io.to(room).emit("game_ended", { results: result.results });
+    io.to(room).emit("update_state", result.state);
+  }
+
   function close(): Promise<void> {
+    for (const gameCode of [...timers.keys()]) {
+      clearRoundTimers(gameCode);
+    }
+
     return new Promise((resolve) => {
       io.close(() => resolve());
     });

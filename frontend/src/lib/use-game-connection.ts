@@ -24,7 +24,13 @@ export type GameConnection = {
   state: GameState;
   /** Running points per player id, from the server's `player_scored` events. */
   scores: Record<string, number>;
+  /** When the round ends, in this device's clock (from `timer_sync`); null before it starts. */
+  roundEndsAt: number | null;
+  /** Final results once the server ends the game (`game_ended`); null while playing. */
+  results: PlayerResult[] | null;
 };
+
+export type PlayerResult = { playerId: string; name: string; score: number };
 
 const tokenKey = (code: string) => `shellhacks.playerToken:${code}`;
 
@@ -57,6 +63,8 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
   const [started, setStarted] = useState(false);
   const [state, setState] = useState<GameState>(MakeEmptyState());
   const [scores, setScores] = useState<Record<string, number>>({});
+  const [roundEndsAt, setRoundEndsAt] = useState<number | null>(null);
+  const [results, setResults] = useState<PlayerResult[] | null>(null);
 
   const code = auth?.code;
   const token = auth?.token;
@@ -78,6 +86,8 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     setStarted(false);
     setState(MakeEmptyState());
     setScores({});
+    setRoundEndsAt(null);
+    setResults(null);
 
     const reconnectToken = readStoredToken(code);
     const socket = io({
@@ -132,6 +142,25 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
         setScores((current) => ({ ...current, [scorerId]: total }));
       },
     );
+    socket.on(
+      "timer_sync",
+      ({
+        roundEndsAt: endsAt,
+        serverNow,
+      }: {
+        roundEndsAt: number;
+        serverNow: number;
+      }) => {
+        // Convert to this device's clock so small clock differences don't skew the countdown.
+        setRoundEndsAt(endsAt - serverNow + Date.now());
+      },
+    );
+    socket.on(
+      "game_ended",
+      ({ results: final }: { results: PlayerResult[] }) => {
+        setResults(final);
+      },
+    );
 
     return () => {
       socket.disconnect();
@@ -148,5 +177,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     started,
     state,
     scores,
+    roundEndsAt,
+    results,
   };
 }
