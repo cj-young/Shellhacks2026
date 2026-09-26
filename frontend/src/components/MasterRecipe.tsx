@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { CursorPoint } from './CursorPathTracker'
-import { GestureRecipe } from './GestureRecipe'
-import type { GestureRecipeDefinition } from './GestureRecipe'
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CursorPoint } from "./CursorPathTracker";
+import { GestureRecipe } from "./GestureRecipe";
+import type { GestureRecipeDefinition } from "./GestureRecipe";
 
 export type MasterRecipeProps = {
-  recipe: GestureRecipeDefinition
-  points: CursorPoint[]
+  recipe: GestureRecipeDefinition;
+  points: CursorPoint[];
   /** Time to show a completed stage before proceeding, in milliseconds. */
-  stageDelayMs?: number
-  /** Called when every stage in the recipe has been completed. */
-  onCompleteChange?: (complete: boolean) => void
+  stageDelayMs?: number;
+  /** Called once when every stage in the recipe has been completed. */
+  onCompleteChange?: (complete: boolean) => void;
   /** Called whenever the active stage changes; -1 means the recipe is done. */
-  onStageChange?: (stageIndex: number) => void
-}
+  onStageChange?: (stageIndex: number) => void;
+};
 
 /** Renders a recipe's stages one at a time and advances after each match. */
 export function MasterRecipe({
@@ -22,51 +22,85 @@ export function MasterRecipe({
   onCompleteChange,
   onStageChange,
 }: MasterRecipeProps) {
-  const recipeKey = useMemo(() => JSON.stringify(recipe), [recipe])
-  const [stageIndex, setStageIndex] = useState(0)
-  const [completedStageIndex, setCompletedStageIndex] = useState<number | null>(
-    null,
-  )
+  const recipeKey = useMemo(() => JSON.stringify(recipe), [recipe]);
+  const [progress, setProgress] = useState({
+    recipeKey,
+    stageIndex: 0,
+    completedStageIndex: null as number | null,
+  });
+  const completedRecipeKey = useRef<string | null>(null);
+
+  // A new recipe must begin at stage zero immediately, before effects run.
+  const currentProgress =
+    progress.recipeKey === recipeKey
+      ? progress
+      : { recipeKey, stageIndex: 0, completedStageIndex: null };
 
   useEffect(() => {
-    setStageIndex(0)
-    setCompletedStageIndex(null)
-  }, [recipeKey])
+    completedRecipeKey.current = null;
+    setProgress((current) =>
+      current.recipeKey === recipeKey
+        ? current
+        : { recipeKey, stageIndex: 0, completedStageIndex: null },
+    );
+  }, [recipeKey]);
 
-  const isComplete = stageIndex >= recipe.stages.length
-  const activeStage = isComplete ? undefined : recipe.stages[stageIndex]
-
-  useEffect(() => {
-    onCompleteChange?.(isComplete)
-  }, [isComplete, onCompleteChange])
-
-  useEffect(() => {
-    onStageChange?.(isComplete ? -1 : stageIndex)
-  }, [isComplete, onStageChange, stageIndex])
+  const isComplete = currentProgress.stageIndex >= recipe.stages.length;
+  const activeStage = isComplete
+    ? undefined
+    : recipe.stages[currentProgress.stageIndex];
 
   useEffect(() => {
-    if (completedStageIndex === null) return
+    if (!isComplete || completedRecipeKey.current === recipeKey) return;
+
+    completedRecipeKey.current = recipeKey;
+    onCompleteChange?.(true);
+  }, [isComplete, onCompleteChange, recipeKey]);
+
+  useEffect(() => {
+    onStageChange?.(isComplete ? -1 : currentProgress.stageIndex);
+  }, [currentProgress.stageIndex, isComplete, onStageChange]);
+
+  useEffect(() => {
+    if (currentProgress.completedStageIndex === null) return;
 
     const timer = window.setTimeout(() => {
-      setStageIndex((currentStage) =>
-        currentStage === completedStageIndex ? currentStage + 1 : currentStage,
-      )
-      setCompletedStageIndex(null)
-    }, stageDelayMs)
+      setProgress((current) => {
+        if (
+          current.recipeKey !== recipeKey ||
+          current.stageIndex !== currentProgress.completedStageIndex
+        ) {
+          return current;
+        }
 
-    return () => window.clearTimeout(timer)
-  }, [completedStageIndex, stageDelayMs])
+        return {
+          ...current,
+          stageIndex: current.stageIndex + 1,
+          completedStageIndex: null,
+        };
+      });
+    }, stageDelayMs);
 
-  if (!activeStage) return null
+    return () => window.clearTimeout(timer);
+  }, [currentProgress.completedStageIndex, recipeKey, stageDelayMs]);
+
+  if (!activeStage) return null;
 
   return (
     <GestureRecipe
-      key={`${recipeKey}:${stageIndex}`}
+      key={`${recipeKey}:${currentProgress.stageIndex}`}
       points={points}
       stage={activeStage}
       onMatchChange={(matches) => {
-        if (matches) setCompletedStageIndex(stageIndex)
+        if (!matches) return;
+
+        setProgress((current) =>
+          current.recipeKey === recipeKey &&
+          current.completedStageIndex !== currentProgress.stageIndex
+            ? { ...current, completedStageIndex: currentProgress.stageIndex }
+            : current,
+        );
       }}
     />
-  )
+  );
 }

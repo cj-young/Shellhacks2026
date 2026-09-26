@@ -16,7 +16,7 @@ export function Store({uploadInventory}:{uploadInventory: (inv: Ingredient[]) =>
             {ingredients.map((ing) => (
                 <button type="button" onClick={()=>setInventory([...inventory, ing])}>
                     <img className="w-12 h-12" src={ing.image}/>
-                    <p>{ing.category}</p>
+                    <p>{ing.name} ({ing.category})</p>
                 </button>
             ))}
         </div>

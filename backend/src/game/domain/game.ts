@@ -21,7 +21,7 @@ export type GameState = {
 
 export type Recipe = {
   name: string;
-  ingredients: {id: number, count: number}[];
+  ingredients: { id: number; count: number }[];
   stages: RecipeStage[];
 };
 
@@ -42,9 +42,8 @@ export type Point = {
   y: number;
 };
 
-
 export type Ingredient = {
-  name: string,
-  image: string,
-  category: string
-}
+  name: string;
+  image: string;
+  category: string;
+};
