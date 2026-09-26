@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { GameService } from '../../game/application/game-service.ts';
 import { normalizeGameCode } from '../../game/domain/code.ts';
 import type { GameState } from '../../game/domain/game.ts';
+import { normalizePlayerName } from '../domain/player.ts';
 import type { PlayerSummary } from '../domain/player.ts';
 
 export type JoinResult =
@@ -11,6 +12,7 @@ export type JoinResult =
 
 export interface JoinInput {
   code: string;
+  name?: string;
   hostToken?: string;
 }
 
@@ -46,7 +48,8 @@ export class GameSession {
     }
 
     const isHost = input.hostToken !== undefined && input.hostToken === game.hostToken;
-    const player: PlayerSummary = { id: randomUUID(), joinedAt: Date.now(), isHost };
+    const name = normalizePlayerName(input.name) || (isHost ? 'Host' : 'Player');
+    const player: PlayerSummary = { id: randomUUID(), name, joinedAt: Date.now(), isHost };
 
     return { ok: true, gameCode: game.code, player };
   }

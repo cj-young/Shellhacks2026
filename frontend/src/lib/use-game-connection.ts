@@ -3,8 +3,8 @@ import type { RefObject } from 'react'
 import { io } from 'socket.io-client'
 import type { Socket } from 'socket.io-client'
 
-export type Player = { id: string; isHost: boolean }
-export type GameAuth = { code: string; token?: string }
+export type Player = { id: string; name: string; isHost: boolean }
+export type GameAuth = { code: string; token?: string; name?: string }
 
 type JoinedPayload = { playerId: string; players: Player[] }
 
@@ -27,6 +27,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
 
   const code = auth?.code
   const token = auth?.token
+  const name = auth?.name
 
   useEffect(() => {
     if (!code) {
@@ -42,7 +43,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     setMessage('')
     setStarted(false)
 
-    const socket = io({ path: '/api/socket.io/', auth: { code, token } })
+    const socket = io({ path: '/api/socket.io/', auth: { code, token, name } })
     socketRef.current = socket
 
     socket.on('connect', () => setStatus('Connected'))
@@ -78,7 +79,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
       socket.disconnect()
       socketRef.current = null
     }
-  }, [code, token])
+  }, [code, name, token])
 
   return { socketRef, players, playerId, status, message, started }
 }

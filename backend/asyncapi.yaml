@@ -3,12 +3,14 @@ asyncapi: 3.1.0
 info:
   title: Shellhacks Game Realtime API
   version: 0.1.0
-  description:
+  description: |
     Socket.IO API used for game lobbies.
 
-    Clients connect to the Socket.IO endpoint with handshake auth `{ code, token? }`:
+    Clients connect to the Socket.IO endpoint with handshake auth
+    `{ code, name, token? }`:
 
     - `code`  - the 6-character game code
+    - `name`  - the display name chosen by the player
     - `token` - the host token returned by `POST /api/games`; sent only by the host
 
     The public path is `/api/socket.io/` (Caddy strips the `/api` prefix before proxying to
@@ -36,6 +38,11 @@ servers:
           code:
             type: string
             description: Six-character game code.
+          name:
+            type: string
+            description: |
+              Display name chosen by the player (trimmed, whitespace collapsed, capped at 20
+              characters). Falls back to "Host" or "Player" when absent.
           token:
             type: string
             description: Host token. Sent only by the host.
@@ -80,7 +87,7 @@ channels:
   gameError:
     address: game_error
     title: Game error
-    description:
+    description: |
       Sent to the affected client when an operation fails. A failed join is followed by a
       server-initiated disconnect.
     x-socketio:
@@ -91,7 +98,7 @@ channels:
   startGame:
     address: start_game
     title: Start game
-    description:
+    description: |
       Sent by the host to start the game. A non-host sender receives `game_error` with code
       `NOT_HOST`; starting an already-active game returns `ALREADY_STARTED`.
     x-socketio:
@@ -169,6 +176,7 @@ components:
       additionalProperties: false
       required:
         - id
+        - name
         - joinedAt
         - isHost
       properties:
@@ -177,6 +185,11 @@ components:
           description: Server-assigned player identifier (UUID).
           examples:
             - 2bee17e1-01a8-4a5e-b47e-3e74a1661657
+        name:
+          type: string
+          description: Display name chosen by the player (trimmed, max 20 characters).
+          examples:
+            - Ada Lovelace
         joinedAt:
           type: integer
           description: Join time as a Unix timestamp in milliseconds.
