@@ -23,6 +23,18 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
 
   function checkoutFromStore(inv: Ingredient[]) {
     setInventory([...inventory, ...inv]);
+
+    const purchaseMap = new Map()
+
+    inv.forEach((v) => {
+        const exists = purchaseMap.get(v.id)
+        if(exists)
+            purchaseMap.set(v.id, {id:v.id, count:exists.count + 1})
+        else
+            purchaseMap.set(v.id, {id:v.id, count:1})
+    })
+
+    connection.socketRef.current?.emit("purchase_items", Array.from(purchaseMap.values()))
     setInterfaceState("recipe");
   }
 

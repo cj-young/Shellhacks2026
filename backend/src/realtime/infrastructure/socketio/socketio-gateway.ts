@@ -137,6 +137,7 @@ export function createSocketIoGateway(
         return;
       }
 
+      console.log("reached session purchase")
       const purchase = await session.purchase({
         code: gameCode,
         playerId: player.id,
@@ -150,6 +151,8 @@ export function createSocketIoGateway(
         });
         return;
       }
+
+      console.log("successfully checked out")
 
       io.to(room).emit("update_state", purchase.state);
     }

@@ -26,5 +26,5 @@ export function generateRecipeOrder(length: number) {
 
 /** Ingredient ids are positional indexes into the ingredients catalogue. */
 export function isKnownIngredientId(id: number): boolean {
-  return Number.isInteger(id) && id >= 0 && id < ingredients.length;
+  return Number.isInteger(id) && (!!ingredients.find((v)=>v.id == id))
 }
