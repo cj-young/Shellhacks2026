@@ -35,5 +35,153 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Half-Moon Cookie",
+        "stages": [
+            {
+                "type": "lines",
+                "image": "/SlicedBreadTest.jpg",
+                "lines": [
+                    {
+                        "start": { "x": 30, "y": 30 },
+                        "end": { "x": 130, "y": 30 },
+                        "radius": 20
+                    },
+                    {
+                        "start": { "x": 130, "y": 30 },
+                        "end": { "x": 130, "y": 130 },
+                        "radius": 20
+                    }
+                ]
+            },
+            {
+                "type": "lines",
+                "image": "/SlicedBreadTest2.jpg",
+                "lines": [
+                    {
+                        "start": { "x": 30, "y": 30 },
+                        "end": { "x": 30, "y": 130 },
+                        "radius": 20
+                    },
+                    {
+                        "start": { "x": 30, "y": 130 },
+                        "end": { "x": 130, "y": 130 },
+                        "radius": 20
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Half-Moon Cookie",
+        "stages": [
+            {
+                "type": "lines",
+                "image": "/SlicedBreadTest.jpg",
+                "lines": [
+                    {
+                        "start": { "x": 30, "y": 30 },
+                        "end": { "x": 130, "y": 30 },
+                        "radius": 20
+                    },
+                    {
+                        "start": { "x": 130, "y": 30 },
+                        "end": { "x": 130, "y": 130 },
+                        "radius": 20
+                    }
+                ]
+            },
+            {
+                "type": "lines",
+                "image": "/SlicedBreadTest2.jpg",
+                "lines": [
+                    {
+                        "start": { "x": 30, "y": 30 },
+                        "end": { "x": 30, "y": 130 },
+                        "radius": 20
+                    },
+                    {
+                        "start": { "x": 30, "y": 130 },
+                        "end": { "x": 130, "y": 130 },
+                        "radius": 20
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Half-Moon Cookie",
+        "stages": [
+            {
+                "type": "lines",
+                "image": "/SlicedBreadTest.jpg",
+                "lines": [
+                    {
+                        "start": { "x": 30, "y": 30 },
+                        "end": { "x": 130, "y": 30 },
+                        "radius": 20
+                    },
+                    {
+                        "start": { "x": 130, "y": 30 },
+                        "end": { "x": 130, "y": 130 },
+                        "radius": 20
+                    }
+                ]
+            },
+            {
+                "type": "lines",
+                "image": "/SlicedBreadTest2.jpg",
+                "lines": [
+                    {
+                        "start": { "x": 30, "y": 30 },
+                        "end": { "x": 30, "y": 130 },
+                        "radius": 20
+                    },
+                    {
+                        "start": { "x": 30, "y": 130 },
+                        "end": { "x": 130, "y": 130 },
+                        "radius": 20
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Half-Moon Cookie",
+        "stages": [
+            {
+                "type": "lines",
+                "image": "/SlicedBreadTest.jpg",
+                "lines": [
+                    {
+                        "start": { "x": 30, "y": 30 },
+                        "end": { "x": 130, "y": 30 },
+                        "radius": 20
+                    },
+                    {
+                        "start": { "x": 130, "y": 30 },
+                        "end": { "x": 130, "y": 130 },
+                        "radius": 20
+                    }
+                ]
+            },
+            {
+                "type": "lines",
+                "image": "/SlicedBreadTest2.jpg",
+                "lines": [
+                    {
+                        "start": { "x": 30, "y": 30 },
+                        "end": { "x": 30, "y": 130 },
+                        "radius": 20
+                    },
+                    {
+                        "start": { "x": 30, "y": 130 },
+                        "end": { "x": 130, "y": 130 },
+                        "radius": 20
+                    }
+                ]
+            }
+        ]
     }
 ]

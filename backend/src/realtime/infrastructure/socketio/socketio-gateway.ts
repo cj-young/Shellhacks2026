@@ -92,7 +92,8 @@ export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIo
       void handleStartGame();
     });
 
-    socket.on('test', () => {
+    socket.on('send_recipe_order', (order:number[]) => {
+      console.log(order)
       io.to(room).emit('game_error', {code: "400", message: 'AHHHHHHHHHHHHHH'})
     })
 

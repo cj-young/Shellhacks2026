@@ -21,7 +21,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   start_game: () => void;
-  test: () => void;
+  send_recipe_order: (order: number[]) => void; //order of recipe IDs
 }
 
 export interface InterServerEvents {}
