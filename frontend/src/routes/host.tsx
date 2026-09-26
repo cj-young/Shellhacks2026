@@ -1,11 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { io } from 'socket.io-client'
-import type { Socket } from 'socket.io-client'
+import { useCallback, useEffect, useState } from 'react'
+import { useGameConnection } from '#/lib/use-game-connection'
 
 type Game = { code: string; hostToken: string }
-type Player = { id: string; isHost: boolean }
-type JoinedPayload = { playerId: string; players: Player[] }
 
 const STORAGE_KEY = 'shellhacks.hostGame'
 
@@ -34,56 +31,17 @@ function loadStoredGame(): Game | null {
 
 function HostScreen() {
   const [game, setGame] = useState<Game | null>(null)
-  const [players, setPlayers] = useState<Player[]>([])
-  const [status, setStatus] = useState('No game yet')
-  const [message, setMessage] = useState('')
-  const socketRef = useRef<Socket | null>(null)
+  const [createError, setCreateError] = useState('')
+  const connection = useGameConnection(
+    game ? { code: game.code, token: game.hostToken } : null,
+  )
 
   useEffect(() => {
     setGame(loadStoredGame())
   }, [])
 
-  useEffect(() => {
-    if (!game) return
-
-    const socket = io({
-      path: '/api/socket.io/',
-      auth: { code: game.code, token: game.hostToken },
-    })
-    socketRef.current = socket
-
-    socket.on('connect', () => setStatus('Connected'))
-    socket.on('connect_error', () => setStatus('Connection failed'))
-    socket.on('disconnect', () => setStatus('Disconnected'))
-    socket.on('joined', (payload: JoinedPayload) => {
-      setPlayers(payload.players)
-      setStatus('Waiting for players')
-    })
-    socket.on('player_joined', (player: Player) => {
-      setPlayers((current) => [
-        ...current.filter((entry) => entry.id !== player.id),
-        player,
-      ])
-    })
-    socket.on('player_left', ({ playerId }: { playerId: string }) => {
-      setPlayers((current) => current.filter((entry) => entry.id !== playerId))
-    })
-    socket.on(
-      'game_error',
-      ({ message: errorMessage }: { message: string }) => {
-        setMessage(errorMessage)
-      },
-    )
-
-    return () => {
-      socket.disconnect()
-      socketRef.current = null
-    }
-  }, [game])
-
   const createGame = useCallback(async () => {
-    setMessage('')
-    setStatus('Creating game...')
+    setCreateError('')
 
     try {
       const response = await fetch('/api/games', { method: 'POST' })
@@ -91,20 +49,20 @@ function HostScreen() {
 
       const created = (await response.json()) as Game
       window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(created))
-      setPlayers([])
       setGame(created)
     } catch (error) {
-      setStatus('Error')
-      setMessage(
+      setCreateError(
         error instanceof Error ? error.message : 'Unable to create a game',
       )
     }
   }, [])
 
   const startGame = useCallback(() => {
-    setMessage('')
-    socketRef.current?.emit('start_game')
-  }, [])
+    setCreateError('')
+    connection.socketRef.current?.emit('start_game')
+  }, [connection.socketRef])
+
+  const errorMessage = createError || connection.message
 
   return (
     <div className="min-h-screen bg-slate-950 p-8 text-slate-100">
@@ -147,13 +105,13 @@ function HostScreen() {
 
             <div className="rounded border border-slate-700 p-4">
               <p className="text-sm text-slate-400">
-                Players ({players.length})
+                Players ({connection.players.length})
               </p>
               <ul className="mt-2 flex flex-col gap-1">
-                {players.length === 0 && (
+                {connection.players.length === 0 && (
                   <li className="text-slate-500">Waiting...</li>
                 )}
-                {players.map((player, index) => (
+                {connection.players.map((player, index) => (
                   <li key={player.id}>
                     Player {index + 1}
                     {player.isHost ? ' (host)' : ''}
@@ -164,8 +122,10 @@ function HostScreen() {
           </>
         )}
 
-        <p className="text-sm text-slate-400">{status}</p>
-        {message && <p className="text-sm text-amber-400">{message}</p>}
+        <p className="text-sm text-slate-400">{connection.status}</p>
+        {errorMessage && (
+          <p className="text-sm text-amber-400">{errorMessage}</p>
+        )}
 
         <a className="text-sm text-cyan-400 underline" href="/">
           Back to the game
