@@ -155,3 +155,53 @@ test("start returns GAME_NOT_FOUND for an unknown code", async () => {
   }
   assert.equal(result.code, "GAME_NOT_FOUND");
 });
+
+test("join returns a reconnect token and the full roster", async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+
+  const result = await session.join({ code: game.code, name: "Ada" });
+
+  if (!result.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  assert.ok(result.reconnectToken.length > 0);
+  assert.equal(result.players.length, 1);
+  assert.equal(result.players[0]?.id, result.player.id);
+});
+
+test("join resumes the same player with the reconnect token, even after start", async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+  const first = await session.join({ code: game.code, name: "Ada" });
+  if (!first.ok) {
+    assert.fail("expected the join to succeed");
+  }
+
+  await gameService.startGame(game.code);
+
+  const resumed = await session.join({
+    code: game.code,
+    reconnectToken: first.reconnectToken,
+  });
+
+  if (!resumed.ok) {
+    assert.fail("expected the resume to succeed");
+  }
+  assert.equal(resumed.player.id, first.player.id);
+});
+
+test("leave marks the player disconnected without removing them", async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+  const joined = await session.join({ code: game.code });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+
+  await session.leave({ code: game.code, playerId: joined.player.id });
+
+  const stored = await gameService.getGame(game.code);
+  assert.equal(stored?.state.players.length, 1);
+  assert.equal(stored?.state.players[0]?.connected, false);
+});

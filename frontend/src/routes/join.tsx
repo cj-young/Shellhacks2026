@@ -74,10 +74,14 @@ function JoinScreen() {
             </p>
             <ul className="mt-2 flex flex-col gap-1">
               {connection.players.map((player) => (
-                <li key={player.id}>
+                <li
+                  key={player.id}
+                  className={player.connected ? undefined : 'text-slate-500'}
+                >
                   {player.name}
                   {player.id === connection.playerId ? ' (you)' : ''}
                   {player.isHost ? ' (host)' : ''}
+                  {player.connected ? '' : ' (disconnected)'}
                 </li>
               ))}
             </ul>

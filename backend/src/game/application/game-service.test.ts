@@ -4,7 +4,7 @@ import { test } from "node:test";
 import type { Game } from "../domain/game.ts";
 import { InMemoryGameStore } from "../infrastructure/in-memory-game-store.ts";
 import type { GameStore } from "../ports/game-store.ts";
-import { GameService } from "./game-service.ts";
+import { GameService, MAX_PLAYERS } from "./game-service.ts";
 
 test("createGame stores the game and getGame finds it case-insensitively", async () => {
   const service = new GameService(new InMemoryGameStore());
@@ -101,4 +101,108 @@ test("startGame reports ALREADY_STARTED for an active game", async () => {
     assert.fail("expected start to fail");
   }
   assert.equal(result.code, "ALREADY_STARTED");
+});
+
+test("joinPlayer creates and persists a player, resolving the host", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+
+  const host = await service.joinPlayer(game.code, {
+    name: "  Ada   Lovelace ",
+    hostToken: game.hostToken,
+  });
+  const guest = await service.joinPlayer(game.code, {});
+
+  if (!host.ok || !guest.ok) {
+    assert.fail("expected both joins to succeed");
+  }
+  assert.equal(host.player.isHost, true);
+  assert.equal(host.player.name, "Ada Lovelace");
+  assert.equal(guest.player.isHost, false);
+  assert.equal(guest.player.name, "Player");
+  assert.ok(host.player.reconnectToken.length > 0);
+  assert.notEqual(host.player.reconnectToken, guest.player.reconnectToken);
+  assert.equal((await service.getGame(game.code))?.state.players.length, 2);
+});
+
+test("joinPlayer resumes a player with a matching reconnect token", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+
+  const first = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!first.ok) {
+    assert.fail("expected the join to succeed");
+  }
+
+  await service.startGame(game.code);
+
+  const resumed = await service.joinPlayer(game.code, {
+    reconnectToken: first.player.reconnectToken,
+  });
+
+  if (!resumed.ok) {
+    assert.fail("expected the resume to succeed");
+  }
+  assert.equal(resumed.player.id, first.player.id);
+  assert.equal(resumed.player.connected, true);
+  assert.equal((await service.getGame(game.code))?.state.players.length, 1);
+});
+
+test("joinPlayer rejects a new player once the game is active", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  await service.startGame(game.code);
+
+  const result = await service.joinPlayer(game.code, { name: "Late" });
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected the join to fail");
+  }
+  assert.equal(result.code, "GAME_STARTED");
+});
+
+test("joinPlayer rejects an unknown code", async () => {
+  const service = new GameService(new InMemoryGameStore());
+
+  const result = await service.joinPlayer("ZZZZZZ", {});
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected the join to fail");
+  }
+  assert.equal(result.code, "GAME_NOT_FOUND");
+});
+
+test("joinPlayer rejects once the game is full", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+
+  for (let index = 0; index < MAX_PLAYERS; index += 1) {
+    const result = await service.joinPlayer(game.code, { name: `P${index}` });
+    assert.equal(result.ok, true);
+  }
+
+  const overflow = await service.joinPlayer(game.code, { name: "Extra" });
+
+  assert.equal(overflow.ok, false);
+  if (overflow.ok) {
+    assert.fail("expected the join to fail");
+  }
+  assert.equal(overflow.code, "GAME_FULL");
+});
+
+test("markDisconnected keeps the player but marks them offline", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+
+  await service.markDisconnected(game.code, joined.player.id);
+
+  const stored = await service.getGame(game.code);
+  assert.equal(stored?.state.players.length, 1);
+  assert.equal(stored?.state.players[0]?.connected, false);
 });

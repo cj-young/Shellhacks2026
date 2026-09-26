@@ -1,11 +1,21 @@
 export function MakeEmptyState() {
   return {
     recipeOrder: [],
+    players: [],
   } as GameState
+}
+
+export type PlayerSummary = {
+  id: string
+  name: string
+  isHost: boolean
+  joinedAt: number
+  connected: boolean
 }
 
 export type GameState = {
   recipeOrder: Recipe[]
+  players: PlayerSummary[]
 }
 
 export type Recipe = {

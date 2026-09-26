@@ -3,16 +3,20 @@ import type { RefObject } from 'react'
 import { io } from 'socket.io-client'
 import type { Socket } from 'socket.io-client'
 import { MakeEmptyState } from './types'
-import type { GameState } from './types'
+import type { GameState, PlayerSummary } from './types'
 
-export type Player = { id: string; name: string; isHost: boolean }
+export type Player = PlayerSummary
 export type GameAuth = { code: string; token?: string; name?: string }
 
-type JoinedPayload = { playerId: string; players: Player[] }
+type JoinedPayload = {
+  playerId: string
+  reconnectToken: string
+  players: PlayerSummary[]
+}
 
 export type GameConnection = {
   socketRef: RefObject<Socket | null>
-  players: Player[]
+  players: PlayerSummary[]
   playerId: string | null
   status: string
   message: string
@@ -20,9 +24,31 @@ export type GameConnection = {
   state: GameState
 }
 
+const tokenKey = (code: string) => `shellhacks.playerToken:${code}`
+
+function readStoredToken(code: string): string | undefined {
+  if (typeof window === 'undefined') return undefined
+
+  try {
+    return window.sessionStorage.getItem(tokenKey(code)) ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
+function storeToken(code: string, reconnectToken: string): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    window.sessionStorage.setItem(tokenKey(code), reconnectToken)
+  } catch {
+    // Ignore storage failures (private mode, quota, etc.).
+  }
+}
+
 export function useGameConnection(auth: GameAuth | null): GameConnection {
   const socketRef = useRef<Socket | null>(null)
-  const [players, setPlayers] = useState<Player[]>([])
+  const [players, setPlayers] = useState<PlayerSummary[]>([])
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [status, setStatus] = useState('Not connected')
   const [message, setMessage] = useState('')
@@ -49,26 +75,38 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     setStarted(false)
     setState(MakeEmptyState())
 
-    const socket = io({ path: '/api/socket.io/', auth: { code, token, name } })
+    const reconnectToken = readStoredToken(code)
+    const socket = io({
+      path: '/api/socket.io/',
+      auth: { code, token, name, reconnectToken },
+    })
     socketRef.current = socket
 
     socket.on('connect', () => setStatus('Connected'))
     socket.on('connect_error', () => setStatus('Connection failed'))
     socket.on('disconnect', () => setStatus('Disconnected'))
     socket.on('joined', (payload: JoinedPayload) => {
+      storeToken(code, payload.reconnectToken)
       setPlayers(payload.players)
       setPlayerId(payload.playerId)
       setStatus('Waiting for host')
     })
-    socket.on('player_joined', (player: Player) => {
+    socket.on('player_joined', (player: PlayerSummary) => {
       setPlayers((current) => [
         ...current.filter((entry) => entry.id !== player.id),
         player,
       ])
     })
-    socket.on('player_left', ({ playerId: leftId }: { playerId: string }) => {
-      setPlayers((current) => current.filter((entry) => entry.id !== leftId))
-    })
+    socket.on(
+      'player_disconnected',
+      ({ playerId: leftId }: { playerId: string }) => {
+        setPlayers((current) =>
+          current.map((entry) =>
+            entry.id === leftId ? { ...entry, connected: false } : entry,
+          ),
+        )
+      },
+    )
     socket.on('game_started', () => {
       setStarted(true)
       setStatus('Game started')

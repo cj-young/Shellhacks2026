@@ -27,6 +27,7 @@ export function createRealtimeModule(
 }
 
 export type {
+  ClientGameState,
   ClientToServerEvents,
   GameStartedPayload,
   InterServerEvents,

@@ -146,9 +146,13 @@ function HostScreen() {
                   <li className="text-slate-500">Waiting...</li>
                 )}
                 {connection.players.map((player) => (
-                  <li key={player.id}>
+                  <li
+                    key={player.id}
+                    className={player.connected ? undefined : 'text-slate-500'}
+                  >
                     {player.name}
                     {player.isHost ? ' (host)' : ''}
+                    {player.connected ? '' : ' (disconnected)'}
                   </li>
                 ))}
               </ul>

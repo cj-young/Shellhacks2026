@@ -3,7 +3,6 @@ import type { Server as HttpServer } from "node:http";
 import { Server, type Socket } from "socket.io";
 
 import type { GameSession } from "../../application/game-session.ts";
-import type { PlayerSummary } from "../../domain/player.ts";
 import type {
   ClientToServerEvents,
   InterServerEvents,
@@ -66,10 +65,12 @@ export function createSocketIoGateway(
     const code = typeof auth.code === "string" ? auth.code : "";
     const name = typeof auth.name === "string" ? auth.name : undefined;
     const hostToken = typeof auth.token === "string" ? auth.token : undefined;
+    const reconnectToken =
+      typeof auth.reconnectToken === "string" ? auth.reconnectToken : undefined;
 
     let result;
     try {
-      result = await session.join({ code, name, hostToken });
+      result = await session.join({ code, name, hostToken, reconnectToken });
     } catch {
       socket.emit("game_error", {
         code: "INTERNAL_ERROR",
@@ -85,20 +86,17 @@ export function createSocketIoGateway(
       return;
     }
 
-    const { gameCode, player } = result;
+    const { gameCode, player, players, reconnectToken: playerToken } = result;
     const room = roomFor(gameCode);
 
     socket.data.player = player;
     await socket.join(room);
 
-    const players = (await io.in(room).fetchSockets())
-      .map((remote) => remote.data.player)
-      .filter(isPlayer);
-
     socket.emit("joined", {
       playerId: player.id,
       gameCode,
       isHost: player.isHost,
+      reconnectToken: playerToken,
       players,
     });
     socket.to(room).emit("player_joined", player);
@@ -126,8 +124,13 @@ export function createSocketIoGateway(
     }
 
     socket.on("disconnect", () => {
-      io.to(room).emit("player_left", { playerId: player.id });
+      void handleDisconnect();
     });
+
+    async function handleDisconnect(): Promise<void> {
+      await session.leave({ code: gameCode, playerId: player.id });
+      io.to(room).emit("player_disconnected", { playerId: player.id });
+    }
   }
 
   function close(): Promise<void> {
@@ -141,10 +144,6 @@ export function createSocketIoGateway(
 
 function roomFor(gameCode: string): string {
   return `game:${gameCode}`;
-}
-
-function isPlayer(value: PlayerSummary | undefined): value is PlayerSummary {
-  return value !== undefined;
 }
 
 function isOriginAllowed(
