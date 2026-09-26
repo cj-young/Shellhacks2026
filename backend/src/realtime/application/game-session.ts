@@ -61,6 +61,9 @@ export interface PurchaseInput {
   items: PurchaseItem[];
 }
 
+export type ConsumeIngredientsInput = PurchaseInput;
+export type ConsumeIngredientsResult = PurchaseResult;
+
 const JOIN_MESSAGES: Record<string, string> = {
   GAME_NOT_FOUND: "No game found for that code",
   GAME_STARTED: "This game has already started",
@@ -74,6 +77,10 @@ const PURCHASE_MESSAGES: Record<string, string> = {
   INVALID_ITEM: "One or more items are invalid",
 };
 
+const CONSUME_MESSAGES: Record<string, string> = {
+  ...PURCHASE_MESSAGES,
+  INSUFFICIENT_INVENTORY: "You do not have enough ingredients for this step",
+}
 const END_MESSAGES: Record<string, string> = {
   GAME_NOT_FOUND: "No game found for that code",
   GAME_NOT_ACTIVE: "The game is not active",
@@ -175,8 +182,14 @@ export class GameSession {
     };
   }
 
-  async endRound(input: EndRoundInput): Promise<EndRoundResult> {
-    const result = await this.#gameService.endRound(input.code);
+  async consumeIngredients(
+    input: ConsumeIngredientsInput,
+  ): Promise<ConsumeIngredientsResult> {
+    const result = await this.#gameService.consumeItemsFromInventory(
+      input.code,
+      input.playerId,
+      input.items,
+    );
 
     if (!result.ok) {
       return {
@@ -185,6 +198,25 @@ export class GameSession {
         message: END_MESSAGES[result.code] ?? "Unable to end the round",
       };
     }
+
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+    };
+  }
+  async endRound(input: EndRoundInput): Promise<EndRoundResult> {
+    const result = await this.#gameService.endRound(input.code);
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message:
+          CONSUME_MESSAGES[result.code] ?? "Unable to consume ingredients",
+      };
+    }
+        
 
     const results: PlayerResult[] = [...result.game.state.players]
       .sort((a, b) => b.score - a.score)

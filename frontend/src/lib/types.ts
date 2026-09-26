@@ -11,6 +11,7 @@ export type PlayerSummary = {
   isHost: boolean;
   joinedAt: number;
   connected: boolean;
+  inventory: Record<number, number>;
 };
 
 export type GameState = {

@@ -11,6 +11,7 @@ export function getRandomIntInclusive(min: number, max: number) {
 export function generateRecipeOrder(length: number): Recipe[] {
   const pool = recipes.map((recipe) => ({
     name: recipe.name,
+    ingredients: recipe.ingredients,
     stages: recipe.stages.map((stage) => ({
       type: stage.type,
       image: stage.image,

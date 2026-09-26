@@ -128,6 +128,19 @@ channels:
     messages:
       purchaseItems:
         $ref: '#/components/messages/PurchaseItems'
+  consumeIngredients:
+    address: consume_ingredients
+    title: Consume ingredients
+    description: |
+      Sent by a player when a recipe stage begins. The requested ingredient counts are removed
+      atomically from that player's inventory while the game is active. On success the server
+      broadcasts `update_state`; on failure the sender receives `game_error` with
+      `GAME_NOT_ACTIVE`, `PLAYER_NOT_FOUND`, `INVALID_ITEM`, or `INSUFFICIENT_INVENTORY`.
+    x-socketio:
+      event: consume_ingredients
+    messages:
+      consumeIngredients:
+        $ref: '#/components/messages/ConsumeIngredients'
   timerSync:
     address: timer_sync
     title: Timer sync
@@ -189,6 +202,11 @@ operations:
     summary: Receive a purchase request from a player.
     channel:
       $ref: '#/channels/purchaseItems'
+  receiveConsumeIngredients:
+    action: receive
+    summary: Receive a request to consume ingredients for a recipe stage.
+    channel:
+      $ref: '#/channels/consumeIngredients'
   sendTimerSync:
     action: send
     summary: Send the round end time and the server clock once.
@@ -234,6 +252,11 @@ components:
     PurchaseItems:
       name: purchase_items
       title: Purchase items
+      payload:
+        $ref: '#/components/schemas/PurchaseItemsPayload'
+    ConsumeIngredients:
+      name: consume_ingredients
+      title: Consume ingredients
       payload:
         $ref: '#/components/schemas/PurchaseItemsPayload'
     TimerSync:

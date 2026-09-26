@@ -1,5 +1,6 @@
 export type Recipe = {
   name: string;
+  ingredients: { id: number; count: number }[];
   stages: RecipeStage[];
 };
 

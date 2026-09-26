@@ -53,6 +53,18 @@ export type AddItemsResult =
         | "INVALID_ITEM";
     };
 
+export type ConsumeItemsResult =
+  | { ok: true; game: Game }
+  | {
+      ok: false;
+      code:
+        | "GAME_NOT_FOUND"
+        | "GAME_NOT_ACTIVE"
+        | "PLAYER_NOT_FOUND"
+        | "INVALID_ITEM"
+        | "INSUFFICIENT_INVENTORY";
+    };
+
 export class GameService {
   readonly #store: GameStore;
 
@@ -244,6 +256,52 @@ export class GameService {
     );
     await this.#store.save(next);
 
+    return { ok: true, game: next };
+  }
+
+  async consumeItemsFromInventory(
+    code: string,
+    playerId: string,
+    items: PurchaseItem[],
+  ): Promise<ConsumeItemsResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+    if (!game) return { ok: false, code: "GAME_NOT_FOUND" };
+    if (game.status !== "active") return { ok: false, code: "GAME_NOT_ACTIVE" };
+
+    const player = game.state.players.find((entry) => entry.id === playerId);
+    if (!player) return { ok: false, code: "PLAYER_NOT_FOUND" };
+    if (items.length === 0 || !items.every(isValidPurchaseItem)) {
+      return { ok: false, code: "INVALID_ITEM" };
+    }
+
+    const requested: Inventory = {};
+    for (const item of items) {
+      requested[item.id] = (requested[item.id] ?? 0) + item.count;
+    }
+    if (
+      Object.entries(requested).some(
+        ([id, count]) => (player.inventory[Number(id)] ?? 0) < count,
+      )
+    ) {
+      return { ok: false, code: "INSUFFICIENT_INVENTORY" };
+    }
+
+    const inventory: Inventory = { ...player.inventory };
+    for (const [id, count] of Object.entries(requested)) {
+      const ingredientId = Number(id);
+      const remaining = inventory[ingredientId] - count;
+      if (remaining === 0) delete inventory[ingredientId];
+      else inventory[ingredientId] = remaining;
+    }
+
+    const updated: Player = { ...player, inventory };
+    const next = this.#withPlayers(
+      game,
+      game.state.players.map((entry) =>
+        entry.id === updated.id ? updated : entry,
+      ),
+    );
+    await this.#store.save(next);
     return { ok: true, game: next };
   }
 

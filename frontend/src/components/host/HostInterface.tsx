@@ -1,6 +1,5 @@
 import type { GameConnection } from "#/lib/use-game-connection";
 import { useEffect, useState } from "react";
-import recipes from "../../data/recipes.json";
 import ingredients from "../../data/ingredients.json";
 
 interface HostInterfaceProps {

@@ -145,6 +145,10 @@ export function createSocketIoGateway(
       void handlePurchase(items);
     });
 
+    socket.on("consume_ingredients", (items) => {
+      void handleConsumeIngredients(items);
+    });
+
     async function handlePurchase(items: PurchaseItem[]): Promise<void> {
       if (!isPurchaseItems(items)) {
         socket.emit("game_error", {
@@ -172,6 +176,33 @@ export function createSocketIoGateway(
       console.log("successfully checked out");
 
       io.to(room).emit("update_state", purchase.state);
+    }
+
+    async function handleConsumeIngredients(
+      items: PurchaseItem[],
+    ): Promise<void> {
+      if (!isPurchaseItems(items)) {
+        socket.emit("game_error", {
+          code: "INVALID_ITEM",
+          message: "Invalid ingredient consumption",
+        });
+        return;
+      }
+
+      const consumption = await session.consumeIngredients({
+        code: gameCode,
+        playerId: player.id,
+        items,
+      });
+      if (!consumption.ok) {
+        socket.emit("game_error", {
+          code: consumption.code,
+          message: consumption.message,
+        });
+        return;
+      }
+
+      io.to(room).emit("update_state", consumption.state);
     }
 
     socket.on("disconnect", () => {
