@@ -56,7 +56,7 @@
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
+            "start": { "x": 35, "y": 30 },
             "end": { "x": 130, "y": 30 },
             "radius": 20
           },
@@ -72,7 +72,7 @@
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
+            "start": { "x": 31, "y": 30 },
             "end": { "x": 30, "y": 130 },
             "radius": 20
           },
@@ -99,7 +99,7 @@
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
+            "start": { "x": 32, "y": 30 },
             "end": { "x": 130, "y": 30 },
             "radius": 20
           },
@@ -115,7 +115,7 @@
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
+            "start": { "x": 33, "y": 30 },
             "end": { "x": 30, "y": 130 },
             "radius": 20
           },
@@ -142,7 +142,7 @@
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
+            "start": { "x": 34, "y": 30 },
             "end": { "x": 130, "y": 30 },
             "radius": 20
           },
@@ -158,7 +158,7 @@
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
+            "start": { "x": 36, "y": 30 },
             "end": { "x": 30, "y": 130 },
             "radius": 20
           },
@@ -185,7 +185,7 @@
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
+            "start": { "x": 29, "y": 30 },
             "end": { "x": 130, "y": 30 },
             "radius": 20
           },
@@ -201,7 +201,7 @@
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
+            "start": { "x": 28, "y": 30 },
             "end": { "x": 30, "y": 130 },
             "radius": 20
           },
