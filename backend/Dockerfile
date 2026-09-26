@@ -4,4 +4,4 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 EXPOSE 3001
-CMD ["node", "--watch", "src/app.ts"]
+CMD ["node", "--watch", "src/server.ts"]

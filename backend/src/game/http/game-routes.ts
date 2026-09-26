@@ -8,7 +8,7 @@ export function createGameRouter(gameService: GameService): Router {
 
   router.post('/', async (_req: Request, res: Response) => {
     const game = await gameService.createGame();
-    res.status(201).json({ code: game.code });
+    res.status(201).json({ code: game.code, hostToken: game.hostToken });
   });
 
   return router;
