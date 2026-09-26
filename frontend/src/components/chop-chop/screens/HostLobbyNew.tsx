@@ -1,18 +1,16 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { VeggieBackground } from "../VeggieBackground";
 import type React from "react";
 import {
   ChefPlaceholder,
   DOT,
-  Food,
   INK,
   LEAF,
   NamePill,
-  PAGE_BG,
   PINK,
   ROYAL,
   SKY,
   SUN,
-  Sparkle,
   lilita,
   nunito,
 } from "../design";
@@ -84,41 +82,13 @@ export function HostLobbyNew(props: HostLobbyProps) {
         height: "100%",
         position: "relative",
         overflow: "hidden",
-        backgroundColor: PAGE_BG,
-        backgroundImage: `radial-gradient(${DOT} ${2.5 * scale}px, transparent ${3 * scale}px)`,
-        backgroundSize: `${40 * scale}px ${40 * scale}px`,
+        backgroundColor: "#FCEBC7",
         fontFamily: "Nunito, sans-serif",
         color: INK,
       }}
     >
+      <VeggieBackground />
       {size && <LobbyLayout {...props} portrait={portrait} scale={scale} />}
-    </div>
-  );
-}
-
-function Decorations({ scale }: { scale: number }) {
-  const at = (left: number, top: number): React.CSSProperties => ({
-    position: "absolute",
-    left: `${(left / 1920) * 100}%`,
-    top: `${(top / 1080) * 100}%`,
-  });
-  const s = (n: number) => Math.round(n * scale);
-  return (
-    <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-      <Food kind="dumpling" size={s(140)} rotate={-14} style={at(70, 60)} />
-      <Food kind="tomato" size={s(120)} rotate={12} style={at(990, 70)} />
-      <Sparkle
-        kind="star"
-        color={SUN}
-        size={s(56)}
-        rotate={10}
-        style={at(1130, 220)}
-      />
-      <Sparkle kind="plus" color={PINK} size={s(34)} style={at(120, 400)} />
-      <Sparkle kind="dot" color={SKY} size={s(22)} style={at(640, 60)} />
-      <Sparkle kind="star" color={LEAF} size={s(40)} style={at(1210, 470)} />
-      <Sparkle kind="plus" color={SUN} size={s(30)} style={at(1860, 560)} />
-      <Sparkle kind="dot" color={PINK} size={s(20)} style={at(1240, 980)} />
     </div>
   );
 }
@@ -145,7 +115,6 @@ function LobbyLayout({
 
   return (
     <>
-      <Decorations scale={scale} />
       <div
         style={{
           position: "relative",

@@ -1,8 +1,8 @@
 // Generates placeholder ingredient + dish SVGs into public/assets from src/data/menu.json.
-// Final art can overwrite any file in public/assets without code changes; re-running this
-// script regenerates (and overwrites) every placeholder.
+// Final art can overwrite any file in public/assets without code changes. Re-running this
+// script only rewrites placeholders: files marked data-final-art are left alone.
 //   node scripts/generate-assets.mjs
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -220,8 +220,15 @@ function labelPill(text) {
 }
 
 let written = 0;
+let keptFinalArt = 0;
 const write = (name, content) => {
-  writeFileSync(join(outDir, name), content);
+  const path = join(outDir, name);
+  // Files marked data-final-art hold real artwork; never overwrite them with a placeholder.
+  if (existsSync(path) && readFileSync(path, "utf8").includes("data-final-art")) {
+    keptFinalArt++;
+    return;
+  }
+  writeFileSync(path, content);
   written++;
 };
 
@@ -399,4 +406,6 @@ for (const recipe of menu.recipes) {
   write(`dish-${recipe.id}.svg`, svg("-4 -4 128 128", body, INK));
 }
 
-console.log(`Wrote ${written} files to ${outDir}`);
+console.log(
+  `Wrote ${written} placeholder files to ${outDir}; kept ${keptFinalArt} final-art files`,
+);

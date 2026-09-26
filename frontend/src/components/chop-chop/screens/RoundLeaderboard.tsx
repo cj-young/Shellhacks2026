@@ -10,6 +10,7 @@ import {
   nunito,
 } from "../design";
 import { CONFETTI } from "./HostVictoryNew";
+import { VeggieBackground } from "../VeggieBackground";
 
 export type LeaderboardEntry = {
   id: string;
@@ -82,6 +83,7 @@ export function RoundLeaderboard({
         color: INK,
       }}
     >
+      <VeggieBackground />
       {scale !== null && (
         <>
           {CONFETTI.map((c, i) => (

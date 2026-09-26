@@ -27,14 +27,19 @@ import {
   PlayerStoreProduce,
 } from "./screens/MenuStates";
 import { FitToViewport } from "./FitToViewport";
+import {
+  VEGGIE_SIZES_CANVAS,
+  VeggieBackgroundSizes,
+} from "./screens/VeggieBackgroundSizes";
 
 type Screen = { id: string; label: string; component: React.ComponentType };
-type Device = "host" | "player" | "sheet";
+type Device = "host" | "player" | "sheet" | "sizes";
 
 const DEVICE_SIZE: Record<Device, { width: number; height: number }> = {
   host: { width: 1920, height: 1080 },
   player: { width: 410, height: 864 },
   sheet: ASSET_SHEET_SIZE,
+  sizes: VEGGIE_SIZES_CANVAS,
 };
 
 const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
@@ -134,6 +139,17 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
         id: "asset-sheet",
         label: "Ingredient & dish sheet",
         component: AssetSheet,
+      },
+    ],
+  },
+  {
+    title: "Backgrounds",
+    device: "sizes",
+    screens: [
+      {
+        id: "veggie-background-sizes",
+        label: "Veggie background · sizes",
+        component: VeggieBackgroundSizes,
       },
     ],
   },

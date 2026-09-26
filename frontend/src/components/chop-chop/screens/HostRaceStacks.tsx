@@ -18,6 +18,7 @@ import { IngredientIcon } from "../IngredientIcon";
 import { dishAsset } from "#/data/menu";
 import type { Gesture, MenuRecipe } from "#/data/menu";
 import { GameIcon } from "../race";
+import { VeggieBackground } from "../VeggieBackground";
 
 export type ShopItem = { kind: string; rot: number; done: boolean };
 
@@ -162,15 +163,19 @@ export function HostRaceStacks({
         position: "relative",
         overflow: "hidden",
         backgroundColor: PAGE_BG,
-        backgroundImage: `radial-gradient(${DOT} ${2.5 * scale}px, transparent ${3 * scale}px)`,
-        backgroundSize: `${40 * scale}px ${40 * scale}px`,
         fontFamily: "Nunito, sans-serif",
         color: INK,
       }}
     >
+      <VeggieBackground />
       {size && (
         <div
-          style={{ height: "100%", display: "flex", flexDirection: "column" }}
+          style={{
+            position: "relative",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
           <div
             style={{
