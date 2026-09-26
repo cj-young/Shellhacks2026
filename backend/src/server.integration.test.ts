@@ -44,6 +44,7 @@ interface GameStatePayload {
   players: Array<{
     id: string;
     name: string;
+    cart: Record<string, number>;
     inventory: Record<string, number>;
   }>;
 }
@@ -317,10 +318,37 @@ test("purchases items and broadcasts the inventory to everyone", async () => {
   ]);
   const hostPlayer = hostView.players.find((player) => player.name === "Hosty");
   assert.deepEqual(hostPlayer?.inventory, { [ITEM_ID]: 2 });
+  assert.deepEqual(hostPlayer?.cart, {});
   assert.deepEqual(guestView, hostView);
 
   host.close();
   guest.close();
+});
+
+test("syncs a player's cart to the shared game state", async () => {
+  const game = await gameModule.service.createGame();
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
+  const joined = waitFor<JoinedPayload>(host, "joined");
+  host.connect();
+  await joined;
+
+  const started = waitFor<GameStartedPayload>(host, "game_started");
+  const startState = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("start_game");
+  await Promise.all([started, startState]);
+
+  const cartUpdated = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("update_cart", [{ id: ITEM_ID, count: 2 }]);
+  const state = await cartUpdated;
+  const player = state.players.find((entry) => entry.name === "Hosty");
+  assert.deepEqual(player?.cart, { [ITEM_ID]: 2 });
+  assert.deepEqual(player?.inventory, {});
+
+  host.close();
 });
 
 test("consumes ingredients and broadcasts the updated inventory", async () => {

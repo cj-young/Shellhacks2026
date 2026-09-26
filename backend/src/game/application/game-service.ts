@@ -65,6 +65,17 @@ export type ConsumeItemsResult =
         | "INSUFFICIENT_INVENTORY";
     };
 
+export type UpdateCartResult =
+  | { ok: true; game: Game }
+  | {
+      ok: false;
+      code:
+        | "GAME_NOT_FOUND"
+        | "GAME_NOT_ACTIVE"
+        | "PLAYER_NOT_FOUND"
+        | "INVALID_ITEM";
+    };
+
 export class GameService {
   readonly #store: GameStore;
 
@@ -144,6 +155,7 @@ export class GameService {
 
       recipeIndex: 0,
       recipeStageIndex: 0,
+      cart: {},
       inventory: {},
       score: 0,
     };
@@ -247,7 +259,42 @@ export class GameService {
       inventory[item.id] = (inventory[item.id] ?? 0) + item.count;
     }
 
-    const updated: Player = { ...player, inventory };
+    const updated: Player = { ...player, cart: {}, inventory };
+    const next = this.#withPlayers(
+      game,
+      game.state.players.map((entry) =>
+        entry.id === updated.id ? updated : entry,
+      ),
+    );
+    await this.#store.save(next);
+
+    return { ok: true, game: next };
+  }
+
+  async updateCart(
+    code: string,
+    playerId: string,
+    items: PurchaseItem[],
+  ): Promise<UpdateCartResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+
+    if (!game) return { ok: false, code: "GAME_NOT_FOUND" };
+    if (game.status !== "active") {
+      return { ok: false, code: "GAME_NOT_ACTIVE" };
+    }
+
+    const player = game.state.players.find((entry) => entry.id === playerId);
+    if (!player) return { ok: false, code: "PLAYER_NOT_FOUND" };
+    if (!items.every(isValidPurchaseItem)) {
+      return { ok: false, code: "INVALID_ITEM" };
+    }
+
+    const cart: Inventory = {};
+    for (const item of items) {
+      cart[item.id] = (cart[item.id] ?? 0) + item.count;
+    }
+
+    const updated: Player = { ...player, cart };
     const next = this.#withPlayers(
       game,
       game.state.players.map((entry) =>

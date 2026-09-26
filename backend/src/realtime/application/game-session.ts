@@ -63,6 +63,8 @@ export interface PurchaseInput {
 
 export type ConsumeIngredientsInput = PurchaseInput;
 export type ConsumeIngredientsResult = PurchaseResult;
+export type UpdateCartInput = PurchaseInput;
+export type UpdateCartResult = PurchaseResult;
 
 const JOIN_MESSAGES: Record<string, string> = {
   GAME_NOT_FOUND: "No game found for that code",
@@ -80,7 +82,7 @@ const PURCHASE_MESSAGES: Record<string, string> = {
 const CONSUME_MESSAGES: Record<string, string> = {
   ...PURCHASE_MESSAGES,
   INSUFFICIENT_INVENTORY: "You do not have enough ingredients for this step",
-}
+};
 const END_MESSAGES: Record<string, string> = {
   GAME_NOT_FOUND: "No game found for that code",
   GAME_NOT_ACTIVE: "The game is not active",
@@ -182,6 +184,28 @@ export class GameSession {
     };
   }
 
+  async updateCart(input: UpdateCartInput): Promise<UpdateCartResult> {
+    const result = await this.#gameService.updateCart(
+      input.code,
+      input.playerId,
+      input.items,
+    );
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message: PURCHASE_MESSAGES[result.code] ?? "Unable to update the cart",
+      };
+    }
+
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+    };
+  }
+
   async consumeIngredients(
     input: ConsumeIngredientsInput,
   ): Promise<ConsumeIngredientsResult> {
@@ -216,7 +240,7 @@ export class GameSession {
           CONSUME_MESSAGES[result.code] ?? "Unable to consume ingredients",
       };
     }
-        
+
 
     const results: PlayerResult[] = [...result.game.state.players]
       .sort((a, b) => b.score - a.score)

@@ -242,6 +242,30 @@ test("addItemsToInventory merges counts into the player inventory", async () => 
   }
   const stored = await service.getGame(game.code);
   assert.deepEqual(stored?.state.players[0]?.inventory, { [ITEM_ID]: 5 });
+  assert.deepEqual(stored?.state.players[0]?.cart, {});
+});
+
+test("updateCart replaces the player's cart without changing inventory", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  const result = await service.updateCart(game.code, joined.player.id, [
+    { id: ITEM_ID, count: 2 },
+  ]);
+
+  assert.equal(result.ok, true);
+  const stored = await service.getGame(game.code);
+  assert.deepEqual(stored?.state.players[0]?.cart, { [ITEM_ID]: 2 });
+  assert.deepEqual(stored?.state.players[0]?.inventory, {});
+
+  await service.updateCart(game.code, joined.player.id, []);
+  const cleared = await service.getGame(game.code);
+  assert.deepEqual(cleared?.state.players[0]?.cart, {});
 });
 
 test("consumeItemsFromInventory removes items atomically", async () => {

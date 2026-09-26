@@ -7,6 +7,7 @@ export interface PlayerSummary {
   readonly isHost: boolean;
   readonly joinedAt: number;
   readonly connected: boolean;
+  readonly cart: Inventory;
   readonly inventory: Inventory;
 }
 
@@ -17,6 +18,7 @@ export function toPlayerSummary(player: Player): PlayerSummary {
     isHost: player.isHost,
     joinedAt: player.joinedAt,
     connected: player.connected,
+    cart: player.cart,
     inventory: player.inventory,
   };
 }

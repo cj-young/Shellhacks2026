@@ -11,6 +11,7 @@ export type PlayerSummary = {
   isHost: boolean;
   joinedAt: number;
   connected: boolean;
+  cart: Record<number, number>;
   inventory: Record<number, number>;
 };
 
