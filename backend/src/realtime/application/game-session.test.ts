@@ -34,8 +34,34 @@ test('join marks only the matching host token as host', async () => {
     assert.fail('expected all joins to succeed');
   }
   assert.equal(host.player.isHost, true);
+  assert.equal(host.player.name, 'Host');
   assert.equal(guest.player.isHost, false);
+  assert.equal(guest.player.name, 'Player');
   assert.equal(anonymous.player.isHost, false);
+});
+
+test('join normalizes the player name', async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+
+  const result = await session.join({ code: game.code, name: '  Ada   Lovelace  ' });
+
+  if (!result.ok) {
+    assert.fail('expected the join to succeed');
+  }
+  assert.equal(result.player.name, 'Ada Lovelace');
+});
+
+test('join caps the player name length', async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+
+  const result = await session.join({ code: game.code, name: 'x'.repeat(50) });
+
+  if (!result.ok) {
+    assert.fail('expected the join to succeed');
+  }
+  assert.equal(result.player.name.length, 20);
 });
 
 test('join normalizes the code and assigns a unique player id', async () => {

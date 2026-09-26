@@ -53,11 +53,12 @@ export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIo
   async function handleConnection(socket: GameSocket): Promise<void> {
     const auth = socket.handshake.auth as Record<string, unknown>;
     const code = typeof auth.code === 'string' ? auth.code : '';
+    const name = typeof auth.name === 'string' ? auth.name : undefined;
     const hostToken = typeof auth.token === 'string' ? auth.token : undefined;
 
     let result;
     try {
-      result = await session.join({ code, hostToken });
+      result = await session.join({ code, name, hostToken });
     } catch {
       socket.emit('game_error', { code: 'INTERNAL_ERROR', message: 'Unable to join the game' });
       socket.disconnect(true);

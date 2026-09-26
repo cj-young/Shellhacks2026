@@ -13,11 +13,12 @@ interface JoinedPayload {
   playerId: string;
   gameCode: string;
   isHost: boolean;
-  players: Array<{ id: string }>;
+  players: Array<{ id: string; name: string }>;
 }
 
 interface PlayerJoinedPayload {
   id: string;
+  name: string;
 }
 
 interface PlayerLeftPayload {
@@ -128,15 +129,16 @@ test('emits game_error and disconnects for an unknown code', async () => {
 test('relays presence between clients and honours the host token', async () => {
   const game = await gameModule.service.createGame();
 
-  const host = connectClient(base, { code: game.code, token: game.hostToken });
+  const host = connectClient(base, { code: game.code, token: game.hostToken, name: 'Hosty' });
   const hostJoined = waitFor<JoinedPayload>(host, 'joined');
   host.connect();
 
   const hostPayload = await hostJoined;
   assert.equal(hostPayload.isHost, true);
   assert.equal(hostPayload.players.length, 1);
+  assert.equal(hostPayload.players[0].name, 'Hosty');
 
-  const guest = connectClient(base, { code: game.code });
+  const guest = connectClient(base, { code: game.code, name: 'Guesty' });
   const guestJoined = waitFor<JoinedPayload>(guest, 'joined');
   const hostSawGuest = waitFor<PlayerJoinedPayload>(host, 'player_joined');
   guest.connect();
@@ -145,6 +147,7 @@ test('relays presence between clients and honours the host token', async () => {
   assert.equal(guestPayload.isHost, false);
   assert.equal(guestPayload.players.length, 2);
   assert.equal(presence.id, guestPayload.playerId);
+  assert.equal(presence.name, 'Guesty');
 
   const guestLeft = waitFor<PlayerLeftPayload>(host, 'player_left');
   guest.disconnect();
