@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { GameService } from '../../game/application/game-service.ts';
 import { normalizeGameCode } from '../../game/domain/code.ts';
+import type { GameState } from '../../game/domain/game.ts';
 import type { PlayerSummary } from '../domain/player.ts';
 
 export type JoinResult =
@@ -14,7 +15,7 @@ export interface JoinInput {
 }
 
 export type StartResult =
-  | { ok: true; gameCode: string }
+  | { ok: true; gameCode: string; state: GameState }
   | { ok: false; code: string; message: string };
 
 export interface StartInput {
@@ -69,6 +70,6 @@ export class GameSession {
       };
     }
 
-    return { ok: true, gameCode: result.game.code };
+    return { ok: true, gameCode: result.game.code, state: result.game.state };
   }
 }

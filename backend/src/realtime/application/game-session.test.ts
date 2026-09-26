@@ -91,6 +91,7 @@ test('start activates the game for the host', async () => {
     assert.fail('expected start to succeed');
   }
   assert.equal(result.gameCode, game.code);
+  assert.equal(result.state.recipeOrder.length, 3);
   assert.equal((await gameService.getGame(game.code))?.status, 'active');
 });
 

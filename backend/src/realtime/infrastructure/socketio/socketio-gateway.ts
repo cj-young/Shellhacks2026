@@ -92,11 +92,6 @@ export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIo
       void handleStartGame();
     });
 
-    socket.on('send_recipe_order', (order:number[]) => {
-      console.log(order)
-      io.to(room).emit('game_error', {code: "400", message: 'AHHHHHHHHHHHHHH'})
-    })
-
     async function handleStartGame(): Promise<void> {
       const startResult = await session.start({ code: gameCode, isHost: player.isHost });
 
@@ -106,6 +101,7 @@ export function createSocketIoGateway(options: SocketIoGatewayOptions): SocketIo
       }
 
       io.to(room).emit('game_started', { gameCode: startResult.gameCode });
+      io.to(room).emit('update_state', startResult.state);
     }
 
     socket.on('disconnect', () => {

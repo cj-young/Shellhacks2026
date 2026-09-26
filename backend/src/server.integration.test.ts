@@ -33,6 +33,10 @@ interface GameStartedPayload {
   gameCode: string;
 }
 
+interface GameStatePayload {
+  recipeOrder: unknown[];
+}
+
 function connectClient(base: string, auth: Record<string, string>, origin?: string): Socket {
   return io(base, {
     path: '/socket.io/',
@@ -168,11 +172,20 @@ test('host starts the game and notifies every player', async () => {
 
   const hostStarted = waitFor<GameStartedPayload>(host, 'game_started');
   const guestStarted = waitFor<GameStartedPayload>(guest, 'game_started');
+  const hostState = waitFor<GameStatePayload>(host, 'update_state');
+  const guestState = waitFor<GameStatePayload>(guest, 'update_state');
   host.emit('start_game');
 
-  const [hostEvent, guestEvent] = await Promise.all([hostStarted, guestStarted]);
+  const [hostEvent, guestEvent, hostGameState, guestGameState] = await Promise.all([
+    hostStarted,
+    guestStarted,
+    hostState,
+    guestState,
+  ]);
   assert.equal(hostEvent.gameCode, game.code);
   assert.equal(guestEvent.gameCode, game.code);
+  assert.equal(hostGameState.recipeOrder.length, 3);
+  assert.deepEqual(guestGameState, hostGameState);
 
   host.close();
   guest.close();

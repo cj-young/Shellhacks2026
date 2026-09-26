@@ -1,5 +1,6 @@
+import { generateRecipeOrder } from '../../util.ts';
 import { generateGameCode, generateHostToken, normalizeGameCode } from '../domain/code.ts';
-import type { Game } from '../domain/game.ts';
+import { MakeEmptyState, type Game } from '../domain/game.ts';
 import type { GameStore } from '../ports/game-store.ts';
 
 const MAX_CODE_ATTEMPTS = 5;
@@ -22,6 +23,7 @@ export class GameService {
         hostToken: generateHostToken(),
         status: 'lobby',
         createdAt: Date.now(),
+        state: MakeEmptyState()
       };
 
       if (await this.#store.createIfAbsent(game)) {
@@ -47,7 +49,9 @@ export class GameService {
       return { ok: false, code: 'ALREADY_STARTED' };
     }
 
-    const started: Game = { ...game, status: 'active' };
+    const order = generateRecipeOrder(3)
+
+    const started: Game = { ...game, status: 'active', state: {...game.state, recipeOrder: order}};
     await this.#store.save(started);
 
     return { ok: true, game: started };

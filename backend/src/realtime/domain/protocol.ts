@@ -1,3 +1,4 @@
+import type { GameState } from '../../game/domain/game.ts';
 import type { PlayerSummary } from './player.ts';
 
 export interface JoinedPayload {
@@ -17,6 +18,7 @@ export interface ServerToClientEvents {
   player_left: (payload: { playerId: string }) => void;
   game_started: (payload: GameStartedPayload) => void;
   game_error: (payload: { code: string; message: string }) => void;
+  update_state: (state: GameState) => void;
 }
 
 export interface ClientToServerEvents {
