@@ -1,17 +1,19 @@
-import express, { type Express, type Request, type Response } from 'express';
+import express, { type Express, type Request, type Response, type Router } from 'express';
 
-import { createGameModule } from './game/index.ts';
+export interface AppDependencies {
+  gameRouter: Router;
+}
 
-const app: Express = express();
+export function createApp({ gameRouter }: AppDependencies): Express {
+  const app = express();
 
-app.use(express.json());
+  app.use(express.json());
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!');
-});
+  app.get('/', (_req: Request, res: Response) => {
+    res.send('Hello World!');
+  });
 
-app.use('/games', createGameModule());
+  app.use('/games', gameRouter);
 
-app.listen(3001, () => {
-  console.log('Server is running on http://localhost:3001');
-});
+  return app;
+}

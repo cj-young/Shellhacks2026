@@ -1,7 +1,7 @@
 COMPOSE ?= docker compose
 
 .DEFAULT_GOAL := help
-.PHONY: help up up-d down build restart logs ps sh-backend sh-frontend clean
+.PHONY: help up up-d down build restart logs ps sh-backend sh-frontend test clean
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -32,6 +32,9 @@ sh-backend: ## Shell into the backend container
 
 sh-frontend: ## Shell into the frontend container
 	$(COMPOSE) exec frontend sh
+
+test: ## Run the backend test suite
+	$(COMPOSE) exec backend npm test
 
 clean: ## Stop everything and delete volumes (Caddy data/config)
 	$(COMPOSE) down -v

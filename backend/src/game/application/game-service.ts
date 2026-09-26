@@ -1,4 +1,4 @@
-import { generateGameCode } from '../domain/code.ts';
+import { generateGameCode, generateHostToken, normalizeGameCode } from '../domain/code.ts';
 import type { Game } from '../domain/game.ts';
 import type { GameStore } from '../ports/game-store.ts';
 
@@ -15,6 +15,7 @@ export class GameService {
     for (let attempt = 0; attempt < MAX_CODE_ATTEMPTS; attempt += 1) {
       const game: Game = {
         code: generateGameCode(),
+        hostToken: generateHostToken(),
         createdAt: Date.now(),
       };
 
@@ -24,5 +25,9 @@ export class GameService {
     }
 
     throw new Error('Failed to allocate a unique game code');
+  }
+
+  async getGame(code: string): Promise<Game | undefined> {
+    return this.#store.get(normalizeGameCode(code));
   }
 }

@@ -5,9 +5,14 @@ import { createGameRouter } from './http/game-routes.ts';
 import { InMemoryGameStore } from './infrastructure/in-memory-game-store.ts';
 import type { GameStore } from './ports/game-store.ts';
 
-export function createGameModule(store: GameStore = new InMemoryGameStore()): Router {
-  const gameService = new GameService(store);
-  return createGameRouter(gameService);
+export interface GameModule {
+  router: Router;
+  service: GameService;
+}
+
+export function createGameModule(store: GameStore = new InMemoryGameStore()): GameModule {
+  const service = new GameService(store);
+  return { router: createGameRouter(service), service };
 }
 
 export { GameService } from './application/game-service.ts';
