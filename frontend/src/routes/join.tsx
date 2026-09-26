@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useState } from 'react'
 import { useGameConnection } from '#/lib/use-game-connection'
+import { ClientInterface } from '#/components/client/ClientInterface'
 
 export const Route = createFileRoute('/join')({ component: JoinScreen })
 
@@ -20,6 +21,9 @@ function JoinScreen() {
     if (!name || !code) return
     setJoined({ code, name })
   }, [codeInput, nameInput])
+
+  if(connection.started)
+    return (<ClientInterface connection={connection}></ClientInterface>)
 
   return (
     <div className="min-h-screen bg-slate-950 p-8 text-slate-100">
