@@ -7,7 +7,7 @@ export type RecipeStage = {
   type: string;
   image?: string;
   lines: LineType[];
-  ingredientsConsumed: Map<number, number>;
+  ingredientsConsumed: Record<number, number>;
 };
 
 export type LineType = {

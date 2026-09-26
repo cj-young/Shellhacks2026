@@ -28,6 +28,7 @@ export type RecipeStage = {
   type: string;
   image?: string;
   lines: LineType[];
+  ingredientsConsumed: Record<number, number>;
 };
 
 export type LineType = {
