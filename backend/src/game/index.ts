@@ -17,13 +17,19 @@ export function createGameModule(
   return { router: createGameRouter(service), service };
 }
 
-export { GameService, MAX_PLAYERS } from "./application/game-service.ts";
+export {
+  GameService,
+  MAX_ITEM_COUNT,
+  MAX_PLAYERS,
+} from "./application/game-service.ts";
 export { InMemoryGameStore } from "./infrastructure/in-memory-game-store.ts";
 export type {
+  AddItemsResult,
   JoinPlayerInput,
   JoinPlayerResult,
   StartGameResult,
 } from "./application/game-service.ts";
 export type { GameStore } from "./ports/game-store.ts";
 export type { Game, GameStatus } from "./domain/game.ts";
+export type { Inventory, PurchaseItem } from "./domain/inventory.ts";
 export type { Player } from "./domain/player.ts";

@@ -115,6 +115,19 @@ channels:
     messages:
       startGame:
         $ref: '#/components/messages/StartGame'
+  purchaseItems:
+    address: purchase_items
+    title: Purchase items
+    description: |
+      Sent by a player to buy store items. Purchases are free and all-or-nothing, and are only
+      accepted while the game is active. On success the server broadcasts `update_state` (with
+      the updated inventories) to everyone; on failure the sender receives `game_error` with
+      `GAME_NOT_ACTIVE`, `PLAYER_NOT_FOUND` or `INVALID_ITEM`.
+    x-socketio:
+      event: purchase_items
+    messages:
+      purchaseItems:
+        $ref: '#/components/messages/PurchaseItems'
 
 operations:
   sendJoined:
@@ -147,6 +160,11 @@ operations:
     summary: Receive a start request from the host.
     channel:
       $ref: '#/channels/startGame'
+  receivePurchaseItems:
+    action: receive
+    summary: Receive a purchase request from a player.
+    channel:
+      $ref: '#/channels/purchaseItems'
 
 components:
   messages:
@@ -179,6 +197,11 @@ components:
       name: start_game
       title: Start game
       description: No payload.
+    PurchaseItems:
+      name: purchase_items
+      title: Purchase items
+      payload:
+        $ref: '#/components/schemas/PurchaseItemsPayload'
   schemas:
     PlayerSummary:
       type: object
@@ -189,6 +212,7 @@ components:
         - joinedAt
         - isHost
         - connected
+        - inventory
       properties:
         id:
           type: string
@@ -211,6 +235,13 @@ components:
         connected:
           type: boolean
           description: False when the player has disconnected but is still in the roster.
+        inventory:
+          type: object
+          description: Map of ingredient id to the quantity held.
+          additionalProperties:
+            type: integer
+          examples:
+            - { "0": 2 }
     JoinedPayload:
       type: object
       additionalProperties: false
@@ -254,6 +285,30 @@ components:
         gameCode:
           type: string
           pattern: '^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$'
+    PurchaseItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - count
+      properties:
+        id:
+          type: integer
+          description: Ingredient id (positional index into the ingredients catalogue).
+          examples:
+            - 0
+        count:
+          type: integer
+          description: Quantity to add (1-99).
+          minimum: 1
+          maximum: 99
+          examples:
+            - 2
+    PurchaseItemsPayload:
+      type: array
+      description: Items to purchase. Processed all-or-nothing.
+      items:
+        $ref: '#/components/schemas/PurchaseItem'
     GameErrorPayload:
       type: object
       additionalProperties: false
@@ -268,6 +323,9 @@ components:
             - GAME_NOT_FOUND
             - GAME_STARTED
             - GAME_FULL
+            - GAME_NOT_ACTIVE
+            - PLAYER_NOT_FOUND
+            - INVALID_ITEM
             - NOT_HOST
             - ALREADY_STARTED
             - INTERNAL_ERROR

@@ -2,6 +2,7 @@ import type { Server as HttpServer } from "node:http";
 
 import { Server, type Socket } from "socket.io";
 
+import type { PurchaseItem } from "../../../game/domain/inventory.ts";
 import type { GameSession } from "../../application/game-session.ts";
 import type {
   ClientToServerEvents,
@@ -123,6 +124,36 @@ export function createSocketIoGateway(
       io.to(room).emit("update_state", startResult.state);
     }
 
+    socket.on("purchase_items", (items) => {
+      void handlePurchase(items);
+    });
+
+    async function handlePurchase(items: PurchaseItem[]): Promise<void> {
+      if (!isPurchaseItems(items)) {
+        socket.emit("game_error", {
+          code: "INVALID_ITEM",
+          message: "Invalid purchase",
+        });
+        return;
+      }
+
+      const purchase = await session.purchase({
+        code: gameCode,
+        playerId: player.id,
+        items,
+      });
+
+      if (!purchase.ok) {
+        socket.emit("game_error", {
+          code: purchase.code,
+          message: purchase.message,
+        });
+        return;
+      }
+
+      io.to(room).emit("update_state", purchase.state);
+    }
+
     socket.on("disconnect", () => {
       void handleDisconnect();
     });
@@ -144,6 +175,19 @@ export function createSocketIoGateway(
 
 function roomFor(gameCode: string): string {
   return `game:${gameCode}`;
+}
+
+function isPurchaseItems(value: unknown): value is PurchaseItem[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as { id?: unknown }).id === "number" &&
+        typeof (item as { count?: unknown }).count === "number",
+    )
+  );
 }
 
 function isOriginAllowed(
