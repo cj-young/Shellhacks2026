@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChopChopDevRouteImport } from './routes/chop-chop-dev'
 import { Route as HostRouteImport } from './routes/host'
 import { Route as JoinRouteImport } from './routes/join'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChopChopDevRoute = ChopChopDevRouteImport.update({
+  id: '/chop-chop-dev',
+  path: '/chop-chop-dev',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HostRoute = HostRouteImport.update({
@@ -31,30 +37,34 @@ const JoinRoute = JoinRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chop-chop-dev': typeof ChopChopDevRoute
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/chop-chop-dev': typeof ChopChopDevRoute
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chop-chop-dev': typeof ChopChopDevRoute
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/host' | '/join'
+  fullPaths: '/' | '/chop-chop-dev' | '/host' | '/join'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/host' | '/join'
-  id: '__root__' | '/' | '/host' | '/join'
+  to: '/' | '/chop-chop-dev' | '/host' | '/join'
+  id: '__root__' | '/' | '/chop-chop-dev' | '/host' | '/join'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChopChopDevRoute: typeof ChopChopDevRoute
   HostRoute: typeof HostRoute
   JoinRoute: typeof JoinRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chop-chop-dev': {
+      id: '/chop-chop-dev'
+      path: '/chop-chop-dev'
+      fullPath: '/chop-chop-dev'
+      preLoaderRoute: typeof ChopChopDevRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/host': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChopChopDevRoute: ChopChopDevRoute,
   HostRoute: HostRoute,
   JoinRoute: JoinRoute,
 }
