@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { CursorPoint } from './CursorPathTracker'
-import { GestureRecipe, type GestureRecipeDefinition } from './GestureRecipe'
+import { GestureRecipe } from './GestureRecipe'
+import type { GestureRecipeDefinition } from './GestureRecipe'
 
 export type MasterRecipeProps = {
   recipe: GestureRecipeDefinition

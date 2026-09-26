@@ -1,27 +1,29 @@
-import type { Server as HttpServer } from 'node:http';
+import type { Server as HttpServer } from 'node:http'
 
-import type { GameService } from '../game/index.ts';
-import { GameSession } from './application/game-session.ts';
-import { createSocketIoGateway } from './infrastructure/socketio/socketio-gateway.ts';
+import type { GameService } from '../game/index.ts'
+import { GameSession } from './application/game-session.ts'
+import { createSocketIoGateway } from './infrastructure/socketio/socketio-gateway.ts'
 
 export interface RealtimeModuleOptions {
-  server: HttpServer;
-  gameService: GameService;
-  allowedOrigins?: readonly string[];
+  server: HttpServer
+  gameService: GameService
+  allowedOrigins?: readonly string[]
 }
 
 export interface RealtimeModule {
-  close(): Promise<void>;
+  close(): Promise<void>
 }
 
-export function createRealtimeModule(options: RealtimeModuleOptions): RealtimeModule {
-  const session = new GameSession(options.gameService);
+export function createRealtimeModule(
+  options: RealtimeModuleOptions,
+): RealtimeModule {
+  const session = new GameSession(options.gameService)
 
   return createSocketIoGateway({
     server: options.server,
     session,
     allowedOrigins: options.allowedOrigins,
-  });
+  })
 }
 
 export type {
@@ -31,5 +33,5 @@ export type {
   JoinedPayload,
   ServerToClientEvents,
   SocketData,
-} from './domain/protocol.ts';
-export type { PlayerSummary } from './domain/player.ts';
+} from './domain/protocol.ts'
+export type { PlayerSummary } from './domain/player.ts'

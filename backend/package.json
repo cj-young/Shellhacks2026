@@ -9,16 +9,25 @@
   "scripts": {
     "test": "node --test --test-timeout=10000 \"src/**/*.test.ts\"",
     "test:watch": "node --test --watch \"src/**/*.test.ts\"",
-    "start": "node src/server.ts"
+    "start": "node src/server.ts",
+    "lint": "eslint",
+    "format": "eslint --fix && prettier --write .",
+    "check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "express": "^5.2.1",
     "socket.io": "^4.8.4"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.3",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.9",
     "socket.io-client": "^4.8.4",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1"
   }
 }

@@ -1,9 +1,10 @@
+node_modules
 package-lock.json
-pnpm-lock.yaml
-yarn.lock
 dist
 dist-ssr
 .output
 .tanstack
 .nitro
-src/routeTree.gen.ts
+__unconfig*
+openapi.yaml
+asyncapi.yaml
