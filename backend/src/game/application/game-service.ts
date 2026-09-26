@@ -187,6 +187,7 @@ export class GameService {
       return { ok: false, code: "PLAYER_NOT_FOUND" };
     }
 
+    console.log("reached up to error")
     if (items.length === 0 || !items.every(isValidPurchaseItem)) {
       return { ok: false, code: "INVALID_ITEM" };
     }
