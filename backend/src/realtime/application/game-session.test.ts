@@ -205,3 +205,46 @@ test("leave marks the player disconnected without removing them", async () => {
   assert.equal(stored?.state.players.length, 1);
   assert.equal(stored?.state.players[0]?.connected, false);
 });
+
+test("purchase adds items and returns the updated client state", async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+  const joined = await session.join({ code: game.code, name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await gameService.startGame(game.code);
+
+  const result = await session.purchase({
+    code: game.code,
+    playerId: joined.player.id,
+    items: [{ id: 0, count: 2 }],
+  });
+
+  if (!result.ok) {
+    assert.fail("expected the purchase to succeed");
+  }
+  assert.equal(result.gameCode, game.code);
+  assert.equal(result.state.players[0]?.inventory[0], 2);
+});
+
+test("purchase rejects when the game is not active", async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+  const joined = await session.join({ code: game.code });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+
+  const result = await session.purchase({
+    code: game.code,
+    playerId: joined.player.id,
+    items: [{ id: 0, count: 1 }],
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected the purchase to fail");
+  }
+  assert.equal(result.code, "GAME_NOT_ACTIVE");
+});

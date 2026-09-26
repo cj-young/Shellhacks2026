@@ -1,4 +1,4 @@
-import type { Ingredient } from "./recipe.ts";
+import type { Inventory } from "./inventory.ts";
 
 export const MAX_PLAYER_NAME_LENGTH = 20;
 
@@ -12,7 +12,7 @@ export interface Player {
 
   recipeIndex: number;
   recipeStageIndex: number;
-  inventory: Ingredient[];
+  inventory: Inventory;
   score: number;
 }
 

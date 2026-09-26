@@ -1,5 +1,6 @@
+import ingredients from "./data/ingredients.json" with { type: "json" };
 import recipes from "./data/recipes.json" with { type: "json" };
-import type { Recipe } from "./game/domain/game.ts";
+import type { Recipe } from "./game/domain/recipe.ts";
 
 export function getRandomIntInclusive(min: number, max: number) {
   min = Math.ceil(min);
@@ -21,4 +22,9 @@ export function generateRecipeOrder(length: number) {
   }
 
   return res;
+}
+
+/** Ingredient ids are positional indexes into the ingredients catalogue. */
+export function isKnownIngredientId(id: number): boolean {
+  return Number.isInteger(id) && id >= 0 && id < ingredients.length;
 }

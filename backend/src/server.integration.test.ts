@@ -38,7 +38,11 @@ interface GameStartedPayload {
 
 interface GameStatePayload {
   recipeOrder: unknown[];
-  players: Array<Record<string, unknown>>;
+  players: Array<{
+    id: string;
+    name: string;
+    inventory: Record<string, number>;
+  }>;
 }
 
 function connectClient(
@@ -238,6 +242,77 @@ test("host starts the game, notifies everyone, and never leaks tokens", async ()
 
   host.close();
   guest.close();
+});
+
+test("purchases items and broadcasts the inventory to everyone", async () => {
+  const game = await gameModule.service.createGame();
+
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
+  const hostJoined = waitFor<JoinedPayload>(host, "joined");
+  host.connect();
+  await hostJoined;
+
+  const guest = connectClient(base, { code: game.code, name: "Guesty" });
+  const guestJoined = waitFor<JoinedPayload>(guest, "joined");
+  guest.connect();
+  await guestJoined;
+
+  const hostStarted = waitFor<GameStartedPayload>(host, "game_started");
+  const guestStarted = waitFor<GameStartedPayload>(guest, "game_started");
+  const hostStartState = waitFor<GameStatePayload>(host, "update_state");
+  const guestStartState = waitFor<GameStatePayload>(guest, "update_state");
+  host.emit("start_game");
+  await Promise.all([
+    hostStarted,
+    guestStarted,
+    hostStartState,
+    guestStartState,
+  ]);
+
+  const hostPurchase = waitFor<GameStatePayload>(host, "update_state");
+  const guestPurchase = waitFor<GameStatePayload>(guest, "update_state");
+  host.emit("purchase_items", [{ id: 0, count: 2 }]);
+
+  const [hostView, guestView] = await Promise.all([
+    hostPurchase,
+    guestPurchase,
+  ]);
+  const hostPlayer = hostView.players.find((player) => player.name === "Hosty");
+  assert.deepEqual(hostPlayer?.inventory, { 0: 2 });
+  assert.deepEqual(guestView, hostView);
+
+  host.close();
+  guest.close();
+});
+
+test("rejects an invalid purchase", async () => {
+  const game = await gameModule.service.createGame();
+
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
+  const hostJoined = waitFor<JoinedPayload>(host, "joined");
+  host.connect();
+  await hostJoined;
+
+  const started = waitFor<GameStartedPayload>(host, "game_started");
+  const startState = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("start_game");
+  await Promise.all([started, startState]);
+
+  const failure = waitFor<GameErrorPayload>(host, "game_error");
+  host.emit("purchase_items", [{ id: 999, count: 1 }]);
+
+  const error = await failure;
+  assert.equal(error.code, "INVALID_ITEM");
+
+  host.close();
 });
 
 test("rejects a join once the game has started", async () => {

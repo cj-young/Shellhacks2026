@@ -1,5 +1,6 @@
 import type { GameService } from "../../game/application/game-service.ts";
 import type { GameState } from "../../game/domain/game.ts";
+import type { PurchaseItem } from "../../game/domain/inventory.ts";
 import { toPlayerSummary } from "../domain/player.ts";
 import type { PlayerSummary } from "../domain/player.ts";
 import type { ClientGameState } from "../domain/protocol.ts";
@@ -35,10 +36,27 @@ export interface LeaveInput {
   playerId: string;
 }
 
+export type PurchaseResult =
+  | { ok: true; gameCode: string; state: ClientGameState }
+  | { ok: false; code: string; message: string };
+
+export interface PurchaseInput {
+  code: string;
+  playerId: string;
+  items: PurchaseItem[];
+}
+
 const JOIN_MESSAGES: Record<string, string> = {
   GAME_NOT_FOUND: "No game found for that code",
   GAME_STARTED: "This game has already started",
   GAME_FULL: "This game is full",
+};
+
+const PURCHASE_MESSAGES: Record<string, string> = {
+  GAME_NOT_FOUND: "No game found for that code",
+  GAME_NOT_ACTIVE: "The game is not active",
+  PLAYER_NOT_FOUND: "Player not found in this game",
+  INVALID_ITEM: "One or more items are invalid",
 };
 
 export class GameSession {
@@ -108,6 +126,29 @@ export class GameSession {
 
   async leave(input: LeaveInput): Promise<void> {
     await this.#gameService.markDisconnected(input.code, input.playerId);
+  }
+
+  async purchase(input: PurchaseInput): Promise<PurchaseResult> {
+    const result = await this.#gameService.addItemsToInventory(
+      input.code,
+      input.playerId,
+      input.items,
+    );
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message:
+          PURCHASE_MESSAGES[result.code] ?? "Unable to purchase these items",
+      };
+    }
+
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+    };
   }
 }
 
