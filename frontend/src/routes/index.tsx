@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CursorPathTracker, type CursorPoint } from '../components/CursorPathTracker'
-import { useEffect, useState } from 'react'
-import { LineTarget } from '#/components/LineTarget'
-import { GestureRecipe } from '#/components/GestureRecipe'
+import { useState } from 'react'
+import { MasterRecipe } from '#/components/MasterRecipe'
 
 import recipes from "../data/recipes.json"
 
@@ -18,8 +17,7 @@ function Home() {
 
   return (<div className='relative'>
       <CursorPathTracker onPointsChange={setCurrentPoints} />
-      {/* <LineTarget points={currentPoints} origin={{ x: 100, y: 100 }} end={{ x: 200, y: 200 }} radius={30} onMatchChange={(m)=>console.log(m)} allowStartOutsideTarget={true} /> */}
-      <GestureRecipe
+      <MasterRecipe
         recipe={recipes[0]}
         points={currentPoints}
       />

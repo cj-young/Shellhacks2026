@@ -20,32 +20,32 @@ export type GestureRecipeDefinition = {
 }
 
 export type GestureRecipeProps = {
-  recipe: GestureRecipeDefinition
+  stage: GestureRecipeStage
   points: CursorPoint[]
-  /** True only while every line in this recipe has been matched. */
+  /** True only while every line in this stage has been matched. */
   onMatchChange?: (matches: boolean) => void
 }
 
 type MatchState = {
-  recipeKey: string
+  stageKey: string
   lines: boolean[]
 }
 
 export function GestureRecipe({
-  recipe,
+  stage,
   points,
   onMatchChange,
 }: GestureRecipeProps) {
-  const recipeKey = useMemo(() => JSON.stringify(recipe), [recipe])
-  const stageLines = recipe.stages[0]?.lines ?? []
+  const stageKey = useMemo(() => JSON.stringify(stage), [stage])
+  const stageLines = stage.lines
   const [matchState, setMatchState] = useState<MatchState>({
-    recipeKey,
+    stageKey,
     lines: Array(stageLines.length).fill(false),
   })
 
   const matches =
     stageLines.length > 0 &&
-    matchState.recipeKey === recipeKey &&
+    matchState.stageKey === stageKey &&
     matchState.lines.length === stageLines.length &&
     matchState.lines.every(Boolean)
 
@@ -56,7 +56,7 @@ export function GestureRecipe({
   const updateLineMatch = (index: number, lineMatches: boolean) => {
     setMatchState((currentState) => {
       const currentMatches =
-        currentState.recipeKey === recipeKey
+        currentState.stageKey === stageKey
           ? currentState.lines
           : Array(stageLines.length).fill(false)
 
@@ -65,16 +65,25 @@ export function GestureRecipe({
       const nextMatches = [...currentMatches]
       nextMatches[index] = lineMatches
 
-      return { recipeKey, lines: nextMatches }
+      return { stageKey, lines: nextMatches }
     })
   }
 
   return (
-    <div className='relative w-75 h-75 pointer-events-none flex'>
-      <p className='absolute top-0 left-0 bottom-0 right-0 m-auto w-fit h-fit z-50 text-white'>{matches ? "Success!" : "Failure"}</p>
+    <div className="relative w-75 h-75 pointer-events-none flex">
+      {stage.image && (
+        <img
+          alt=""
+          className="absolute inset-0 h-full w-full object-contain"
+          src={stage.image}
+        />
+      )}
+      <p className="absolute top-0 left-0 bottom-0 right-0 m-auto w-fit h-fit z-50 text-white">
+        {matches ? 'Success!' : 'Failure'}
+      </p>
       {stageLines.map((line, index) => (
         <LineTarget
-          key={`${recipeKey}:${index}`}
+          key={`${stageKey}:${index}`}
           allowStartOutsideTarget
           end={line.end}
           onMatchChange={(lineMatches) => updateLineMatch(index, lineMatches)}
