@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChopChopDevRouteImport } from './routes/chop-chop-dev'
+import { Route as GestureDemoRouteImport } from './routes/gesture-demo'
 import { Route as HostRouteImport } from './routes/host'
 import { Route as JoinRouteImport } from './routes/join'
+import { Route as PracticeRouteImport } from './routes/practice'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const ChopChopDevRoute = ChopChopDevRouteImport.update({
   id: '/chop-chop-dev',
   path: '/chop-chop-dev',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestureDemoRoute = GestureDemoRouteImport.update({
+  id: '/gesture-demo',
+  path: '/gesture-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HostRoute = HostRouteImport.update({
@@ -34,39 +41,60 @@ const JoinRoute = JoinRouteImport.update({
   path: '/join',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PracticeRoute = PracticeRouteImport.update({
+  id: '/practice',
+  path: '/practice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/chop-chop-dev': typeof ChopChopDevRoute
+  '/gesture-demo': typeof GestureDemoRoute
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
+  '/practice': typeof PracticeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/chop-chop-dev': typeof ChopChopDevRoute
+  '/gesture-demo': typeof GestureDemoRoute
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
+  '/practice': typeof PracticeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/chop-chop-dev': typeof ChopChopDevRoute
+  '/gesture-demo': typeof GestureDemoRoute
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
+  '/practice': typeof PracticeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chop-chop-dev' | '/host' | '/join'
+  fullPaths:
+    '/' | '/chop-chop-dev' | '/gesture-demo' | '/host' | '/join' | '/practice'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chop-chop-dev' | '/host' | '/join'
-  id: '__root__' | '/' | '/chop-chop-dev' | '/host' | '/join'
+  to: '/' | '/chop-chop-dev' | '/gesture-demo' | '/host' | '/join' | '/practice'
+  id:
+    | '__root__'
+    | '/'
+    | '/chop-chop-dev'
+    | '/gesture-demo'
+    | '/host'
+    | '/join'
+    | '/practice'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChopChopDevRoute: typeof ChopChopDevRoute
+  GestureDemoRoute: typeof GestureDemoRoute
   HostRoute: typeof HostRoute
   JoinRoute: typeof JoinRoute
+  PracticeRoute: typeof PracticeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -85,6 +113,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChopChopDevRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gesture-demo': {
+      id: '/gesture-demo'
+      path: '/gesture-demo'
+      fullPath: '/gesture-demo'
+      preLoaderRoute: typeof GestureDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/host': {
       id: '/host'
       path: '/host'
@@ -99,14 +134,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JoinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/practice': {
+      id: '/practice'
+      path: '/practice'
+      fullPath: '/practice'
+      preLoaderRoute: typeof PracticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChopChopDevRoute: ChopChopDevRoute,
+  GestureDemoRoute: GestureDemoRoute,
   HostRoute: HostRoute,
   JoinRoute: JoinRoute,
+  PracticeRoute: PracticeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

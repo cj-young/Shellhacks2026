@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 112 112" fill="none" stroke="#2B2A6B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M50 6 Q66 6 70 28 Q84 54 66 68 Q50 78 34 68 Q16 54 30 28 Q34 6 50 6Z" fill="#1E8A4A"/>
+    <path d="M50 16 Q60 16 62 32 Q74 52 60 62 Q50 68 40 62 Q26 52 38 32 Q40 16 50 16Z" fill="#8FD14F" stroke-width="3"/>
+    <circle cx="50" cy="48" r="10" fill="#C9803F"/>
+    <circle cx="46" cy="45" r="3" fill="#FFFFFF" stroke="none"/>
+    <rect x="8" y="78" width="84" height="20" rx="10" fill="#FFFFFF" stroke="#2B2A6B" stroke-width="3"/>
+    <text x="50" y="93" font-family="Nunito, 'Arial Rounded MT Bold', Arial, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#2B2A6B" stroke="none" text-anchor="middle">AVOCADO</text>
+</svg>

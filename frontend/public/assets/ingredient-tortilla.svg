@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 112 112" fill="none" stroke="#2B2A6B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="50" cy="38" r="32" fill="#FFF1D2"/>
+    <circle cx="36" cy="28" r="4" fill="#F2BE63" stroke-width="2.5" stroke="#2B2A6B"/><circle cx="62" cy="24" r="3" fill="#F2BE63" stroke-width="2.5" stroke="#2B2A6B"/>
+    <circle cx="58" cy="50" r="4" fill="#F2BE63" stroke-width="2.5" stroke="#2B2A6B"/><circle cx="38" cy="50" r="3" fill="#F2BE63" stroke-width="2.5" stroke="#2B2A6B"/>
+    <rect x="8" y="78" width="84" height="20" rx="10" fill="#FFFFFF" stroke="#2B2A6B" stroke-width="3"/>
+    <text x="50" y="93" font-family="Nunito, 'Arial Rounded MT Bold', Arial, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#2B2A6B" stroke="none" text-anchor="middle">TORTILLA</text>
+</svg>

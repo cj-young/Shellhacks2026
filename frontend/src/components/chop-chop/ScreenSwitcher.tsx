@@ -11,38 +11,82 @@ import {
   RacePhoneStore,
   RacePhoneStove,
 } from './screens/RacePhoneScreens'
+import { AssetSheet, ASSET_SHEET_SIZE } from './screens/AssetSheet'
+import {
+  HostMenuPrepping,
+  HostMenuShopping,
+  PlayerChopTacos,
+  PlayerFlipCheeseburger,
+  PlayerPlatePancakes,
+  PlayerRecipeCardTacos,
+  PlayerStoreProduce,
+} from './screens/MenuStates'
 import { FitToViewport } from './FitToViewport'
 
-type Screen =
-  | 'host-lobby'
-  | 'mobile-join'
-  | 'mobile-waiting'
-  | 'host-victory'
-  | 'host-race-stacks'
-  | 'mobile-race-store'
-  | 'mobile-race-chop'
-  | 'mobile-race-stove'
-  | 'mobile-race-plating'
-  | 'mobile-race-robbed'
+type Screen = { id: string; label: string; component: React.ComponentType }
+type Device = 'host' | 'player' | 'sheet'
 
-const SCREENS: { id: Screen; label: string; component: React.ComponentType }[] = [
-  { id: 'host-lobby', label: '① Host Lobby', component: HostLobbyNew },
-  { id: 'mobile-join', label: '② Mobile Join', component: MobileJoinNew },
-  { id: 'mobile-waiting', label: '③ Mobile Waiting', component: MobileWaitingNew },
-  { id: 'host-victory', label: '④ Host Round Clear', component: HostVictoryNew },
-  { id: 'host-race-stacks', label: '5b Host Race Stacks', component: HostRaceStacks },
-  { id: 'mobile-race-store', label: '6.1 Phone Store', component: RacePhoneStore },
-  { id: 'mobile-race-chop', label: '6.2 Phone Chop', component: RacePhoneChop },
-  { id: 'mobile-race-stove', label: '6.3 Phone Stove', component: RacePhoneStove },
-  { id: 'mobile-race-plating', label: '6.4 Phone Plating', component: RacePhonePlating },
-  { id: 'mobile-race-robbed', label: '6.5 Phone Robbed', component: RacePhoneRobbed },
+const DEVICE_SIZE: Record<Device, { width: number; height: number }> = {
+  host: { width: 1920, height: 1080 },
+  player: { width: 410, height: 864 },
+  sheet: ASSET_SHEET_SIZE,
+}
+
+const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
+  {
+    title: 'Host · big screen',
+    device: 'host',
+    screens: [
+      { id: 'host-lobby', label: 'Lobby', component: HostLobbyNew },
+      { id: 'host-race-stacks', label: 'Gameplay · card stacks', component: HostRaceStacks },
+      { id: 'host-round-clear', label: 'Round clear', component: HostVictoryNew },
+    ],
+  },
+  {
+    title: 'Player · phone',
+    device: 'player',
+    screens: [
+      { id: 'player-join', label: 'Join', component: MobileJoinNew },
+      { id: 'player-waiting', label: 'Waiting', component: MobileWaitingNew },
+      { id: 'player-store', label: 'Store', component: RacePhoneStore },
+      { id: 'player-chop', label: 'Chop', component: RacePhoneChop },
+      { id: 'player-stove', label: 'Stove', component: RacePhoneStove },
+      { id: 'player-plating', label: 'Plating', component: RacePhonePlating },
+      { id: 'player-robbed', label: 'Robbed', component: RacePhoneRobbed },
+    ],
+  },
+  {
+    title: 'Menu recipes · host',
+    device: 'host',
+    screens: [
+      { id: 'menu-host-shopping', label: 'Everyone shopping', component: HostMenuShopping },
+      { id: 'menu-host-prepping', label: 'Chop · stir · flip · plate', component: HostMenuPrepping },
+    ],
+  },
+  {
+    title: 'Menu recipes · phone',
+    device: 'player',
+    screens: [
+      { id: 'menu-player-card', label: 'Recipe card · Tacos', component: PlayerRecipeCardTacos },
+      { id: 'menu-player-store', label: 'Store · Produce', component: PlayerStoreProduce },
+      { id: 'menu-player-chop', label: 'Chop · Tacos', component: PlayerChopTacos },
+      { id: 'menu-player-flip', label: 'Flip · Cheeseburger', component: PlayerFlipCheeseburger },
+      { id: 'menu-player-plate', label: 'Plate · Pancakes', component: PlayerPlatePancakes },
+    ],
+  },
+  {
+    title: 'Assets',
+    device: 'sheet',
+    screens: [{ id: 'asset-sheet', label: 'Ingredient & dish sheet', component: AssetSheet }],
+  },
 ]
 
 export function ScreenSwitcher() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('host-lobby')
+  const [currentScreen, setCurrentScreen] = useState('host-lobby')
 
-  const CurrentComponent = SCREENS.find((s) => s.id === currentScreen)?.component || HostLobbyNew
-  const isMobile = currentScreen.startsWith('mobile')
+  const section = SECTIONS.find((s) => s.screens.some((screen) => screen.id === currentScreen)) ?? SECTIONS[0]
+  const CurrentComponent = section.screens.find((s) => s.id === currentScreen)?.component ?? HostLobbyNew
+  const size = DEVICE_SIZE[section.device]
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#EEF3FB', overflow: 'hidden' }}>
@@ -69,35 +113,46 @@ export function ScreenSwitcher() {
         >
           Chop Chop
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {SCREENS.map((screen) => (
-            <button
-              key={screen.id}
-              onClick={() => setCurrentScreen(screen.id)}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '12px 16px',
-                borderRadius: '12px',
-                border: '3px solid #2B2A6B',
-                backgroundColor: currentScreen === screen.id ? '#1F4FD8' : '#fff',
-                color: currentScreen === screen.id ? '#fff' : '#2B2A6B',
-                font: 'bold 14px Nunito',
-                cursor: 'pointer',
-                transition: 'all 150ms',
-              }}
-            >
-              {screen.label}
-            </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {SECTIONS.map((group) => (
+            <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span
+                style={{
+                  font: '900 12px Nunito',
+                  letterSpacing: '.14em',
+                  textTransform: 'uppercase',
+                  color: '#2B2A6B',
+                }}
+              >
+                {group.title}
+              </span>
+              {group.screens.map((screen) => (
+                <button
+                  key={screen.id}
+                  onClick={() => setCurrentScreen(screen.id)}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '3px solid #2B2A6B',
+                    backgroundColor: currentScreen === screen.id ? '#1F4FD8' : '#fff',
+                    color: currentScreen === screen.id ? '#fff' : '#2B2A6B',
+                    font: 'bold 14px Nunito',
+                    cursor: 'pointer',
+                    transition: 'all 150ms',
+                  }}
+                >
+                  {screen.label}
+                </button>
+              ))}
+            </div>
           ))}
         </div>
       </div>
 
       <div style={{ flex: 1, minWidth: 0, padding: '16px', boxSizing: 'border-box' }}>
-        <FitToViewport
-          width={isMobile ? 410 : 1920}
-          height={isMobile ? 864 : 1080}
-        >
+        <FitToViewport width={size.width} height={size.height}>
           <CurrentComponent />
         </FitToViewport>
       </div>

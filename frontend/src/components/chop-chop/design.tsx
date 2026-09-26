@@ -342,10 +342,12 @@ export function NamePill({
   name,
   color,
   size = 32,
+  maxWidth,
 }: {
   name: string
   color: string
   size?: number
+  maxWidth?: number
 }) {
   return (
     <div
@@ -358,18 +360,28 @@ export function NamePill({
         borderRadius: 28,
         padding: '6px 20px 6px 8px',
         boxShadow: `0 0 0 6px ${color}`,
+        maxWidth,
+        boxSizing: maxWidth ? 'border-box' : undefined,
       }}
     >
       <span
         style={{
           width: 26,
           height: 26,
+          flexShrink: 0,
           borderRadius: '50%',
           background: color,
           border: `3px solid ${INK}`,
         }}
       />
-      <span style={{ font: lilita(size) }}>{name}</span>
+      <span
+        style={{
+          font: lilita(size),
+          ...(maxWidth ? { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } : {}),
+        }}
+      >
+        {name}
+      </span>
     </div>
   )
 }

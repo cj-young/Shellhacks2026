@@ -1,55 +1,55 @@
+import { useRef, useState } from 'react'
 import type React from 'react'
-import { CARD_BG, DOT, INK, PAGE_BG, PINK, PhoneFrame, ROYAL, SUN, Sparkle, TOMATO, lilita } from '../design'
-import { INGREDIENT_NAMES, Ingredient } from '../Ingredient'
-import type { IngredientKind } from '../Ingredient'
-import { Basket, COUNTER_BG, GreenPill, PhoneTopBar, StoreButton, TrashButton } from '../race'
+import { CARD_BG, DOT, INK, PAGE_BG, PINK, ROYAL, SUN, Sparkle, TOMATO, lilita, nunito } from '../design'
+import { IngredientIcon } from '../IngredientIcon'
+import { dishAsset, getIngredient, ingredientName } from '#/data/menu'
+import { Basket, COUNTER_BG, GreenPill, PhoneShell, PhoneTopBar, StoreButton, TrashButton } from '../race'
+import type { AvatarMood } from '../race'
 
-const MOCK = {
-  store: {
-    score: 1800,
-    progress: 20,
-    aisle: 'DAIRY',
-    aisleIndex: 1,
-    aisleCount: 6,
-    shelves: [
-      [{ kind: 'cheese', size: 84, rot: -4 }, null],
-      [
-        { kind: 'milk', size: 84, rot: 3 },
-        { kind: 'cream', size: 80, rot: -3 },
-      ],
-      [
-        { kind: 'yogurt', size: 80, rot: -3 },
-        { kind: 'egg', size: 78, rot: 6 },
-      ],
-    ] as ({ kind: IngredientKind; size: number; rot: number } | null)[][],
-    dragging: 'butter' as IngredientKind,
-    basket: ['tomato', 'garlic', 'bread'] as IngredientKind[],
-  },
-  chop: {
-    score: 1800,
-    progress: 45,
-    basket: ['steak', 'garlic', 'chicken', 'bread'] as IngredientKind[],
-    queue: ['tomato', 'tomato', 'carrot', 'onion'] as IngredientKind[],
-    currentIndex: 2,
-  },
-  stove: {
-    score: 2150,
-    progress: 70,
-    basket: ['chicken', 'bread', 'lemon'] as IngredientKind[],
-  },
-  plating: {
-    score: 2400,
-    progress: 94,
-    basket: ['garlic'] as IngredientKind[],
-  },
-  robbed: {
-    score: 2150,
-    progress: 60,
-    basket: ['chicken', 'tomato', 'bread'] as IngredientKind[],
-    stolenIndex: 1,
-    thief: { name: 'Jun', color: TOMATO },
-  },
+type Common = {
+  /** Draw the phone mockup frame (dev switcher) instead of filling the device. */
+  framed?: boolean
+  score: number
+  /** Recipe progress, 0–100. */
+  progress: number
 }
+
+export type ShelfItem = { kind: string; size?: number; rot?: number }
+
+const SHELF_ROTATIONS = [-4, 3, -3, 6, 4, -5]
+const CHOPS_TO_FINISH = 3
+
+/** Converts a pointer event to the 390×844 design coordinates of `el`, whatever it's scaled to. */
+function toDesign(el: HTMLElement | null, e: React.PointerEvent) {
+  const r = el?.getBoundingClientRect()
+  if (!r || r.width === 0) return { x: 0, y: 0 }
+  return { x: ((e.clientX - r.left) * 390) / r.width, y: ((e.clientY - r.top) * 844) / r.height }
+}
+
+function Toast({ children, style }: { children: React.ReactNode; style: React.CSSProperties }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 26,
+        right: 26,
+        zIndex: 9,
+        background: '#FFE1DA',
+        border: `4px solid ${TOMATO}`,
+        borderRadius: 22,
+        padding: '8px 16px',
+        font: nunito(800, 18),
+        textAlign: 'center',
+        boxShadow: '0 6px 0 rgba(43,42,107,.16)',
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+/* ---------------------------------- Store --------------------------------- */
 
 const plank: React.CSSProperties = {
   height: 16,
@@ -71,14 +71,78 @@ const arrowButton: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   font: lilita(36, 1),
+  color: INK,
   paddingBottom: 4,
+  cursor: 'pointer',
 }
 
-export function RacePhoneStore() {
-  const m = MOCK.store
+type Drag = { slot: number; kind: string; x: number; y: number; sx: number; sy: number }
+
+export function StoreScreen({
+  framed,
+  score,
+  progress,
+  aisleName,
+  aisleIndex,
+  aisleCount,
+  shelf,
+  basket,
+  onPrevAisle,
+  onNextAisle,
+  onTake,
+  onBasketTap,
+  onTrash,
+  onLeave,
+  notice,
+  illustrateDrag,
+}: Common & {
+  aisleName: string
+  aisleIndex: number
+  aisleCount: number
+  /** Up to 6 slots, two per shelf; `null` is an empty (taken) slot. */
+  shelf: (ShelfItem | null)[]
+  basket: string[]
+  onPrevAisle?: () => void
+  onNextAisle?: () => void
+  onTake?: (slot: number) => void
+  onBasketTap?: (index: number) => void
+  onTrash?: () => void
+  onLeave?: () => void
+  notice?: string
+  /** The design's static "dragging into the basket" illustration. */
+  illustrateDrag?: string
+}) {
+  const surfaceRef = useRef<HTMLDivElement>(null)
+  const [drag, setDrag] = useState<Drag | null>(null)
+  const rows = [0, 1, 2].map((r) => [shelf.at(r * 2), shelf.at(r * 2 + 1)])
+
+  const itemHandlers = (slot: number, kind: string) =>
+    onTake
+      ? {
+          onPointerDown: (e: React.PointerEvent) => {
+            e.currentTarget.setPointerCapture(e.pointerId)
+            const p = toDesign(surfaceRef.current, e)
+            setDrag({ slot, kind, x: p.x, y: p.y, sx: p.x, sy: p.y })
+          },
+          onPointerMove: (e: React.PointerEvent) => {
+            if (!drag) return
+            const p = toDesign(surfaceRef.current, e)
+            setDrag({ ...drag, x: p.x, y: p.y })
+          },
+          onPointerUp: () => {
+            if (!drag) return
+            const tapped = Math.hypot(drag.x - drag.sx, drag.y - drag.sy) < 10
+            if (tapped || drag.y > 520) onTake(drag.slot)
+            setDrag(null)
+          },
+          onPointerCancel: () => setDrag(null),
+        }
+      : {}
+
   return (
-    <PhoneFrame background={COUNTER_BG}>
-      <PhoneTopBar mood="happy" progress={m.progress} score={m.score} />
+    <PhoneShell framed={framed} background={COUNTER_BG}>
+      <div ref={surfaceRef} style={{ position: 'absolute', inset: 0 }} />
+      <PhoneTopBar mood="happy" progress={progress} score={score} />
 
       <div
         style={{
@@ -98,12 +162,14 @@ export function RacePhoneStore() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 58 }}>
-          <div style={arrowButton}>‹</div>
+          <div style={arrowButton} onClick={onPrevAisle} role={onPrevAisle ? 'button' : undefined} aria-label="Previous aisle">
+            ‹
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <span style={{ font: lilita(40, 1), letterSpacing: '.04em' }}>{m.aisle}</span>
+            <span style={{ font: lilita(40, 1), letterSpacing: '.04em' }}>{aisleName}</span>
             <span style={{ display: 'flex', gap: 5 }}>
-              {Array.from({ length: m.aisleCount }, (_, i) =>
-                i === m.aisleIndex ? (
+              {Array.from({ length: aisleCount }, (_, i) =>
+                i === aisleIndex ? (
                   <span key={i} style={{ width: 18, height: 8, borderRadius: 4, background: INK }} />
                 ) : (
                   <span key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: DOT }} />
@@ -111,29 +177,51 @@ export function RacePhoneStore() {
               )}
             </span>
           </div>
-          <div style={arrowButton}>›</div>
+          <div style={arrowButton} onClick={onNextAisle} role={onNextAisle ? 'button' : undefined} aria-label="Next aisle">
+            ›
+          </div>
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
-          {m.shelves.map((row, r) => (
+          {rows.map((row, r) => (
             <div key={r} style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'flex-end', height: 88 }}>
-                {row.map((item, i) =>
-                  item ? (
-                    <Ingredient key={i} kind={item.kind} size={item.size} rotate={item.rot} />
-                  ) : (
+                {row.map((item, i) => {
+                  const slot = r * 2 + i
+                  if (item === undefined) return <div key={i} style={{ width: 78 }} />
+                  if (item === null) {
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          width: 78,
+                          height: 78,
+                          borderRadius: '50%',
+                          border: `4px dashed ${INK}`,
+                          opacity: 0.3,
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    )
+                  }
+                  return (
                     <div
                       key={i}
+                      {...itemHandlers(slot, item.kind)}
                       style={{
-                        width: 78,
-                        height: 78,
-                        borderRadius: '50%',
-                        border: `4px dashed ${INK}`,
-                        opacity: 0.3,
-                        boxSizing: 'border-box',
+                        touchAction: 'none',
+                        cursor: onTake ? 'grab' : undefined,
+                        lineHeight: 0,
+                        opacity: drag?.slot === slot ? 0.15 : 1,
                       }}
-                    />
-                  ),
-                )}
+                    >
+                      <IngredientIcon
+                        id={item.kind}
+                        size={item.size ?? 82}
+                        rotate={item.rot ?? SHELF_ROTATIONS[slot % SHELF_ROTATIONS.length]}
+                      />
+                    </div>
+                  )
+                })}
               </div>
               <div style={plank} />
             </div>
@@ -141,33 +229,63 @@ export function RacePhoneStore() {
         </div>
       </div>
 
-      <svg width="160" height="300" viewBox="0 0 160 300" style={{ position: 'absolute', left: 150, top: 250 }}>
-        <path
-          d="M110 20 Q140 140 60 270"
-          fill="none"
-          stroke={INK}
-          strokeWidth="4"
-          strokeDasharray="4 12"
-          strokeLinecap="round"
-        />
-      </svg>
+      {illustrateDrag && (
+        <>
+          <svg width="160" height="300" viewBox="0 0 160 300" style={{ position: 'absolute', left: 150, top: 250 }}>
+            <path
+              d="M110 20 Q140 140 60 270"
+              fill="none"
+              stroke={INK}
+              strokeWidth="4"
+              strokeDasharray="4 12"
+              strokeLinecap="round"
+            />
+          </svg>
+          <DragGhost kind={illustrateDrag} left={168} top={510} />
+        </>
+      )}
+      {drag && <DragGhost kind={drag.kind} left={drag.x - 60} top={drag.y - 92} />}
+
+      <div style={{ position: 'absolute', top: 566, left: 84 }}>
+        <Basket items={basket} width={296} height={148} token={62} onItemTap={onBasketTap} />
+      </div>
+      <TrashButton position={{ left: 18, top: 650 }} onClick={onTrash} />
+
+      {notice && <Toast style={{ bottom: 128 }}>{notice}</Toast>}
+
+      <GreenPill
+        onClick={onLeave}
+        streak={{ left: 32, width: 44 }}
+        style={{ left: 22, right: 22, bottom: 30, height: 78, borderRadius: 39, font: lilita(40) }}
+      >
+        Leave store ›
+      </GreenPill>
+    </PhoneShell>
+  )
+}
+
+function DragGhost({ kind, left, top }: { kind: string; left: number; top: number }) {
+  return (
+    <>
       <div
         style={{
           position: 'absolute',
-          left: 168,
-          top: 510,
+          left,
+          top,
           zIndex: 4,
+          pointerEvents: 'none',
           filter: 'drop-shadow(0 16px 10px rgba(43,42,107,.28))',
         }}
       >
-        <Ingredient kind={m.dragging} size={100} rotate={-10} />
+        <IngredientIcon id={kind} size={100} rotate={-10} />
       </div>
       <div
         style={{
           position: 'absolute',
-          left: 198,
-          top: 572,
+          left: left + 30,
+          top: top + 62,
           zIndex: 5,
+          pointerEvents: 'none',
           width: 60,
           height: 60,
           borderRadius: '50%',
@@ -176,23 +294,39 @@ export function RacePhoneStore() {
           boxShadow: `0 0 0 3px ${INK}`,
         }}
       />
-
-      <div style={{ position: 'absolute', top: 566, left: 84 }}>
-        <Basket items={m.basket} width={296} height={148} token={62} />
-      </div>
-      <TrashButton position={{ left: 18, top: 650 }} />
-
-      <GreenPill
-        streak={{ left: 32, width: 44 }}
-        style={{ left: 22, right: 22, bottom: 30, height: 78, borderRadius: 39, font: lilita(40) }}
-      >
-        Leave store ›
-      </GreenPill>
-    </PhoneFrame>
+    </>
   )
 }
 
-function QueueToken({ kind, current }: { kind: IngredientKind; current: boolean }) {
+/* ---------------------------------- Chop ---------------------------------- */
+
+const BIT_COLORS: Partial<Record<string, [string, string]>> = {
+  carrot: ['#FF9A3C', '#FFB870'],
+  tomato: ['#F2553D', '#FF8A7A'],
+  redpepper: ['#F2553D', '#FF8A7A'],
+  chili: ['#F2553D', '#FF8A7A'],
+  garlic: ['#FFFFFF', '#E3EAF6'],
+  onion: ['#F2BE63', '#FFDD6B'],
+  chicken: ['#E9A866', '#FFF1D2'],
+  steak: ['#D9474A', '#FFF1D2'],
+  greenonion: ['#3CB54A', '#BFEBD9'],
+  leek: ['#1E8A4A', '#BFEBD9'],
+  mushroom: ['#E9A866', '#FFF1D2'],
+  'red-bell-pepper': ['#F2553D', '#FF8A7A'],
+  'green-onion': ['#3CB54A', '#BFEBD9'],
+  lettuce: ['#3CB54A', '#BFEBD9'],
+  broccoli: ['#1E8A4A', '#8FD14F'],
+  celery: ['#8FD14F', '#BFEBD9'],
+  potato: ['#E9A866', '#FFF1D2'],
+  avocado: ['#8FD14F', '#1E8A4A'],
+}
+const BIT_SPOTS = [
+  { left: 40, top: 250, size: 40, inset: 6 },
+  { left: 78, top: 270, size: 34, inset: 5 },
+  { left: 116, top: 244, size: 36, inset: 5 },
+]
+
+function QueueToken({ kind, current }: { kind: string; current: boolean }) {
   return (
     <div
       style={{
@@ -208,37 +342,68 @@ function QueueToken({ kind, current }: { kind: IngredientKind; current: boolean 
         justifyContent: 'center',
       }}
     >
-      <Ingredient kind={kind} size={current ? 46 : 36} sticker={false} />
+      <IngredientIcon id={kind} size={current ? 46 : 36} sticker={false} />
     </div>
   )
 }
 
-function CarrotSlice({ left, top, size, inset }: { left: number; top: number; size: number; inset: number }) {
-  return (
-    <span
-      style={{
-        position: 'absolute',
-        left,
-        top,
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        background: '#FF9A3C',
-        border: `4px solid ${INK}`,
-        boxSizing: 'border-box',
-        boxShadow: `inset 0 0 0 ${inset}px #FFB870`,
-      }}
-    />
-  )
-}
+export function ChopScreen({
+  framed,
+  score,
+  progress,
+  basket,
+  queue,
+  current,
+  chops,
+  onChop,
+  onStore,
+  onTrash,
+  onBasketTap,
+  notice,
+}: Common & {
+  basket: string[]
+  queue: string[]
+  current: number
+  /** Swipes landed on the current item so far. */
+  chops: number
+  notice?: string
+  onChop?: () => void
+  onStore?: () => void
+  onTrash?: () => void
+  onBasketTap?: (index: number) => void
+}) {
+  const surfaceRef = useRef<HTMLDivElement>(null)
+  const start = useRef<{ x: number; y: number } | null>(null)
+  const kind = queue[current]
+  const [bit, bitInner] = BIT_COLORS[kind] ?? [getIngredient(kind)?.color ?? '#FFC928', '#FFFFFF']
 
-export function RacePhoneChop() {
-  const m = MOCK.chop
+  const swipe = onChop
+    ? {
+        onPointerDown: (e: React.PointerEvent) => {
+          e.currentTarget.setPointerCapture(e.pointerId)
+          start.current = toDesign(surfaceRef.current, e)
+        },
+        onPointerUp: (e: React.PointerEvent) => {
+          const s = start.current
+          start.current = null
+          if (!s) return
+          const p = toDesign(surfaceRef.current, e)
+          const dx = p.x - s.x
+          const dy = p.y - s.y
+          if (dy > 80 && dy > Math.abs(dx) * 1.3) onChop()
+        },
+        onPointerCancel: () => {
+          start.current = null
+        },
+      }
+    : {}
+
   return (
-    <PhoneFrame background={COUNTER_BG}>
-      <PhoneTopBar mood="focused" progress={m.progress} score={m.score} />
+    <PhoneShell framed={framed} background={COUNTER_BG}>
+      <div ref={surfaceRef} style={{ position: 'absolute', inset: 0 }} />
+      <PhoneTopBar mood="focused" progress={progress} score={score} />
       <div style={{ position: 'absolute', top: 138, left: 18 }}>
-        <Basket items={m.basket} width={354} height={126} token={58} />
+        <Basket items={basket} width={354} height={126} token={58} onItemTap={onBasketTap} />
       </div>
 
       <div
@@ -253,12 +418,13 @@ export function RacePhoneChop() {
           gap: 12,
         }}
       >
-        {m.queue.map((kind, i) => (
-          <QueueToken key={i} kind={kind} current={i === m.currentIndex} />
+        {queue.map((k, i) => (
+          <QueueToken key={i} kind={k} current={i === current} />
         ))}
       </div>
 
       <div
+        {...swipe}
         style={{
           position: 'absolute',
           top: 366,
@@ -271,6 +437,8 @@ export function RacePhoneChop() {
           border: `5px solid ${INK}`,
           boxShadow: `inset 0 -12px 0 rgba(43,42,107,.12),0 0 0 6px ${ROYAL},0 14px 0 6px rgba(43,42,107,.16)`,
           boxSizing: 'border-box',
+          touchAction: 'none',
+          cursor: onChop ? 'grab' : undefined,
         }}
       >
         <span
@@ -286,12 +454,34 @@ export function RacePhoneChop() {
             boxSizing: 'border-box',
           }}
         />
-        <div style={{ position: 'absolute', left: 66, top: 84 }}>
-          <Ingredient kind={m.queue[m.currentIndex]} size={200} rotate={-72} />
-        </div>
-        <CarrotSlice left={40} top={250} size={40} inset={6} />
-        <CarrotSlice left={78} top={270} size={34} inset={5} />
-        <svg width="170" height="200" viewBox="0 0 170 200" style={{ position: 'absolute', right: 10, top: 10 }}>
+        {kind && (
+          <div style={{ position: 'absolute', left: 66, top: 84, pointerEvents: 'none' }}>
+            <IngredientIcon id={kind} size={200} rotate={kind === 'carrot' ? -72 : -10} />
+          </div>
+        )}
+        {BIT_SPOTS.slice(0, Math.min(chops, CHOPS_TO_FINISH)).map((s, i) => (
+          <span
+            key={i}
+            style={{
+              position: 'absolute',
+              left: s.left,
+              top: s.top,
+              width: s.size,
+              height: s.size,
+              borderRadius: '50%',
+              background: bit,
+              border: `4px solid ${INK}`,
+              boxSizing: 'border-box',
+              boxShadow: `inset 0 0 0 ${s.inset}px ${bitInner}`,
+            }}
+          />
+        ))}
+        <svg
+          width="170"
+          height="200"
+          viewBox="0 0 170 200"
+          style={{ position: 'absolute', right: 10, top: 10, pointerEvents: 'none' }}
+        >
           <g transform="rotate(28 85 100)">
             <rect x="72" y="4" width="26" height="70" rx="10" fill={ROYAL} stroke={INK} strokeWidth="5" />
             <circle cx="85" cy="24" r="3.5" fill="#fff" />
@@ -306,7 +496,12 @@ export function RacePhoneChop() {
             <path d="M76 90 L76 176" stroke="#CFE6FB" strokeWidth="5" strokeLinecap="round" />
           </g>
         </svg>
-        <svg width="90" height="200" viewBox="0 0 90 200" style={{ position: 'absolute', left: 236, top: 150 }}>
+        <svg
+          width="90"
+          height="200"
+          viewBox="0 0 90 200"
+          style={{ position: 'absolute', left: 236, top: 150, pointerEvents: 'none' }}
+        >
           <path d="M45 12 L45 170" stroke="#fff" strokeWidth="22" strokeLinecap="round" />
           <path
             d="M45 12 L45 170 M20 146 L45 176 L70 146"
@@ -319,11 +514,15 @@ export function RacePhoneChop() {
         </svg>
       </div>
 
-      <StoreButton />
-      <TrashButton position={{ right: 22, bottom: 30 }} />
-    </PhoneFrame>
+      {notice && <Toast style={{ top: 346 }}>{notice}</Toast>}
+
+      <StoreButton onClick={onStore} />
+      <TrashButton position={{ right: 22, bottom: 30 }} onClick={onTrash} />
+    </PhoneShell>
   )
 }
+
+/* ---------------------------------- Stove --------------------------------- */
 
 function Burner({
   top,
@@ -443,7 +642,12 @@ function HintArrow({
   head: string
 }) {
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ position: 'absolute', ...style }}>
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      style={{ position: 'absolute', pointerEvents: 'none', ...style }}
+    >
       <path d={arc} fill="none" stroke="#fff" strokeWidth="18" strokeLinecap="round" />
       <path d={arc} fill="none" stroke={INK} strokeWidth="6" strokeLinecap="round" />
       <path d={head} fill="none" stroke="#fff" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" />
@@ -470,13 +674,88 @@ function HeatDash({ left, top, rot }: { left: number; top: number; rot: number }
   )
 }
 
-export function RacePhoneStove() {
-  const m = MOCK.stove
+/** Pan-relative positions (pan box: left 54, top 338, 282×282) from the design. */
+const PAN_SPOTS = [
+  { left: 64, top: 60, size: 130, rot: -10 },
+  { left: 54, top: 150, size: 66, rot: 10 },
+  { left: 156, top: 152, size: 66, rot: -8 },
+]
+const PAN_CENTER = { x: 54 + 141, y: 338 + 141 }
+
+export function StoveScreen({
+  framed,
+  score,
+  progress,
+  basket,
+  panItems,
+  gesture,
+  turn = 0,
+  lifted = false,
+  onStir,
+  onFlip,
+  onStore,
+  onTrash,
+  onBasketTap,
+  notice,
+  mood = 'worried',
+}: Common & {
+  basket: string[]
+  panItems: string[]
+  gesture: 'stir' | 'flip'
+  /** Radians the food has been stirred round. */
+  turn?: number
+  /** Food is mid-flip. */
+  lifted?: boolean
+  onStir?: (deltaRadians: number) => void
+  onFlip?: () => void
+  onStore?: () => void
+  onTrash?: () => void
+  onBasketTap?: (index: number) => void
+  notice?: string
+  mood?: AvatarMood
+}) {
+  const surfaceRef = useRef<HTMLDivElement>(null)
+  const last = useRef<{ angle: number; y: number } | null>(null)
+  const active = Boolean(onStir || onFlip)
+
+  const angleOf = (e: React.PointerEvent) => {
+    const p = toDesign(surfaceRef.current, e)
+    return { angle: Math.atan2(p.y - PAN_CENTER.y, p.x - PAN_CENTER.x), y: p.y }
+  }
+
+  const handlers = active
+    ? {
+        onPointerDown: (e: React.PointerEvent) => {
+          e.currentTarget.setPointerCapture(e.pointerId)
+          last.current = angleOf(e)
+        },
+        onPointerMove: (e: React.PointerEvent) => {
+          if (!last.current || !onStir) return
+          const next = angleOf(e)
+          let delta = next.angle - last.current.angle
+          if (delta > Math.PI) delta -= 2 * Math.PI
+          if (delta < -Math.PI) delta += 2 * Math.PI
+          onStir(delta)
+          last.current = { ...next, y: last.current.y }
+        },
+        onPointerUp: (e: React.PointerEvent) => {
+          const s = last.current
+          last.current = null
+          if (!s || !onFlip) return
+          if (angleOf(e).y - s.y < -70) onFlip()
+        },
+        onPointerCancel: () => {
+          last.current = null
+        },
+      }
+    : {}
+
   return (
-    <PhoneFrame background={COUNTER_BG}>
-      <PhoneTopBar mood="worried" progress={m.progress} score={m.score} />
+    <PhoneShell framed={framed} background={COUNTER_BG}>
+      <div ref={surfaceRef} style={{ position: 'absolute', inset: 0 }} />
+      <PhoneTopBar mood={mood} progress={progress} score={score} />
       <div style={{ position: 'absolute', top: 138, left: 18 }}>
-        <Basket items={m.basket} width={354} height={126} token={58} />
+        <Basket items={basket} width={354} height={126} token={58} onItemTap={onBasketTap} />
       </div>
 
       <Burner
@@ -488,38 +767,93 @@ export function RacePhoneStove() {
         handle={{ left: 278, top: 584, width: 120, height: 40, knob: true }}
         inner={{ top: 378, left: 94, size: 202 }}
       />
-      <div style={{ position: 'absolute', left: 118, top: 398 }}>
-        <Ingredient kind="steak" size={130} rotate={-10} sticker={false} />
+      <div
+        style={{
+          position: 'absolute',
+          left: 54,
+          top: 338,
+          width: 282,
+          height: 282,
+          transform: `rotate(${turn}rad) translateY(${lifted ? -46 : 0}px)`,
+          transition: 'transform 180ms ease-out',
+          pointerEvents: 'none',
+        }}
+      >
+        {panItems.slice(0, PAN_SPOTS.length).map((kind, i) => (
+          <div key={i} style={{ position: 'absolute', left: PAN_SPOTS[i].left, top: PAN_SPOTS[i].top }}>
+            <IngredientIcon id={kind} size={PAN_SPOTS[i].size} rotate={PAN_SPOTS[i].rot} sticker={false} />
+          </div>
+        ))}
       </div>
-      <div style={{ position: 'absolute', left: 108, top: 488 }}>
-        <Ingredient kind="garlic" size={66} rotate={10} sticker={false} />
-      </div>
-      <div style={{ position: 'absolute', left: 210, top: 490 }}>
-        <Ingredient kind="tomato" size={66} rotate={-8} sticker={false} />
-      </div>
-      <HintArrow
-        width={282}
-        height={282}
-        style={{ top: 338, left: 54 }}
-        arc="M58 90 A104 104 0 1 0 108 42"
-        head="M90 26 L114 40 L94 62"
-      />
+      {gesture === 'stir' ? (
+        <HintArrow
+          width={282}
+          height={282}
+          style={{ top: 338, left: 54 }}
+          arc="M58 90 A104 104 0 1 0 108 42"
+          head="M90 26 L114 40 L94 62"
+        />
+      ) : (
+        <HintArrow
+          width={200}
+          height={120}
+          style={{ left: 88, top: 340 }}
+          arc="M40 100 Q60 16 150 30"
+          head="M130 12 L154 30 L132 50"
+        />
+      )}
       <HeatDash left={40} top={318} rot={-40} />
       <HeatDash left={330} top={350} rot={40} />
 
-      <StoreButton />
-      <TrashButton position={{ right: 22, bottom: 30 }} />
-    </PhoneFrame>
+      <div
+        {...handlers}
+        style={{
+          position: 'absolute',
+          top: 304,
+          left: 20,
+          width: 350,
+          height: 350,
+          borderRadius: '50%',
+          touchAction: 'none',
+          cursor: active ? 'grab' : undefined,
+        }}
+      />
+
+      {notice && <Toast style={{ top: 282 }}>{notice}</Toast>}
+
+      <StoreButton onClick={onStore} />
+      <TrashButton position={{ right: 22, bottom: 30 }} onClick={onTrash} />
+    </PhoneShell>
   )
 }
 
-export function RacePhonePlating() {
-  const m = MOCK.plating
+/* --------------------------------- Plating -------------------------------- */
+
+export function PlatingScreen({
+  framed,
+  score,
+  progress,
+  basket,
+  onServe,
+  onTrash,
+  onStore,
+  onBasketTap,
+  dish,
+}: Common & {
+  /** Leftovers still in the basket. */
+  basket: string[]
+  /** Recipe id; shows its dish-<id>.svg on the plate instead of the design's sample dish. */
+  dish?: string
+  onServe?: () => void
+  onTrash?: () => void
+  onStore?: () => void
+  onBasketTap?: (index: number) => void
+}) {
   return (
-    <PhoneFrame background={COUNTER_BG}>
-      <PhoneTopBar mood="delighted" progress={m.progress} score={m.score} />
+    <PhoneShell framed={framed} background={COUNTER_BG}>
+      <PhoneTopBar mood="delighted" progress={progress} score={score} />
       <div style={{ position: 'absolute', top: 138, left: 18 }}>
-        <Basket items={m.basket} width={354} height={126} token={58} />
+        <Basket items={basket} width={354} height={126} token={58} onItemTap={onBasketTap} />
       </div>
 
       <div
@@ -536,6 +870,16 @@ export function RacePhonePlating() {
           boxSizing: 'border-box',
         }}
       />
+      {dish ? (
+        <img
+          src={dishAsset(dish)}
+          alt=""
+          width={250}
+          height={250}
+          draggable={false}
+          style={{ position: 'absolute', top: 345, left: 70, pointerEvents: 'none' }}
+        />
+      ) : (
       <svg
         width="250"
         height="250"
@@ -569,12 +913,14 @@ export function RacePhonePlating() {
         <ellipse cx="150" cy="130" rx="10" ry="6" transform="rotate(-30 150 130)" fill="#3CB54A" stroke={INK} strokeWidth="4" />
         <ellipse cx="96" cy="136" rx="9" ry="5.5" transform="rotate(25 96 136)" fill="#3CB54A" stroke={INK} strokeWidth="4" />
       </svg>
+      )}
       <Sparkle kind="star" color={SUN} size={40} style={{ position: 'absolute', left: 36, top: 300 }} />
       <Sparkle kind="plus" color={PINK} size={26} style={{ position: 'absolute', right: 36, top: 620 }} />
 
-      <StoreButton bottom={40} />
-      <TrashButton dashed position={{ right: 22, bottom: 40 }} />
+      <StoreButton bottom={40} onClick={onStore} />
+      <TrashButton dashed={basket.length > 0} position={{ right: 22, bottom: 40 }} onClick={onTrash} />
       <GreenPill
+        onClick={onServe}
         streak={{ left: 28, width: 40 }}
         style={{
           left: '50%',
@@ -588,18 +934,33 @@ export function RacePhonePlating() {
       >
         Serve!
       </GreenPill>
-    </PhoneFrame>
+    </PhoneShell>
   )
 }
 
-export function RacePhoneRobbed() {
-  const m = MOCK.robbed
-  const stolen = m.basket[m.stolenIndex]
+/* --------------------------------- Robbed --------------------------------- */
+
+export function RobbedScreen({
+  framed,
+  score,
+  progress,
+  basket,
+  goneIndex,
+  thief,
+  panItem = 'steak',
+}: Common & {
+  /** Basket as it was before the steal; `goneIndex` is the stolen slot. */
+  basket: string[]
+  goneIndex: number
+  thief: { name: string; color: string }
+  panItem?: string
+}) {
+  const stolen = basket[goneIndex]
   return (
-    <PhoneFrame background={COUNTER_BG}>
-      <PhoneTopBar mood="panicked" progress={m.progress} score={m.score} />
+    <PhoneShell framed={framed} background={COUNTER_BG}>
+      <PhoneTopBar mood="panicked" progress={progress} score={score} />
       <div style={{ position: 'absolute', top: 138, left: 18 }}>
-        <Basket items={m.basket} gone={m.stolenIndex} width={354} height={126} token={58} />
+        <Basket items={basket} gone={goneIndex} width={354} height={126} token={58} />
       </div>
 
       <Burner
@@ -612,7 +973,7 @@ export function RacePhoneRobbed() {
         inner={{ top: 436, left: 100, size: 190 }}
       />
       <div style={{ position: 'absolute', left: 130, top: 460 }}>
-        <Ingredient kind="steak" size={130} rotate={14} sticker={false} />
+        <IngredientIcon id={panItem} size={130} rotate={14} sticker={false} />
       </div>
       <HintArrow
         width={200}
@@ -646,13 +1007,13 @@ export function RacePhoneRobbed() {
             height: 44,
             flexShrink: 0,
             borderRadius: '50%',
-            background: m.thief.color,
+            background: thief.color,
             border: `4px solid ${INK}`,
             boxSizing: 'border-box',
           }}
         />
         <span style={{ flex: 1, font: lilita(29, 1.05) }}>
-          {m.thief.name} stole your {INGREDIENT_NAMES[stolen].toLowerCase()}!
+          {thief.name} stole your {stolen ? ingredientName(stolen).toLowerCase() : 'food'}!
         </span>
       </div>
 
@@ -672,14 +1033,16 @@ export function RacePhoneRobbed() {
         strokeLinejoin="round"
         strokeLinecap="round"
       >
-        <path d="M52 0 L128 0 L122 100 L58 100Z" fill={m.thief.color} />
+        <path d="M52 0 L128 0 L122 100 L58 100Z" fill={thief.color} />
         <path d="M55 30 L125 30 M57 62 L123 62" stroke="#fff" strokeWidth="9" />
         <rect x="48" y="94" width="84" height="22" rx="10" fill="#fff" />
         <path d="M50 116 Q46 160 72 176 L110 176 Q136 160 130 116Z" fill="#FFD9B8" />
       </svg>
-      <div style={{ position: 'absolute', left: 162, top: 128, zIndex: 6 }}>
-        <Ingredient kind={stolen} size={100} rotate={-14} />
-      </div>
+      {stolen && (
+        <div style={{ position: 'absolute', left: 162, top: 128, zIndex: 6 }}>
+          <IngredientIcon id={stolen} size={100} rotate={-14} />
+        </div>
+      )}
       <svg
         width="180"
         height="230"
@@ -744,6 +1107,71 @@ export function RacePhoneRobbed() {
           boxShadow: 'inset 0 0 0 8px rgba(242,85,61,.85)',
         }}
       />
-    </PhoneFrame>
+    </PhoneShell>
+  )
+}
+
+/* ------------------------- Design mocks (dev switcher) ------------------------ */
+
+export function RacePhoneStore() {
+  return (
+    <StoreScreen
+      score={1800}
+      progress={20}
+      aisleName="DAIRY"
+      aisleIndex={1}
+      aisleCount={6}
+      shelf={[
+        { kind: 'cheese', size: 84, rot: -4 },
+        null,
+        { kind: 'milk', size: 84, rot: 3 },
+        { kind: 'cream', size: 80, rot: -3 },
+        { kind: 'yogurt', size: 80, rot: -3 },
+        { kind: 'egg', size: 78, rot: 6 },
+      ]}
+      basket={['tomato', 'garlic', 'bread']}
+      illustrateDrag="butter"
+    />
+  )
+}
+
+export function RacePhoneChop() {
+  return (
+    <ChopScreen
+      score={1800}
+      progress={45}
+      basket={['steak', 'garlic', 'chicken', 'bread']}
+      queue={['tomato', 'tomato', 'carrot', 'onion']}
+      current={2}
+      chops={2}
+    />
+  )
+}
+
+export function RacePhoneStove() {
+  return (
+    <StoveScreen
+      score={2150}
+      progress={70}
+      basket={['chicken', 'bread', 'lemon']}
+      panItems={['steak', 'garlic', 'tomato']}
+      gesture="stir"
+    />
+  )
+}
+
+export function RacePhonePlating() {
+  return <PlatingScreen score={2400} progress={94} basket={['garlic']} />
+}
+
+export function RacePhoneRobbed() {
+  return (
+    <RobbedScreen
+      score={2150}
+      progress={60}
+      basket={['chicken', 'tomato', 'bread']}
+      goneIndex={1}
+      thief={{ name: 'Jun', color: TOMATO }}
+    />
   )
 }

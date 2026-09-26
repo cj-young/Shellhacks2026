@@ -1,7 +1,7 @@
+import { useLayoutEffect, useRef, useState } from 'react'
 import type React from 'react'
-import { INK, ROYAL, SKY, SUN, TOMATO, lilita } from './design'
-import { Ingredient } from './Ingredient'
-import type { IngredientKind } from './Ingredient'
+import { INK, PhoneFrame, ROYAL, SKY, SUN, TOMATO, lilita } from './design'
+import { IngredientIcon } from './IngredientIcon'
 
 export type GameIconKind = 'chop' | 'stir' | 'flip' | 'steal' | 'blackout' | 'basket'
 
@@ -120,8 +120,11 @@ export function Basket({
   width = 346,
   height = 140,
   token = 66,
+  onItemTap,
 }: {
-  items: IngredientKind[]
+  /** Ingredient ids (menu ids or design-handoff kinds). */
+  items: string[]
+  onItemTap?: (index: number) => void
   /** Index of an item that was stolen; rendered as an empty dashed slot. */
   gone?: number
   width?: number
@@ -199,8 +202,19 @@ export function Basket({
                 }}
               />
             ) : (
-              <div key={i} style={{ width: tok, height: tok, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Ingredient kind={kind} size={icon} />
+              <div
+                key={i}
+                onClick={onItemTap ? () => onItemTap(i) : undefined}
+                style={{
+                  width: tok,
+                  height: tok,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: onItemTap ? 'pointer' : undefined,
+                }}
+              >
+                <IngredientIcon id={kind} size={icon} />
               </div>
             ),
           )}
@@ -361,10 +375,14 @@ export function PhoneTopBar({
   )
 }
 
-export function StoreButton({ bottom = 30 }: { bottom?: number }) {
+export function StoreButton({ bottom = 30, onClick }: { bottom?: number; onClick?: () => void }) {
   return (
     <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      aria-label={onClick ? 'Back to the store' : undefined}
       style={{
+        cursor: onClick ? 'pointer' : undefined,
         position: 'absolute',
         left: 22,
         bottom,
@@ -417,14 +435,20 @@ function TrashGlyph({ width, height }: { width: number; height: number }) {
 export function TrashButton({
   position,
   dashed = false,
+  onClick,
 }: {
   position: React.CSSProperties
   dashed?: boolean
+  onClick?: () => void
 }) {
   const size = dashed ? 64 : 60
   return (
     <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      aria-label={onClick ? 'Trash' : undefined}
       style={{
+        cursor: onClick ? 'pointer' : undefined,
         position: 'absolute',
         width: size,
         height: size,
@@ -449,13 +473,17 @@ export function GreenPill({
   style,
   streak,
   children,
+  onClick,
 }: {
   style: React.CSSProperties
   streak: { left: number; width: number }
   children: React.ReactNode
+  onClick?: () => void
 }) {
   return (
     <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
       style={{
         position: 'absolute',
         background: '#3CB54A',
@@ -481,6 +509,62 @@ export function GreenPill({
         }}
       />
       {children}
+    </div>
+  )
+}
+
+/**
+ * `framed` draws the design's phone mockup (dev switcher). Otherwise the 390×844
+ * screen fills a real device, scaled to fit, with the background running edge to edge.
+ */
+export function PhoneShell({
+  framed = true,
+  background,
+  children,
+}: {
+  framed?: boolean
+  background: React.CSSProperties
+  children: React.ReactNode
+}) {
+  if (framed) return <PhoneFrame background={background}>{children}</PhoneFrame>
+  return <FullScreenPhone background={background}>{children}</FullScreenPhone>
+}
+
+function FullScreenPhone({ background, children }: { background: React.CSSProperties; children: React.ReactNode }) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState<number | null>(null)
+
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const update = () => setScale(Math.min(root.clientWidth / 390, root.clientHeight / 844))
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(root)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div
+      ref={rootRef}
+      style={{
+        width: '100vw',
+        height: '100dvh',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        touchAction: 'none',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        fontFamily: 'Nunito, sans-serif',
+        color: INK,
+        ...background,
+      }}
+    >
+      {scale !== null && (
+        <div style={{ position: 'relative', width: 390, height: 844, flexShrink: 0, zoom: scale }}>{children}</div>
+      )}
     </div>
   )
 }

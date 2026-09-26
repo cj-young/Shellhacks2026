@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 112 112" fill="none" stroke="#2B2A6B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 42 Q14 16 44 14 Q78 10 86 34 Q92 60 64 68 Q36 74 22 62 Q16 54 16 42Z" fill="#E9A866"/>
+    <circle cx="36" cy="34" r="2.6" fill="#2B2A6B" stroke="none"/><circle cx="60" cy="28" r="2.6" fill="#2B2A6B" stroke="none"/><circle cx="66" cy="52" r="2.6" fill="#2B2A6B" stroke="none"/>
+    <ellipse cx="30" cy="24" rx="7" ry="4" transform="rotate(-20 30 24)" fill="#FFFFFF" stroke="none"/>
+    <rect x="8" y="78" width="84" height="20" rx="10" fill="#FFFFFF" stroke="#2B2A6B" stroke-width="3"/>
+    <text x="50" y="93" font-family="Nunito, 'Arial Rounded MT Bold', Arial, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#2B2A6B" stroke="none" text-anchor="middle">POTATO</text>
+</svg>

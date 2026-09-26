@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 112 112" fill="none" stroke="#2B2A6B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="42" y="4" width="16" height="16" rx="4" fill="#F2553D"/>
+    <path d="M40 20 L60 20 L68 34 L68 68 Q68 72 64 72 L36 72 Q32 72 32 68 L32 34Z" fill="#4A4F8C"/>
+    <rect x="37" y="40" width="26" height="18" rx="3" fill="#FFFFFF"/>
+    <path d="M42 49 L58 49" stroke="#F2553D" stroke-width="4"/>
+    <rect x="8" y="78" width="84" height="20" rx="10" fill="#FFFFFF" stroke="#2B2A6B" stroke-width="3"/>
+    <text x="50" y="93" font-family="Nunito, 'Arial Rounded MT Bold', Arial, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#2B2A6B" stroke="none" text-anchor="middle">SOY</text>
+</svg>

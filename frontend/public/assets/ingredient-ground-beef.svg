@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 112 112" fill="none" stroke="#2B2A6B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="10" y="40" width="80" height="30" rx="10" fill="#CFE6FB"/>
+    <path d="M20 50 Q22 18 50 18 Q78 18 80 50Z" fill="#FF8A7A"/>
+    <circle cx="36" cy="36" r="2.5" fill="#FFFFFF" stroke="none"/><circle cx="52" cy="28" r="2.5" fill="#FFFFFF" stroke="none"/><circle cx="64" cy="40" r="2.5" fill="#FFFFFF" stroke="none"/><circle cx="46" cy="42" r="2.5" fill="#FFFFFF" stroke="none"/>
+    <rect x="8" y="78" width="84" height="20" rx="10" fill="#FFFFFF" stroke="#2B2A6B" stroke-width="3"/>
+    <text x="50" y="93" font-family="Nunito, 'Arial Rounded MT Bold', Arial, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#2B2A6B" stroke="none" text-anchor="middle">BEEF</text>
+</svg>

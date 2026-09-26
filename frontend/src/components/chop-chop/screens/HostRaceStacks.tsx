@@ -1,49 +1,62 @@
+import { useLayoutEffect, useRef, useState } from 'react'
 import type React from 'react'
 import { CARD_BG, DOT, INK, LEAF, PAGE_BG, PINK, ROYAL, SKY, SUN, TOMATO, lilita, nunito } from '../design'
-import { Ingredient } from '../Ingredient'
-import type { IngredientKind } from '../Ingredient'
+import { IngredientIcon } from '../IngredientIcon'
+import { dishAsset } from '#/data/menu'
+import type { Gesture, MenuRecipe } from '#/data/menu'
 import { GameIcon } from '../race'
 
-type ShopItem = { kind: IngredientKind; rot: number; done: boolean }
+export type ShopItem = { kind: string; rot: number; done: boolean }
 
-type Stack = {
+export type RaceStack = {
+  id: string
   name: string
   color: string
-  tint: string
+  /** 1-based index of the recipe this player is on. */
   recipe: number
   recipeName: string
 } & (
   | { phase: 'shop'; items: ShopItem[] }
   | {
       phase: 'prep'
-      gesture: 'chop' | 'stir'
+      gesture: Gesture
+      /** Recipe id, used to show the finished dish on the PLATE step. */
+      dish?: string
       gestureName: string
       stepLabel: string
+      /** 1-based current step. */
       step: number
-      /** Text color on the current step token. */
-      tokenFg: string
+      steps: number
     }
 )
 
-const TOTAL_RECIPES = 5
-const PREP_STEPS = 5
-const TIMER = 60
+/** Card tint for each player color (from the design's stacks). */
+const TINTS: Record<string, string> = {
+  [ROYAL]: '#DCE6FF',
+  [TOMATO]: '#FFE1DA',
+  '#159A6B': '#D4F1E3',
+  [PINK]: '#FFE4EF',
+  [SUN]: '#FFF3C2',
+}
+const tintFor = (color: string) => TINTS[color] ?? CARD_BG
+/** Light player colors need navy step numbers; dark ones get white with a navy stroke. */
+const tokenFgFor = (color: string) => (color === PINK || color === SUN ? INK : '#fff')
 
-const shopItems = (doneKinds: IngredientKind[]): ShopItem[] =>
+const shopItems = (doneKinds: string[]): ShopItem[] =>
   (
     [
       ['garlic', -6],
       ['steak', 5],
       ['chicken', -4],
       ['tomato', 6],
-    ] as [IngredientKind, number][]
+    ] as [string, number][]
   ).map(([kind, rot]) => ({ kind, rot, done: doneKinds.includes(kind) }))
 
-const STACKS: Stack[] = [
+export const DEMO_STACKS: RaceStack[] = [
   {
+    id: 'mina',
     name: 'Mina',
     color: ROYAL,
-    tint: '#DCE6FF',
     recipe: 3,
     recipeName: 'Chicken Stir-fry',
     phase: 'prep',
@@ -51,30 +64,22 @@ const STACKS: Stack[] = [
     gestureName: 'STIR!',
     stepLabel: 'Circle on your phone',
     step: 3,
-    tokenFg: '#fff',
+    steps: 5,
   },
+  { id: 'jun', name: 'Jun', color: TOMATO, recipe: 2, recipeName: 'Garlic Steak & Chicken', phase: 'shop', items: shopItems(['garlic']) },
   {
-    name: 'Jun',
-    color: TOMATO,
-    tint: '#FFE1DA',
-    recipe: 2,
-    recipeName: 'Garlic Steak & Chicken',
-    phase: 'shop',
-    items: shopItems(['garlic']),
-  },
-  {
+    id: 'ari',
     name: 'Ari',
     color: '#159A6B',
-    tint: '#D4F1E3',
     recipe: 2,
     recipeName: 'Garlic Steak & Chicken',
     phase: 'shop',
     items: shopItems(['garlic', 'steak', 'tomato']),
   },
   {
+    id: 'leo',
     name: 'Leo',
     color: PINK,
-    tint: '#FFE4EF',
     recipe: 2,
     recipeName: 'Garlic Steak & Chicken',
     phase: 'prep',
@@ -82,9 +87,148 @@ const STACKS: Stack[] = [
     gestureName: 'CHOP!',
     stepLabel: 'Swipe on your phone',
     step: 2,
-    tokenFg: INK,
+    steps: 5,
   },
 ]
+
+interface HostRaceStacksProps {
+  stacks?: RaceStack[]
+  totalRecipes?: number
+  secondsLeft?: number
+  /** Small label in the top-left corner, e.g. to mark demo data. */
+  banner?: string
+}
+
+const COLUMN_WIDTH = 460
+const SIDE_MARGIN = 40
+
+/** Fills its parent; blocks are authored at the design's pixel values and zoomed to fit. */
+export function HostRaceStacks({ stacks = DEMO_STACKS, totalRecipes = 5, secondsLeft = 60, banner }: HostRaceStacksProps) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null)
+
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const update = () => setSize({ w: root.clientWidth, h: root.clientHeight })
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(root)
+    return () => observer.disconnect()
+  }, [])
+
+  const columns = Math.max(1, stacks.length)
+  const designWidth = SIDE_MARGIN * 2 + COLUMN_WIDTH * Math.max(columns, 4)
+  const scale = size ? Math.min(size.w / designWidth, size.h / 1080) : 1
+  const grid: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: `repeat(${columns},minmax(0,1fr))`,
+    padding: `0 ${SIDE_MARGIN * scale}px`,
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: PAGE_BG,
+        backgroundImage: `radial-gradient(${DOT} ${2.5 * scale}px, transparent ${3 * scale}px)`,
+        backgroundSize: `${40 * scale}px ${40 * scale}px`,
+        fontFamily: 'Nunito, sans-serif',
+        color: INK,
+      }}
+    >
+      {size && (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ height: 186 * scale, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ zoom: scale, paddingTop: 22 }}>
+              <Timer secondsLeft={secondsLeft} />
+            </div>
+          </div>
+
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center' }}>
+            <div style={{ ...grid, width: '100%' }}>
+              {stacks.map((s) => (
+                <div key={s.id} style={{ zoom: scale, justifySelf: 'center' }}>
+                  <RecipeStack stack={s} totalRecipes={totalRecipes} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ ...grid, height: 114 * scale, flexShrink: 0, alignItems: 'start' }}>
+            {stacks.map((s) => (
+              <div key={s.id} style={{ zoom: scale, justifySelf: 'center' }}>
+                <PlayerTab stack={s} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {size && banner && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 24 * scale,
+            top: 24 * scale,
+            zoom: scale,
+            background: '#fff',
+            border: `4px solid ${INK}`,
+            borderRadius: 22,
+            padding: '6px 18px',
+            boxShadow: '0 6px 0 rgba(43,42,107,.16)',
+            font: nunito(800, 22),
+          }}
+        >
+          {banner}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Timer({ secondsLeft }: { secondsLeft: number }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
+      <Hourglass />
+      <div
+        style={{
+          width: 240,
+          height: 156,
+          borderRadius: '46% 54% 50% 50% / 56% 48% 52% 44%',
+          background: SUN,
+          border: `6px solid ${INK}`,
+          boxShadow: '0 0 0 10px #fff,0 18px 0 10px rgba(43,42,107,.16)',
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: 'rotate(2deg)',
+          position: 'relative',
+        }}
+      >
+        <span
+          style={{
+            position: 'absolute',
+            left: 34,
+            top: 20,
+            width: 44,
+            height: 13,
+            borderRadius: 7,
+            background: '#fff',
+            opacity: 0.7,
+            transform: 'rotate(-14deg)',
+          }}
+        />
+        <span style={{ font: lilita(132, 1), paddingTop: 6 }}>{secondsLeft}</span>
+      </div>
+    </div>
+  )
+}
 
 function Tick({ size }: { size: number }) {
   return (
@@ -118,10 +262,11 @@ function Hourglass() {
   )
 }
 
-function StepTokens({ current, color, fg }: { current: number; color: string; fg: string }) {
+function StepTokens({ current, total, color }: { current: number; total: number; color: string }) {
+  const fg = tokenFgFor(color)
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, height: 72 }}>
-      {Array.from({ length: PREP_STEPS }, (_, i) => {
+      {Array.from({ length: total }, (_, i) => {
         const n = i + 1
         const done = n < current
         const now = n === current
@@ -191,7 +336,7 @@ function ShopGrid({ items }: { items: ShopItem[] }) {
               justifyContent: 'center',
             }}
           >
-            <Ingredient kind={it.kind} size={124} rotate={it.rot} />
+            <IngredientIcon id={it.kind} size={124} rotate={it.rot} />
             {it.done && (
               <div
                 style={{
@@ -225,11 +370,11 @@ function ShopGrid({ items }: { items: ShopItem[] }) {
   )
 }
 
-function PrepPanel({ stack }: { stack: Extract<Stack, { phase: 'prep' }> }) {
+function PrepPanel({ stack }: { stack: Extract<RaceStack, { phase: 'prep' }> }) {
   const isChop = stack.gesture === 'chop'
   return (
     <>
-      <StepTokens current={stack.step} color={stack.color} fg={stack.tokenFg} />
+      <StepTokens current={stack.step} total={stack.steps} color={stack.color} />
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 0 }}>
         <div
           style={{
@@ -237,7 +382,7 @@ function PrepPanel({ stack }: { stack: Extract<Stack, { phase: 'prep' }> }) {
             width: 270,
             height: 270,
             borderRadius: '50%',
-            background: stack.tint,
+            background: tintFor(stack.color),
             border: `5px solid ${INK}`,
             boxSizing: 'border-box',
             display: 'flex',
@@ -272,14 +417,13 @@ function PrepPanel({ stack }: { stack: Extract<Stack, { phase: 'prep' }> }) {
               />
             </div>
           )}
-          <GameIcon kind={stack.gesture} size={200} style={{ position: 'relative' }} />
+          {stack.gesture === 'plate' ? (
+            stack.dish && <img src={dishAsset(stack.dish)} alt="" width={210} height={210} style={{ position: 'relative' }} />
+          ) : (
+            <GameIcon kind={stack.gesture} size={200} style={{ position: 'relative' }} />
+          )}
           {isChop && (
-            <svg
-              width="250"
-              height="50"
-              viewBox="0 0 250 50"
-              style={{ position: 'absolute', left: 10, bottom: -26 }}
-            >
+            <svg width="250" height="50" viewBox="0 0 250 50" style={{ position: 'absolute', left: 10, bottom: -26 }}>
               <path d="M30 25 H220" stroke="#fff" strokeWidth="16" strokeLinecap="round" />
               <path
                 d="M30 25 H220 M42 10 L24 25 L42 40 M208 10 L226 25 L208 40"
@@ -311,12 +455,13 @@ function PrepPanel({ stack }: { stack: Extract<Stack, { phase: 'prep' }> }) {
   )
 }
 
-function RecipeStack({ stack }: { stack: Stack }) {
+function RecipeStack({ stack, totalRecipes }: { stack: RaceStack; totalRecipes: number }) {
   const isShop = stack.phase === 'shop'
+  const tint = tintFor(stack.color)
   const backCard: React.CSSProperties = {
     position: 'absolute',
     height: 220,
-    background: stack.tint,
+    background: tint,
     border: `5px solid ${INK}`,
     borderRadius: 32,
     boxShadow: '0 10px 0 rgba(43,42,107,.12)',
@@ -326,23 +471,27 @@ function RecipeStack({ stack }: { stack: Stack }) {
   const nextLabel = { font: lilita(26), opacity: 0.45 }
 
   return (
-    <div style={{ position: 'relative', width: 392, height: 732, justifySelf: 'center' }}>
-      <div style={{ ...backCard, top: 0, left: 34, right: 34, transform: 'rotate(-3deg)' }}>
-        <span style={nextLabel}>{stack.recipe + 2}</span>
-      </div>
-      <div
-        style={{
-          ...backCard,
-          top: 22,
-          left: 16,
-          right: 16,
-          transform: 'rotate(2.5deg)',
-          display: 'flex',
-          justifyContent: 'flex-end',
-        }}
-      >
-        <span style={nextLabel}>{stack.recipe + 1}</span>
-      </div>
+    <div style={{ position: 'relative', width: 392, height: 732 }}>
+      {stack.recipe + 2 <= totalRecipes && (
+        <div style={{ ...backCard, top: 0, left: 34, right: 34, transform: 'rotate(-3deg)' }}>
+          <span style={nextLabel}>{stack.recipe + 2}</span>
+        </div>
+      )}
+      {stack.recipe + 1 <= totalRecipes && (
+        <div
+          style={{
+            ...backCard,
+            top: 22,
+            left: 16,
+            right: 16,
+            transform: 'rotate(2.5deg)',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <span style={nextLabel}>{stack.recipe + 1}</span>
+        </div>
+      )}
 
       <div
         style={{
@@ -382,7 +531,7 @@ function RecipeStack({ stack }: { stack: Stack }) {
           </div>
           <span style={{ font: lilita(28, 1) }}>
             {stack.recipe}
-            <span style={{ opacity: 0.5 }}> / {TOTAL_RECIPES}</span>
+            <span style={{ opacity: 0.5 }}> / {totalRecipes}</span>
           </span>
         </div>
         <div style={{ font: '900 24px/1.15 Nunito', marginTop: -4 }}>{stack.recipeName}</div>
@@ -393,145 +542,90 @@ function RecipeStack({ stack }: { stack: Stack }) {
   )
 }
 
-export function HostRaceStacks() {
+function PlayerTab({ stack }: { stack: RaceStack }) {
   return (
     <div
       style={{
-        width: 1920,
-        height: 1080,
-        position: 'relative',
-        overflow: 'hidden',
-        backgroundColor: PAGE_BG,
-        backgroundImage: `radial-gradient(${DOT} 2.5px, transparent 3px)`,
-        backgroundSize: '40px 40px',
+        width: 392,
+        height: 122,
+        marginBottom: -8,
+        background: tintFor(stack.color),
         border: `5px solid ${INK}`,
-        borderRadius: 32,
+        borderBottom: 'none',
+        borderRadius: '38px 38px 0 0',
         boxSizing: 'border-box',
-        fontFamily: 'Nunito, sans-serif',
-        color: INK,
+        padding: '0 22px 8px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
       }}
     >
       <div
         style={{
-          position: 'absolute',
-          top: 22,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 22,
+          width: 80,
+          height: 80,
+          flexShrink: 0,
+          borderRadius: '50%',
+          background: stack.color,
+          border: `5px solid ${INK}`,
+          boxShadow: '0 0 0 5px #fff',
+          boxSizing: 'border-box',
         }}
-      >
-        <Hourglass />
-        <div
-          style={{
-            width: 240,
-            height: 156,
-            borderRadius: '46% 54% 50% 50% / 56% 48% 52% 44%',
-            background: SUN,
-            border: `6px solid ${INK}`,
-            boxShadow: '0 0 0 10px #fff,0 18px 0 10px rgba(43,42,107,.16)',
-            boxSizing: 'border-box',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transform: 'rotate(2deg)',
-            position: 'relative',
-          }}
-        >
-          <span
-            style={{
-              position: 'absolute',
-              left: 34,
-              top: 20,
-              width: 44,
-              height: 13,
-              borderRadius: 7,
-              background: '#fff',
-              opacity: 0.7,
-              transform: 'rotate(-14deg)',
-            }}
-          />
-          <span style={{ font: lilita(132, 1), paddingTop: 6 }}>{TIMER}</span>
-        </div>
-      </div>
-
+      />
       <div
         style={{
-          position: 'absolute',
-          left: 40,
-          right: 40,
-          top: 208,
-          height: 732,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4,minmax(0,1fr))',
+          flex: 1,
+          minWidth: 0,
+          background: '#fff',
+          border: `5px solid ${INK}`,
+          borderRadius: 34,
+          boxShadow: `0 0 0 5px ${stack.color}`,
+          padding: '4px 20px',
+          boxSizing: 'border-box',
+          font: lilita(44, 1.1),
+          textAlign: 'center',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}
       >
-        {STACKS.map((s) => (
-          <RecipeStack key={s.name} stack={s} />
-        ))}
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          left: 40,
-          right: 40,
-          bottom: -8,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4,minmax(0,1fr))',
-        }}
-      >
-        {STACKS.map((s) => (
-          <div
-            key={s.name}
-            style={{
-              justifySelf: 'center',
-              width: 392,
-              height: 122,
-              background: s.tint,
-              border: `5px solid ${INK}`,
-              borderBottom: 'none',
-              borderRadius: '38px 38px 0 0',
-              boxSizing: 'border-box',
-              padding: '0 22px 8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                width: 80,
-                height: 80,
-                flexShrink: 0,
-                borderRadius: '50%',
-                background: s.color,
-                border: `5px solid ${INK}`,
-                boxShadow: '0 0 0 5px #fff',
-                boxSizing: 'border-box',
-              }}
-            />
-            <div
-              style={{
-                flex: 1,
-                minWidth: 0,
-                background: '#fff',
-                border: `5px solid ${INK}`,
-                borderRadius: 34,
-                boxShadow: `0 0 0 5px ${s.color}`,
-                padding: '4px 20px',
-                boxSizing: 'border-box',
-                font: lilita(44, 1.1),
-                textAlign: 'center',
-              }}
-            >
-              {s.name}
-            </div>
-          </div>
-        ))}
+        {stack.name}
       </div>
     </div>
   )
+}
+
+const GESTURE_NAMES: Record<Gesture, string> = { chop: 'CHOP!', stir: 'STIR!', flip: 'FLIP!', plate: 'PLATE!' }
+const SHOP_ROTATIONS = [-6, 5, -4, 6]
+
+/** Builds a player's card from menu data: shopping (with what's already in the basket) or a prep step. */
+export function stackFor(
+  player: { id: string; name: string; color: string },
+  recipe: MenuRecipe,
+  recipeNumber: number,
+  progress: { phase: 'shop'; inBasket: string[] } | { phase: 'prep'; step: number },
+): RaceStack {
+  const base = { ...player, recipe: recipeNumber, recipeName: recipe.name }
+  if (progress.phase === 'shop') {
+    return {
+      ...base,
+      phase: 'shop',
+      items: recipe.ingredients.map((kind, i) => ({
+        kind,
+        rot: SHOP_ROTATIONS[i % SHOP_ROTATIONS.length],
+        done: progress.inBasket.includes(kind),
+      })),
+    }
+  }
+  const step = recipe.steps[Math.min(progress.step, recipe.steps.length) - 1]
+  return {
+    ...base,
+    phase: 'prep',
+    gesture: step.gesture,
+    dish: recipe.id,
+    gestureName: GESTURE_NAMES[step.gesture],
+    stepLabel: step.label,
+    step: progress.step,
+    steps: recipe.steps.length,
+  }
 }

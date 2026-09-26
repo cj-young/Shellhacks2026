@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 112 112" fill="none" stroke="#2B2A6B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="30" y="8" width="40" height="64" rx="8" fill="#1F4FD8"/>
+    <rect x="37" y="18" width="26" height="38" rx="5" fill="#FFDD6B"/>
+    <path d="M42 20 L42 54 M47 20 L47 54 M52 20 L52 54 M57 20 L57 54" stroke="#2B2A6B" stroke-width="2.5"/>
+    <rect x="8" y="78" width="84" height="20" rx="10" fill="#FFFFFF" stroke="#2B2A6B" stroke-width="3"/>
+    <text x="50" y="93" font-family="Nunito, 'Arial Rounded MT Bold', Arial, sans-serif" font-weight="900" font-size="12.5" letter-spacing="0.5" fill="#2B2A6B" stroke="none" text-anchor="middle">PASTA</text>
+</svg>
