@@ -1,6 +1,12 @@
 [
   {
     "name": "Half-Moon Cookie",
+    "ingredients": [
+        {
+            "id": 0,
+            "count": 1
+        }
+    ],
     "stages": [
       {
         "type": "lines",
@@ -38,6 +44,12 @@
   },
   {
     "name": "Half-Moon Cookie",
+    "ingredients": [
+        {
+            "id": 0,
+            "count": 1
+        }
+    ],
     "stages": [
       {
         "type": "lines",
@@ -75,6 +87,12 @@
   },
   {
     "name": "Half-Moon Cookie",
+    "ingredients": [
+        {
+            "id": 0,
+            "count": 1
+        }
+    ],
     "stages": [
       {
         "type": "lines",
@@ -112,6 +130,12 @@
   },
   {
     "name": "Half-Moon Cookie",
+    "ingredients": [
+        {
+            "id": 0,
+            "count": 1
+        }
+    ],
     "stages": [
       {
         "type": "lines",
@@ -149,6 +173,12 @@
   },
   {
     "name": "Half-Moon Cookie",
+    "ingredients": [
+        {
+            "id": 0,
+            "count": 1
+        }
+    ],
     "stages": [
       {
         "type": "lines",
