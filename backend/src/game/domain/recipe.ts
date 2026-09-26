@@ -1,6 +1,5 @@
 export type Recipe = {
   name: string;
-  ingredients: { id: number; count: number }[];
   stages: RecipeStage[];
 };
 
@@ -8,6 +7,7 @@ export type RecipeStage = {
   type: string;
   image?: string;
   lines: LineType[];
+  ingredientsConsumed: Map<number, number>;
 };
 
 export type LineType = {
