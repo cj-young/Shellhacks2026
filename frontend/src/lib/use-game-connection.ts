@@ -39,12 +39,14 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
       setStatus('Not connected')
       setMessage('')
       setStarted(false)
+      setState(MakeEmptyState())
       return
     }
 
     setStatus('Connecting...')
     setMessage('')
     setStarted(false)
+    setState(MakeEmptyState())
 
     const socket = io({ path: '/api/socket.io/', auth: { code, token, name } })
     socketRef.current = socket
@@ -79,10 +81,10 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     )
     socket.on(
       'update_state',
-      (gameState:GameState) => {
+      (gameState: GameState) => {
         setState(gameState)
         console.log(gameState)
-      }
+      },
     )
 
     return () => {
