@@ -1,0 +1,107 @@
+:root {
+  /* Backgrounds */
+  --bg: #EEF3FB;
+  --bg-dots: #D5E0F2;
+  --surface: #F7F9FE;
+  --surface-white: #FFFFFF;
+
+  /* Ink / Text */
+  --ink: #262A6B;
+  --ink-soft: #5A5F94;
+
+  /* Brand Colors */
+  --royal: #1F4FD8;
+  --sky: #4FB3F0;
+  --sun: #FFC928;
+  --leaf: #2FA84F;
+  --tomato: #EF4B3C;
+  --pink: #F48FB7;
+
+  /* Station Colors */
+  --station-blue: #1F4FD8;
+  --station-red: #E8583A;
+  --station-green: #1E9E5A;
+  --station-pink: #E06A9A;
+
+  /* Typography */
+  --font-display: "Fredoka", "Baloo 2", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+
+  /* Border radius */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  /* Border width */
+  --border-width: 2.5px;
+
+  /* Shadows (hard offset, not blurry) */
+  --shadow-sm: 0 2px 0 var(--ink);
+  --shadow-md: 0 5px 0 var(--ink);
+  --shadow-lg: 0 8px 0 var(--ink);
+}
+
+/* Dot grid background pattern */
+.dot-grid {
+  background-image: radial-gradient(circle, var(--bg-dots) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
+}
+
+/* Base typography */
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background-color: var(--bg);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.display-lg {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.display-md {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.text-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.text-caption {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* Utility classes */
+.no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.active-press {
+  transition: all 100ms ease-out;
+}
+
+.active-press:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--ink) !important;
+}
