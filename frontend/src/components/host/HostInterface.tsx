@@ -2,6 +2,7 @@ import type { GameConnection } from "#/lib/use-game-connection";
 import type { Ingredient, Recipe } from "#/lib/types";
 import { useEffect, useState } from "react";
 import ingredients from "../../data/ingredients.json";
+import recipes from "../../data/recipes.json";
 import {
   DEMO_STACKS,
   HostRaceStacks,
@@ -27,9 +28,18 @@ function roundSeconds() {
 
 type RoundPhase = "play" | "timesUp" | "roundEnd";
 
-// Recipes reference ingredients by id; fall back to array position for older data.
+// Same lookup as the team's original host screen: recipe ingredient ids index into ingredients.json.
 const ingredientById = (id: number): Ingredient | undefined =>
-  ingredients.find((ing) => ing.id === id) ?? ingredients.at(id);
+  ingredients.at(id);
+
+/**
+ * The server strips `ingredients` when it builds the recipe order, so fall back to the
+ * team's recipes.json entry with the same name.
+ */
+const neededIngredients = (recipe: Recipe) =>
+  recipe.ingredients ??
+  recipes.find((r) => r.name === recipe.name)?.ingredients ??
+  [];
 
 /** A player's shopping card for a server recipe, ticked off from their inventory. */
 function shoppingStack(
@@ -43,7 +53,7 @@ function shoppingStack(
     recipe: recipeNumber,
     recipeName: recipe.name,
     phase: "shop",
-    items: recipe.ingredients.map((needed, i) => {
+    items: neededIngredients(recipe).map((needed, i) => {
       const ingredient = ingredientById(needed.id);
       return {
         kind: ingredient ? iconIdFor(ingredient) : "",
