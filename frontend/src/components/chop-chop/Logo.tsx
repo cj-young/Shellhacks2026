@@ -1,17 +1,17 @@
-import React from 'react'
+import React from "react";
 
 interface LogoProps {
-  size?: 'sm' | 'md' | 'lg'
-  rotation?: number
+  size?: "sm" | "md" | "lg";
+  rotation?: number;
 }
 
 const sizeMap = {
-  sm: 'text-2xl',
-  md: 'text-4xl',
-  lg: 'text-6xl',
-}
+  sm: "text-2xl",
+  md: "text-4xl",
+  lg: "text-6xl",
+};
 
-export function Logo({ size = 'md', rotation = 0 }: LogoProps) {
+export function Logo({ size = "md", rotation = 0 }: LogoProps) {
   return (
     <div
       className={`
@@ -23,11 +23,11 @@ export function Logo({ size = 'md', rotation = 0 }: LogoProps) {
       `}
       style={{
         transform: `rotate(${rotation}deg)`,
-        color: 'var(--sun)',
+        color: "var(--sun)",
         textShadow: `3px 3px 0 var(--ink)`,
       }}
     >
       🔪
     </div>
-  )
+  );
 }

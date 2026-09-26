@@ -1,14 +1,18 @@
-import React, { useState } from 'react'
-import { Logo } from '../Logo'
-import { RoomCode } from '../RoomCode'
-import { TextInput } from '../TextInput'
-import { Button } from '../Button'
-import { Avatar } from '../Avatar'
-import { AVAILABLE_CHEFS, ROOM_CODE, PLAYER_COLORS } from '#/data/chop-chop-mock'
+import React, { useState } from "react";
+import { Logo } from "../Logo";
+import { RoomCode } from "../RoomCode";
+import { TextInput } from "../TextInput";
+import { Button } from "../Button";
+import { Avatar } from "../Avatar";
+import {
+  AVAILABLE_CHEFS,
+  ROOM_CODE,
+  PLAYER_COLORS,
+} from "#/data/chop-chop-mock";
 
 export function MobileJoin() {
-  const [playerName, setPlayerName] = useState('')
-  const [selectedChef, setSelectedChef] = useState<string | null>(null)
+  const [playerName, setPlayerName] = useState("");
+  const [selectedChef, setSelectedChef] = useState<string | null>(null);
 
   return (
     <div className="w-full h-screen bg-[var(--bg)] dot-grid overflow-y-auto flex flex-col max-w-sm mx-auto p-4">
@@ -43,7 +47,7 @@ export function MobileJoin() {
         <label className="text-label block mb-4">PICK YOUR CHEF</label>
         <div className="grid grid-cols-2 gap-3">
           {AVAILABLE_CHEFS.map((chef) => {
-            const isTaken = false // Mock: none are taken yet
+            const isTaken = false; // Mock: none are taken yet
             return (
               <button
                 key={chef.id}
@@ -60,7 +64,7 @@ export function MobileJoin() {
                 />
                 <div className="text-sm font-bold text-center">{chef.name}</div>
               </button>
-            )
+            );
           })}
         </div>
       </div>
@@ -78,5 +82,5 @@ export function MobileJoin() {
       {/* Spacer */}
       <div className="flex-1" />
     </div>
-  )
+  );
 }

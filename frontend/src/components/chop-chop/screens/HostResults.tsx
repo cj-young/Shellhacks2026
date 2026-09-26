@@ -1,13 +1,13 @@
-import React from 'react'
-import { MOCK_PLAYERS, MOCK_ORDERS } from '#/data/chop-chop-mock'
-import { Card } from '../Card'
-import { Button } from '../Button'
-import { Pill } from '../Pill'
+import React from "react";
+import { MOCK_PLAYERS, MOCK_ORDERS } from "#/data/chop-chop-mock";
+import { Card } from "../Card";
+import { Button } from "../Button";
+import { Pill } from "../Pill";
 
 export function HostResults() {
-  const totalScore = 12500
-  const completed = 3
-  const total = 4
+  const totalScore = 12500;
+  const completed = 3;
+  const total = 4;
 
   return (
     <div className="w-screen h-screen bg-[var(--bg)] dot-grid overflow-hidden flex flex-col items-center justify-center p-8">
@@ -46,7 +46,11 @@ export function HostResults() {
               <div className="text-xs text-[var(--ink-soft)]">
                 {order.customerName}
               </div>
-              <Pill color="leaf" textColor="text-white" className="mt-3 justify-center">
+              <Pill
+                color="leaf"
+                textColor="text-white"
+                className="mt-3 justify-center"
+              >
                 +1250
               </Pill>
             </Card>
@@ -69,5 +73,5 @@ export function HostResults() {
         </Button>
       </div>
     </div>
-  )
+  );
 }

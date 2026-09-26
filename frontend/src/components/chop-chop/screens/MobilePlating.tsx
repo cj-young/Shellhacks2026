@@ -1,43 +1,54 @@
-import React, { useState } from 'react'
-import { Pill } from '../Pill'
-import { PLAYER_COLORS } from '#/data/chop-chop-mock'
+import React, { useState } from "react";
+import { Pill } from "../Pill";
+import { PLAYER_COLORS } from "#/data/chop-chop-mock";
 
-const demoPlayer = { name: 'Casey', color: PLAYER_COLORS[2], avatar: 'C' }
-const ingredients = ['🍋', '🌿', '🐟']
+const demoPlayer = { name: "Casey", color: PLAYER_COLORS[2], avatar: "C" };
+const ingredients = ["🍋", "🌿", "🐟"];
 
 export function MobilePlating() {
-  const [platedIngredients, setPlatedIngredients] = useState<string[]>([])
-  const [availableIngredients, setAvailableIngredients] = useState(ingredients)
+  const [platedIngredients, setPlatedIngredients] = useState<string[]>([]);
+  const [availableIngredients, setAvailableIngredients] = useState(ingredients);
 
-  const handleDragStart = (e: React.DragEvent, ingredient: string, index: number) => {
-    e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('ingredient', ingredient)
-    e.dataTransfer.setData('index', index.toString())
-  }
+  const handleDragStart = (
+    e: React.DragEvent,
+    ingredient: string,
+    index: number,
+  ) => {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("ingredient", ingredient);
+    e.dataTransfer.setData("index", index.toString());
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-  }
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const ingredient = e.dataTransfer.getData('ingredient')
-    const index = parseInt(e.dataTransfer.getData('index'))
+    e.preventDefault();
+    const ingredient = e.dataTransfer.getData("ingredient");
+    const index = parseInt(e.dataTransfer.getData("index"));
 
     if (!platedIngredients.includes(ingredient)) {
-      setPlatedIngredients([...platedIngredients, ingredient])
-      setAvailableIngredients(availableIngredients.filter((_, i) => i !== index))
+      setPlatedIngredients([...platedIngredients, ingredient]);
+      setAvailableIngredients(
+        availableIngredients.filter((_, i) => i !== index),
+      );
     }
-  }
+  };
 
-  const isComplete = availableIngredients.length === 0 && platedIngredients.length > 0
+  const isComplete =
+    availableIngredients.length === 0 && platedIngredients.length > 0;
 
   return (
     <div className="w-full h-screen max-w-sm mx-auto overflow-hidden flex flex-col bg-[var(--bg)] dot-grid">
       {/* Station header */}
       <div className="p-4 border-b-4 border-[var(--ink)]">
-        <Pill color="royal" textColor="text-white" className="w-full justify-center">
+        <Pill
+          color="royal"
+          textColor="text-white"
+          className="w-full justify-center"
+        >
           Plating Station
         </Pill>
       </div>
@@ -70,8 +81,8 @@ export function MobilePlating() {
             transition-all duration-200
             ${
               platedIngredients.length > 0
-                ? 'bg-[var(--sun)] border-[var(--ink)] shadow-[0_5px_0_var(--ink)]'
-                : 'bg-[var(--surface-white)] border-dashed border-[var(--ink-soft)]'
+                ? "bg-[var(--sun)] border-[var(--ink)] shadow-[0_5px_0_var(--ink)]"
+                : "bg-[var(--surface-white)] border-dashed border-[var(--ink-soft)]"
             }
           `}
         >
@@ -104,5 +115,5 @@ export function MobilePlating() {
         </div>
       </div>
     </div>
-  )
+  );
 }

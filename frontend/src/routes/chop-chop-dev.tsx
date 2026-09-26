@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { ScreenSwitcher } from '../components/chop-chop/ScreenSwitcher'
+import { createFileRoute } from "@tanstack/react-router";
+import { ScreenSwitcher } from "../components/chop-chop/ScreenSwitcher";
 
-export const Route = createFileRoute('/chop-chop-dev')({
+export const Route = createFileRoute("/chop-chop-dev")({
   component: ScreenSwitcher,
-})
+});

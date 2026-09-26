@@ -1,7 +1,7 @@
 [
-    {
-        "name": "Flour",
-        "image": "/FlourTest.webp",
-        "category": "Grain"
-    }
+  {
+    "name": "Flour",
+    "image": "/FlourTest.webp",
+    "category": "Grain"
+  }
 ]

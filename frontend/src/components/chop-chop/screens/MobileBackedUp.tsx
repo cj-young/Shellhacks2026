@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import { Pill } from '../Pill'
-import { PLAYER_COLORS } from '#/data/chop-chop-mock'
+import React, { useEffect, useState } from "react";
+import { Pill } from "../Pill";
+import { PLAYER_COLORS } from "#/data/chop-chop-mock";
 
 export function MobileBackedUp() {
-  const [isShaking, setIsShaking] = useState(true)
+  const [isShaking, setIsShaking] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsShaking((s) => !s)
-    }, 400)
-    return () => clearInterval(interval)
-  }, [])
+      setIsShaking((s) => !s);
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div
@@ -18,7 +18,7 @@ export function MobileBackedUp() {
         w-full h-screen max-w-sm mx-auto overflow-hidden flex flex-col
         bg-[var(--tomato)] items-center justify-center gap-6 p-6
         transition-transform duration-100
-        ${isShaking ? 'scale-100' : 'scale-95'}
+        ${isShaking ? "scale-100" : "scale-95"}
       `}
     >
       {/* Animated warning */}
@@ -27,7 +27,9 @@ export function MobileBackedUp() {
       {/* Message */}
       <div className="text-center">
         <h1 className="display-lg text-white mb-4">YOU'RE BACKED UP!</h1>
-        <p className="text-lg text-white font-bold mb-2">Keep it moving, chef!</p>
+        <p className="text-lg text-white font-bold mb-2">
+          Keep it moving, chef!
+        </p>
         <p className="text-sm text-white opacity-80">
           Finish your current items to get back on track
         </p>
@@ -53,5 +55,5 @@ export function MobileBackedUp() {
         Get Back to Work!
       </button>
     </div>
-  )
+  );
 }

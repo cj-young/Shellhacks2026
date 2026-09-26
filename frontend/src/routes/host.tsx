@@ -1,91 +1,91 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useCallback, useEffect, useState } from 'react'
-import { useGameConnection } from '#/lib/use-game-connection'
-import { HostInterface } from '#/components/host/HostInterface'
+import { createFileRoute } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
+import { useGameConnection } from "#/lib/use-game-connection";
+import { HostInterface } from "#/components/host/HostInterface";
 
-type HostGame = { code: string; hostToken: string; name: string }
+type HostGame = { code: string; hostToken: string; name: string };
 
-const STORAGE_KEY = 'shellhacks.hostGame'
+const STORAGE_KEY = "shellhacks.hostGame";
 
-export const Route = createFileRoute('/host')({ component: HostScreen })
+export const Route = createFileRoute("/host")({ component: HostScreen });
 
 function loadStoredGame(): HostGame | null {
-  if (typeof window === 'undefined') return null
+  if (typeof window === "undefined") return null;
 
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
+    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
 
-    const parsed = JSON.parse(raw) as Partial<HostGame>
+    const parsed = JSON.parse(raw) as Partial<HostGame>;
     if (
-      typeof parsed.code !== 'string' ||
-      typeof parsed.hostToken !== 'string'
+      typeof parsed.code !== "string" ||
+      typeof parsed.hostToken !== "string"
     ) {
-      return null
+      return null;
     }
 
     const name =
-      typeof parsed.name === 'string' && parsed.name.trim()
+      typeof parsed.name === "string" && parsed.name.trim()
         ? parsed.name
-        : 'Host'
+        : "Host";
 
-    return { code: parsed.code, hostToken: parsed.hostToken, name }
+    return { code: parsed.code, hostToken: parsed.hostToken, name };
   } catch {
-    return null
+    return null;
   }
 }
 
 function HostScreen() {
-  const [game, setGame] = useState<HostGame | null>(null)
-  const [nameInput, setNameInput] = useState('')
-  const [createError, setCreateError] = useState('')
+  const [game, setGame] = useState<HostGame | null>(null);
+  const [nameInput, setNameInput] = useState("");
+  const [createError, setCreateError] = useState("");
   const connection = useGameConnection(
     game ? { code: game.code, token: game.hostToken, name: game.name } : null,
-  )
+  );
 
   useEffect(() => {
-    const stored = loadStoredGame()
+    const stored = loadStoredGame();
     if (stored) {
-      setGame(stored)
-      setNameInput(stored.name)
+      setGame(stored);
+      setNameInput(stored.name);
     }
-  }, [])
+  }, []);
 
-  const canCreate = nameInput.trim().length > 0
+  const canCreate = nameInput.trim().length > 0;
 
   const createGame = useCallback(async () => {
-    const name = nameInput.trim()
-    if (!name) return
+    const name = nameInput.trim();
+    if (!name) return;
 
-    setCreateError('')
+    setCreateError("");
 
     try {
-      const response = await fetch('/api/games', { method: 'POST' })
-      if (!response.ok) throw new Error(`Request failed (${response.status})`)
+      const response = await fetch("/api/games", { method: "POST" });
+      if (!response.ok) throw new Error(`Request failed (${response.status})`);
 
       const created = (await response.json()) as {
-        code: string
-        hostToken: string
-      }
-      const hostGame: HostGame = { ...created, name }
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(hostGame))
-      setGame(hostGame)
+        code: string;
+        hostToken: string;
+      };
+      const hostGame: HostGame = { ...created, name };
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(hostGame));
+      setGame(hostGame);
     } catch (error) {
       setCreateError(
-        error instanceof Error ? error.message : 'Unable to create a game',
-      )
+        error instanceof Error ? error.message : "Unable to create a game",
+      );
     }
-  }, [nameInput])
+  }, [nameInput]);
 
   const startGame = useCallback(() => {
-    setCreateError('')
-    connection.socketRef.current?.emit('start_game')
-  }, [connection.socketRef])
+    setCreateError("");
+    connection.socketRef.current?.emit("start_game");
+  }, [connection.socketRef]);
 
-  const errorMessage = createError || connection.message
+  const errorMessage = createError || connection.message;
 
   if (connection.started) {
-    return <HostInterface connection={connection}></HostInterface>
+    return <HostInterface connection={connection}></HostInterface>;
   }
 
   return (
@@ -106,11 +106,11 @@ function HostScreen() {
           className="rounded border border-cyan-400 px-4 py-2 font-medium hover:bg-cyan-400/10 disabled:opacity-40"
           disabled={!canCreate}
           onClick={() => {
-            void createGame()
+            void createGame();
           }}
           type="button"
         >
-          {game ? 'Create a new game' : 'Create game'}
+          {game ? "Create a new game" : "Create game"}
         </button>
 
         {game && (
@@ -121,7 +121,7 @@ function HostScreen() {
               <button
                 className="mt-2 text-sm text-cyan-400 underline"
                 onClick={() => {
-                  void navigator.clipboard.writeText(game.code)
+                  void navigator.clipboard.writeText(game.code);
                 }}
                 type="button"
               >
@@ -148,11 +148,11 @@ function HostScreen() {
                 {connection.players.map((player) => (
                   <li
                     key={player.id}
-                    className={player.connected ? undefined : 'text-slate-500'}
+                    className={player.connected ? undefined : "text-slate-500"}
                   >
                     {player.name}
-                    {player.isHost ? ' (host)' : ''}
-                    {player.connected ? '' : ' (disconnected)'}
+                    {player.isHost ? " (host)" : ""}
+                    {player.connected ? "" : " (disconnected)"}
                   </li>
                 ))}
               </ul>
@@ -170,5 +170,5 @@ function HostScreen() {
         </a>
       </div>
     </div>
-  )
+  );
 }

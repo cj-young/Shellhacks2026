@@ -1,27 +1,27 @@
 :root {
   /* Backgrounds */
-  --bg: #EEF3FB;
-  --bg-dots: #D5E0F2;
-  --surface: #F7F9FE;
-  --surface-white: #FFFFFF;
+  --bg: #eef3fb;
+  --bg-dots: #d5e0f2;
+  --surface: #f7f9fe;
+  --surface-white: #ffffff;
 
   /* Ink / Text */
-  --ink: #262A6B;
-  --ink-soft: #5A5F94;
+  --ink: #262a6b;
+  --ink-soft: #5a5f94;
 
   /* Brand Colors */
-  --royal: #1F4FD8;
-  --sky: #4FB3F0;
-  --sun: #FFC928;
-  --leaf: #2FA84F;
-  --tomato: #EF4B3C;
-  --pink: #F48FB7;
+  --royal: #1f4fd8;
+  --sky: #4fb3f0;
+  --sun: #ffc928;
+  --leaf: #2fa84f;
+  --tomato: #ef4b3c;
+  --pink: #f48fb7;
 
   /* Station Colors */
-  --station-blue: #1F4FD8;
-  --station-red: #E8583A;
-  --station-green: #1E9E5A;
-  --station-pink: #E06A9A;
+  --station-blue: #1f4fd8;
+  --station-red: #e8583a;
+  --station-green: #1e9e5a;
+  --station-pink: #e06a9a;
 
   /* Typography */
   --font-display: "Fredoka", "Baloo 2", system-ui, sans-serif;
@@ -44,7 +44,11 @@
 
 /* Dot grid background pattern */
 .dot-grid {
-  background-image: radial-gradient(circle, var(--bg-dots) 1px, transparent 1px);
+  background-image: radial-gradient(
+    circle,
+    var(--bg-dots) 1px,
+    transparent 1px
+  );
   background-size: 20px 20px;
   background-position: 0 0;
 }
@@ -58,7 +62,12 @@ body {
   font-size: 16px;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   color: var(--ink);
   font-weight: 700;

@@ -1,9 +1,9 @@
-import React from 'react'
+import React from "react";
 
 interface PlayerPillProps {
-  name: string
-  color: string
-  onRemove?: () => void
+  name: string;
+  color: string;
+  onRemove?: () => void;
 }
 
 export function PlayerPill({ name, color, onRemove }: PlayerPillProps) {
@@ -32,5 +32,5 @@ export function PlayerPill({ name, color, onRemove }: PlayerPillProps) {
         </button>
       )}
     </div>
-  )
+  );
 }

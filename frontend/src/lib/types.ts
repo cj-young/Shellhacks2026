@@ -2,25 +2,25 @@ export function MakeEmptyState() {
   return {
     recipeOrder: [],
     players: [],
-  } as GameState
+  } as GameState;
 }
 
 export type PlayerSummary = {
-  id: string
-  name: string
-  isHost: boolean
-  joinedAt: number
-  connected: boolean
-}
+  id: string;
+  name: string;
+  isHost: boolean;
+  joinedAt: number;
+  connected: boolean;
+};
 
 export type GameState = {
-  recipeOrder: Recipe[]
-  players: PlayerSummary[]
-}
+  recipeOrder: Recipe[];
+  players: PlayerSummary[];
+};
 
 export type Recipe = {
   name: string;
-  ingredients: {id: number, count: number}[];
+  ingredients: { id: number; count: number }[];
   stages: RecipeStage[];
 };
 
@@ -41,10 +41,8 @@ export type Point = {
   y: number;
 };
 
-
 export type Ingredient = {
-  name: string,
-  image: string,
-  category: string
-}
-
+  name: string;
+  image: string;
+  category: string;
+};
