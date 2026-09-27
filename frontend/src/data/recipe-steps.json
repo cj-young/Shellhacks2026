@@ -75,14 +75,16 @@
       "gesture": "stir",
       "word": "STIR!",
       "station": "pot",
-      "art": "/assets/steps/spaghetti/pot-tomato.svg"
+      "art": "/assets/steps/spaghetti/pot-tomato.svg",
+      "doneArt": "/assets/steps/spaghetti/pot-sauce.svg"
     },
     {
       "label": "Toss in the pasta",
       "gesture": "stir",
       "word": "TOSS!",
       "station": "pot",
-      "art": "/assets/steps/spaghetti/pot-pasta.svg"
+      "art": "/assets/steps/spaghetti/pot-sauce-pasta.svg",
+      "doneArt": "/assets/steps/spaghetti/pot-pasta-in-sauce.svg"
     }
   ],
   "cheeseburger": [
