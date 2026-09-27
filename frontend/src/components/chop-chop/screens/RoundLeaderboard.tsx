@@ -13,6 +13,7 @@ import { CONFETTI } from "./HostVictoryNew";
 import { KitchenBackground } from "../KitchenBackground";
 
 import { paper } from "#/components/chop-chop/paper";
+
 export type LeaderboardEntry = {
   id: string;
   name: string;
@@ -248,7 +249,7 @@ export function RoundLeaderboard({
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            gap: 6 * s,
+                            gap: 8 * s,
                           }}
                         >
                           <span
@@ -265,6 +266,11 @@ export function RoundLeaderboard({
                           </span>
                           <span
                             style={{
+                              ...paper(24 * s, 11, false),
+                              transform: `rotate(${rank === 1 ? 2 : -2}deg)`,
+                              background: "#fff",
+                              padding: `${2 * s}px ${18 * s}px`,
+                              boxShadow: "var(--paper-shadow)",
                               font: lilita(54 * s, 1),
                               whiteSpace: "nowrap",
                             }}
