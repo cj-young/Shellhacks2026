@@ -110,11 +110,11 @@ function scene(station, art) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${BOX} ${BOX}" width="${BOX}" height="${BOX}">${parts.join("")}</svg>\n`;
 }
 
-// Shown when a stage is finished. GestureRecipe draws it at 70% of the box,
-// centred on the box, so the burst is offset to land on the gesture centre.
+// Shown when a stage is finished and there's no next picture. GestureRecipe
+// draws stage pictures over the 0–200px gesture space, so the burst is centred there.
 function done() {
-  const size = BOX * 0.7;
-  const c = { x: CX - (BOX - size) / 2, y: CY - (BOX - size) / 2 };
+  const size = 200;
+  const c = { x: CX, y: CY };
   const star = (x, y, r, fill) => {
     const k = r * 0.42;
     return `<path d="M${x} ${y - r} Q${x + k * 0.35} ${y - k * 0.35} ${x + r} ${y} Q${x + k * 0.35} ${y + k * 0.35} ${x} ${y + r} Q${x - k * 0.35} ${y + k * 0.35} ${x - r} ${y} Q${x - k * 0.35} ${y - k * 0.35} ${x} ${y - r}Z" fill="${fill}"/>`;

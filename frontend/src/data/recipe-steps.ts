@@ -28,6 +28,20 @@ export type StepInfo = {
    * draws it under the gesture, lined up with the 0–200px gesture space.
    */
   art?: string;
+  /** Picture shown on "Success!" for this step; defaults to the next step's art. */
+  doneArt?: string;
+  /** Surface drawn behind the step's picture (e.g. the cutting board). */
+  background?: string;
+  /** Utensil that follows the finger instead of a plain pointer (e.g. a whisk). */
+  tool?: StepTool;
+};
+
+export type StepTool = {
+  src: string;
+  /** Point on the image that sits under the finger, as fractions of its width and height. */
+  hotspot: [number, number];
+  /** Drawn height in px. */
+  height: number;
 };
 
 const step = (
@@ -109,31 +123,49 @@ function consumedArt(stage: RecipeStage): string[] {
 }
 
 /**
- * Swaps the recipe's test pictures for placeholder station art (with the
- * ingredient being used). Real art in recipes.json is left alone. The finished
- * picture stays set so the stage still pauses on "Success!" like the data asks.
+ * Fills in each stage's pictures for GestureRecipe, which draws them over the
+ * 0–200px gesture space:
+ * - image (while doing the step): the stage's own art from recipes.json, else
+ *   our step art from recipe-steps.json, else nothing (the station shows).
+ * - finishedImage (the "Success!" pause): the stage's own, else our doneArt,
+ *   else the next step's picture (the dish so far), else the finished dish on
+ *   the last step, else a sparkle. Keeping it set means the stage still pauses on success.
+ * - backgroundImage: the stage's own, else our background (e.g. the board),
+ *   else a placeholder station scene when there's no step picture.
  */
 export function withStepArt(recipe: Recipe): Recipe {
+  const real = (src?: string) => (isPlaceholder(src) ? undefined : src);
+  const pictures = recipe.stages.map(
+    (stage, i) => real(stage.image) ?? stepInfo(recipe.name, i, stage).art,
+  );
+  const dishId = menuRecipeIdFor(recipe.name);
+  const dish = dishId ? `/assets/dish-${dishId}.svg` : undefined;
+
   return {
     ...recipe,
     stages: recipe.stages.map((stage, i) => {
       const info = stepInfo(recipe.name, i, stage);
       const art = consumedArt(stage);
       const scene = `/assets/steps/${[info.station, ...art].join("-")}.svg`;
+      const picture = pictures[i];
+      const after =
+        info.doneArt ?? (i + 1 < pictures.length ? pictures[i + 1] : dish);
       return {
         ...stage,
-        // With final step art (drawn by the phone under the gesture) there's
-        // no placeholder scene behind it.
-        backgroundImage: isPlaceholder(stage.backgroundImage)
-          ? info.art
-            ? undefined
-            : scene
-          : stage.backgroundImage,
-        image: isPlaceholder(stage.image) ? undefined : stage.image,
-        finishedImage: isPlaceholder(stage.finishedImage)
-          ? "/assets/steps/done.svg"
-          : stage.finishedImage,
+        backgroundImage:
+          real(stage.backgroundImage) ??
+          info.background ??
+          (picture ? undefined : scene),
+        image: picture,
+        finishedImage:
+          real(stage.finishedImage) ??
+          (picture && after ? after : "/assets/steps/done.svg"),
       };
     }),
   };
+}
+
+/** Entries in recipe-steps.json for a recipe, or undefined if it has none. */
+export function stepTableLength(recipeName: string): number | undefined {
+  return STEPS[normalize(recipeName)]?.length;
 }

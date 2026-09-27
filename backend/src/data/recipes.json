@@ -68,12 +68,10 @@
           }
         ]
       },
-      ,
       {
         "type": "spin",
-        "backgroundImage": "/assets/steps/pan.svg",
-        "image": "/assets/steps/spaghetti/raw-meatballs.png",
-        "finishedImage": "/assets/steps/spaghetti/cooked-meatballs.png",
+        "image": "/assets/steps/spaghetti/pan-meatballs-raw.png",
+        "finishedImage": "/assets/steps/spaghetti/pan-meatballs-cooked.png",
         "spins": [
           {
             "center": { "x": 100, "y": 100 },
@@ -87,7 +85,7 @@
       {
         "type": "lines",
         "backgroundImage": "/SlicedBreadTest.jpg",
-        "image": "/assets/ingredient-garlic.svg",
+        "image": "/assets/steps/spaghetti/garlic-small.svg",
         "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {
@@ -103,7 +101,7 @@
       {
         "type": "lines",
         "backgroundImage": "/SlicedBreadTest.jpg",
-        "image": "/assets/ingredient-garlic.svg",
+        "image": "/assets/steps/spaghetti/garlic-sliced.png",
         "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {

@@ -1,65 +1,88 @@
 {
-  "_note": "Presentation for backend/src/data/recipes.json, one entry per stage in order, keyed by recipe name (letters only, lowercase). gesture: host card icon (chop|stir|flip|plate). station: placeholder art (board|bowl|pan|pot|plate). art (optional): final picture of the dish at that step, drawn under the gesture instead of the station placeholder. After editing, run: node scripts/generate-step-art.mjs",
+  "_note": "Presentation for backend/src/data/recipes.json, one entry per stage in order, keyed by recipe name (letters only, lowercase). gesture: host card icon (chop|stir|flip|plate). station: placeholder art (board|bowl|pan|pot|plate). art (optional): final picture of the dish at that step, drawn under the gesture instead of the station placeholder. doneArt (optional): picture on \"Success!\" (defaults to the next step's art). background (optional): surface behind the picture, e.g. /assets/steps/board.svg. tool (optional): { src, hotspot: [x, y] fractions, height } utensil that follows the finger. After editing, run: node scripts/generate-step-art.mjs",
   "spaghettimeatballs": [
     {
       "label": "Roll a meatball",
       "gesture": "stir",
       "word": "ROLL!",
-      "station": "board"
+      "station": "board",
+      "background": "/assets/steps/board.svg"
     },
     {
       "label": "Roll another meatball",
       "gesture": "stir",
       "word": "ROLL!",
-      "station": "board"
+      "station": "board",
+      "background": "/assets/steps/board.svg"
     },
     {
       "label": "Roll the last meatball",
       "gesture": "stir",
       "word": "ROLL!",
-      "station": "board"
+      "station": "board",
+      "background": "/assets/steps/board.svg"
+    },
+    {
+      "label": "Cook the meatballs",
+      "gesture": "stir",
+      "word": "SIZZLE!",
+      "station": "pan"
     },
     {
       "label": "Slice the garlic",
       "gesture": "chop",
       "word": "SLICE!",
-      "station": "board"
+      "station": "board",
+      "background": "/assets/steps/board.svg",
+      "doneArt": "/assets/steps/spaghetti/garlic-sliced.png"
     },
     {
       "label": "Mince the garlic",
       "gesture": "chop",
       "word": "MINCE!",
-      "station": "board"
+      "station": "board",
+      "doneArt": "/assets/steps/spaghetti/garlic-chopped.png",
+      "background": "/assets/steps/board.svg"
     },
     {
       "label": "Slice the tomato",
       "gesture": "chop",
       "word": "SLICE!",
-      "station": "board"
+      "station": "board",
+      "art": "/assets/steps/spaghetti/tomato-small.svg",
+      "background": "/assets/steps/board.svg"
     },
     {
       "label": "Slice it again",
       "gesture": "chop",
       "word": "SLICE!",
-      "station": "board"
+      "station": "board",
+      "art": "/assets/steps/spaghetti/tomato-small.svg",
+      "doneArt": "/assets/steps/spaghetti/tomato-sliced.png",
+      "background": "/assets/steps/board.svg"
     },
     {
       "label": "Crush it into sauce",
       "gesture": "chop",
       "word": "CRUSH!",
-      "station": "pot"
+      "station": "pot",
+      "art": "/assets/steps/spaghetti/tomato-sliced.png",
+      "doneArt": "/assets/steps/spaghetti/tomato-chopped.png",
+      "background": "/assets/steps/board.svg"
     },
     {
       "label": "Stir the sauce",
       "gesture": "stir",
       "word": "STIR!",
-      "station": "pot"
+      "station": "pot",
+      "art": "/assets/steps/spaghetti/pot-tomato.svg"
     },
     {
       "label": "Toss in the pasta",
       "gesture": "stir",
       "word": "TOSS!",
-      "station": "pot"
+      "station": "pot",
+      "art": "/assets/steps/spaghetti/pot-pasta.svg"
     }
   ],
   "cheeseburger": [
@@ -68,56 +91,64 @@
       "gesture": "stir",
       "word": "MIX!",
       "station": "bowl",
-      "art": "/assets/ingredient-ground-beef.svg"
-    },
-    {
-      "label": "Shape the patty",
-      "gesture": "stir",
-      "word": "SHAPE!",
-      "station": "board",
-      "art": "/assets/steps/cheeseburger/step-2.png"
-    },
-    {
-      "label": "Flip the patty",
-      "gesture": "flip",
-      "word": "FLIP!",
-      "station": "pan",
-      "art": "/assets/steps/cheeseburger/step-3.png"
+      "art": "/assets/steps/cheeseburger/bowl-beef.png",
+      "doneArt": "/assets/steps/cheeseburger/patty-raw.png"
     },
     {
       "label": "Let it sizzle",
       "gesture": "stir",
       "word": "SIZZLE!",
       "station": "pan",
-      "art": "/assets/steps/cheeseburger/step-4.png"
+      "art": "/assets/steps/cheeseburger/pan-patty-raw.png",
+      "doneArt": "/assets/steps/cheeseburger/pan-patty-seared.png"
+    },
+    {
+      "label": "Flip the patty",
+      "gesture": "flip",
+      "word": "FLIP!",
+      "station": "pan",
+      "art": "/assets/steps/cheeseburger/pan-patty-seared.png",
+      "doneArt": "/assets/steps/cheeseburger/pan-patty-half.png"
+    },
+    {
+      "label": "Sizzle the other side",
+      "gesture": "stir",
+      "word": "SIZZLE!",
+      "station": "pan",
+      "art": "/assets/steps/cheeseburger/pan-patty-half.png",
+      "doneArt": "/assets/steps/cheeseburger/pan-patty-cooked.png"
     },
     {
       "label": "Flip it again",
       "gesture": "flip",
       "word": "FLIP!",
       "station": "pan",
-      "art": "/assets/steps/cheeseburger/step-5.png"
+      "art": "/assets/steps/cheeseburger/pan-patty-cooked.png",
+      "doneArt": "/assets/steps/cheeseburger/patty-cooked.png"
     },
     {
-      "label": "Slice the lettuce",
+      "label": "Tear off a leaf",
       "gesture": "chop",
-      "word": "SLICE!",
+      "word": "TEAR!",
       "station": "board",
-      "art": "/assets/steps/cheeseburger/step-6.png"
+      "art": "/assets/ingredient-lettuce.svg",
+      "doneArt": "/assets/steps/cheeseburger/lettuce-leaf.png"
     },
     {
       "label": "Shred the lettuce",
       "gesture": "chop",
       "word": "SHRED!",
       "station": "board",
-      "art": "/assets/steps/cheeseburger/step-7.png"
+      "art": "/assets/steps/cheeseburger/lettuce-leaf.png",
+      "doneArt": "/assets/steps/cheeseburger/lettuce-shredded.png"
     },
     {
-      "label": "Stack the burger",
-      "gesture": "plate",
-      "word": "STACK!",
-      "station": "plate",
-      "art": "/assets/steps/cheeseburger/step-8.png"
+      "label": "Slice the cheese",
+      "gesture": "chop",
+      "word": "SLICE!",
+      "station": "board",
+      "art": "/assets/steps/cheeseburger/cheese-block.png",
+      "doneArt": "/assets/steps/cheeseburger/cheese-sliced.png"
     }
   ],
   "pancakes": [
@@ -147,14 +178,24 @@
       "gesture": "stir",
       "word": "WHISK!",
       "station": "bowl",
-      "art": "/assets/steps/pancakes/step-4.png"
+      "art": "/assets/steps/pancakes/step-4.png",
+      "tool": {
+        "src": "/assets/steps/pancakes/whisk-tilt-left.png",
+        "hotspot": [0.59, 0.71],
+        "height": 120
+      }
     },
     {
       "label": "Whisk the other way",
       "gesture": "stir",
       "word": "WHISK!",
       "station": "bowl",
-      "art": "/assets/steps/pancakes/step-5.png"
+      "art": "/assets/steps/pancakes/step-5.png",
+      "tool": {
+        "src": "/assets/steps/pancakes/whisk-tilt-right.png",
+        "hotspot": [0.42, 0.71],
+        "height": 120
+      }
     },
     {
       "label": "Pour a pancake",

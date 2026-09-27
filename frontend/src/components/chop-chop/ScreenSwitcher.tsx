@@ -21,6 +21,7 @@ import {
 } from "./screens/RacePhoneScreens";
 import { AssetSheet, ASSET_SHEET_SIZE } from "./screens/AssetSheet";
 import { StyleTest } from "./screens/StyleTest";
+import { RecipeWalkthrough } from "#/components/dev/RecipeWalkthrough";
 import {
   HostMenuPrepping,
   HostMenuShopping,
@@ -42,14 +43,24 @@ import {
 
 import { paper } from "./paper";
 type Screen = { id: string; label: string; component: React.ComponentType };
-type Device = "host" | "player" | "sheet" | "sizes";
+type Device = "host" | "player" | "sheet" | "sizes" | "recipe";
 
 const DEVICE_SIZE: Record<Device, { width: number; height: number }> = {
   host: { width: 1920, height: 1080 },
   player: { width: 410, height: 864 },
   sheet: ASSET_SHEET_SIZE,
   sizes: VEGGIE_SIZES_CANVAS,
+  // Small enough to show unscaled on a laptop, since gestures are traced at real size.
+  recipe: { width: 1120, height: 760 },
 };
+
+// Playable recipe checks (real recipes from the server, real gestures).
+const RecipeAll = () => <RecipeWalkthrough embedded />;
+const RecipeSpaghetti = () => <RecipeWalkthrough embedded only="Spaghetti" />;
+const RecipeCheeseburger = () => (
+  <RecipeWalkthrough embedded only="Cheeseburger" />
+);
+const RecipePancakes = () => <RecipeWalkthrough embedded only="Pancakes" />;
 
 const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
   {
@@ -153,6 +164,24 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
         label: "Plate · Pancakes",
         component: PlayerPlatePancakes,
       },
+    ],
+  },
+  {
+    title: "Recipes · playable",
+    device: "recipe",
+    screens: [
+      {
+        id: "recipe-spaghetti",
+        label: "Spaghetti & Meatballs",
+        component: RecipeSpaghetti,
+      },
+      {
+        id: "recipe-cheeseburger",
+        label: "Cheeseburger",
+        component: RecipeCheeseburger,
+      },
+      { id: "recipe-pancakes", label: "Pancakes", component: RecipePancakes },
+      { id: "recipe-all", label: "All recipes", component: RecipeAll },
     ],
   },
   {

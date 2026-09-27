@@ -21,6 +21,7 @@ import {
 } from "#/components/chop-chop/race";
 import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
 import { NewRecipeCard } from "./NewRecipeCard";
+import { ToolCursor, toolRest } from "./ToolCursor";
 import { Countdown } from "#/components/chop-chop/Countdown";
 import { gestureHint, stepInfo, withStepArt } from "#/data/recipe-steps";
 
@@ -78,16 +79,18 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     () => (currentRecipe ? withStepArt(currentRecipe) : undefined),
     [currentRecipe],
   );
-  // Preload this recipe's step art so each step's picture is ready when it starts.
-  const recipeName = currentRecipe?.name;
-  const stageCount = currentRecipe?.stages.length ?? 0;
+  // Preload this recipe's step pictures so each one is ready when it shows.
   useEffect(() => {
-    if (!recipeName) return;
-    for (let i = 0; i < stageCount; i++) {
-      const art = stepInfo(recipeName, i).art;
-      if (art) new Image().src = art;
+    for (const stage of stepRecipe?.stages ?? []) {
+      for (const src of [
+        stage.image,
+        stage.finishedImage,
+        stage.backgroundImage,
+      ]) {
+        if (src) new Image().src = src;
+      }
     }
-  }, [recipeName, stageCount]);
+  }, [stepRecipe]);
   const inventory = useMemo(() => {
     if (!me) return [];
 
@@ -513,31 +516,13 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
                 position: "relative",
                 width: GESTURE_AREA,
                 height: GESTURE_AREA,
+                // A utensil (e.g. whisk) replaces the pointer on some steps.
+                cursor: activeStep?.tool ? "none" : undefined,
                 overflow: "hidden",
                 borderRadius: 22,
                 background: "#FFF6E3",
               }}
             >
-              {activeStep?.art && (
-                // Final art for this step, under the gesture and lined up with
-                // its 0–200px space. Each step's art is the dish so far.
-                <img
-                  key={activeStep.art}
-                  src={activeStep.art}
-                  alt=""
-                  draggable={false}
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    width: 200,
-                    height: 200,
-                    pointerEvents: "none",
-                    animation: "stepArtIn 260ms ease-out both",
-                  }}
-                />
-              )}
-              <style>{`@keyframes stepArtIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }`}</style>
               <MasterRecipe
                 recipe={stepRecipe}
                 initialStageIndex={Math.max(0, activeStageIndex)}
@@ -548,6 +533,13 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
                 }}
               />
               <CursorPathTracker onPointsChange={setCurrentPoints} />
+              {activeStep?.tool && activeStage && (
+                <ToolCursor
+                  key={activeStep.tool.src}
+                  tool={activeStep.tool}
+                  rest={toolRest(activeStage)}
+                />
+              )}
             </div>
           ) : (
             recipe && (

@@ -83,9 +83,11 @@ export function GestureRecipe({
         />
       )}
       {foregroundImage && (
+        // Over the stage's gesture space (targets use 0–200px), so the art sits
+        // under the lines and circles rather than centred on the whole box.
         <img
           alt=""
-          className="absolute inset-0 m-auto h-[70%] w-[70%] object-contain"
+          className="absolute left-0 top-0 h-50 w-50 object-contain"
           src={foregroundImage}
         />
       )}
