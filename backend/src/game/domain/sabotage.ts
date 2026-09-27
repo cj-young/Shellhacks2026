@@ -13,10 +13,26 @@ export interface SabotageDefinition {
   readonly durationMs: number | null;
 }
 
-/** A concrete sabotage instance held by a player. */
+/** One choice credit earned by completing a recipe; its definition is chosen on use. */
 export interface Sabotage {
   readonly id: string;
-  readonly definitionId: SabotageId;
+  readonly definitionId: SabotageId | null;
   readonly acquiredAt: number;
   readonly usedAt: number | null;
+}
+
+/** Persisted application; serverNow is added when delivering it to clients. */
+export interface SabotageApplication {
+  id: string;
+  definition: SabotageDefinition;
+  sourcePlayerId: string;
+  targetPlayerId: string | null;
+  appliedAt: number;
+  expiresAt: number | null;
+  ingredientId: number | null;
+}
+
+export interface UseSabotagePayload {
+  definitionId: string;
+  targetPlayerId?: string;
 }

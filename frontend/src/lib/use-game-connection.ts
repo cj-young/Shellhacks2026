@@ -178,6 +178,8 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     room: code,
     playerId,
     players: state.players,
+    activeSabotages: state.activeSabotages,
+    serverNow: state.serverNow,
     ended: results !== null,
   });
 

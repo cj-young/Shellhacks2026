@@ -139,7 +139,7 @@ function MainMenu() {
         }}
       >
         <ChopChopLogo width="min(88vw, 620px)" />
-        <div
+        {/* <div
           style={{
             ...paper(40, 1, false),
             position: "relative",
@@ -158,10 +158,10 @@ function MainMenu() {
           }}
         >
           KITCHEN RELAY
-        </div>
+        </div> */}
       </div>
 
-      <div
+      {/* <div
         style={{
           font: nunito(900, 38),
           fontSize: "clamp(22px, 3vw, 38px)",
@@ -169,7 +169,7 @@ function MainMenu() {
         }}
       >
         Cook together. Pass it on.
-      </div>
+      </div> */}
 
       <div
         style={{

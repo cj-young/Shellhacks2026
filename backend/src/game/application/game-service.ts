@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import {
+  getSabotageDefinition,
   generateRecipeOrder,
   getRandomIntInclusive,
   isKnownIngredientId,
@@ -24,6 +25,7 @@ import {
   type CharacterId,
   type Player,
 } from "../domain/player.ts";
+import type { SabotageApplication } from "../domain/sabotage.ts";
 import type { Recipe } from "../domain/recipe.ts";
 import type { GameStore } from "../ports/game-store.ts";
 
@@ -76,6 +78,7 @@ export type AddItemsResult =
         | "GAME_NOT_FOUND"
         | "GAME_NOT_ACTIVE"
         | "PLAYER_NOT_FOUND"
+        | "PLAYER_FROZEN"
         | "INVALID_ITEM";
     };
 
@@ -87,6 +90,7 @@ export type ConsumeItemsResult =
         | "GAME_NOT_FOUND"
         | "GAME_NOT_ACTIVE"
         | "PLAYER_NOT_FOUND"
+        | "PLAYER_FROZEN"
         | "INVALID_ITEM"
         | "INSUFFICIENT_INVENTORY";
     };
@@ -99,6 +103,7 @@ export type UpdateCartResult =
         | "GAME_NOT_FOUND"
         | "GAME_NOT_ACTIVE"
         | "PLAYER_NOT_FOUND"
+        | "PLAYER_FROZEN"
         | "INVALID_ITEM";
     };
 
@@ -110,6 +115,7 @@ export type UpdateInterfaceStateResult =
         | "GAME_NOT_FOUND"
         | "GAME_NOT_ACTIVE"
         | "PLAYER_NOT_FOUND"
+        | "PLAYER_FROZEN"
         | "INVALID_INTERFACE_STATE";
     };
 
@@ -121,12 +127,27 @@ export type FinishStageResult =
         | "GAME_NOT_FOUND"
         | "GAME_NOT_ACTIVE"
         | "PLAYER_NOT_FOUND"
+        | "PLAYER_FROZEN"
         | "ALREADY_FINISHED";
     };
 
 export type ExpireStagesResult =
   | { ok: true; game: Game; changed: boolean }
   | { ok: false; code: "GAME_NOT_FOUND" | "GAME_NOT_ACTIVE" };
+
+export type UseSabotageResult =
+  | { ok: true; game: Game; application: SabotageApplication }
+  | {
+      ok: false;
+      code:
+        | "GAME_NOT_FOUND"
+        | "GAME_NOT_ACTIVE"
+        | "PLAYER_NOT_FOUND"
+        | "PLAYER_FROZEN"
+        | "SABOTAGE_NOT_FOUND"
+        | "SABOTAGE_ALREADY_USED"
+        | "INVALID_TARGET";
+    };
 
 export class GameService {
   readonly #store: GameStore;
@@ -286,7 +307,11 @@ export class GameService {
       return { ok: false, code: "GAME_NOT_ACTIVE" };
     }
 
-    const finished: Game = { ...game, status: "finished" };
+    const finished: Game = {
+      ...game,
+      status: "finished",
+      state: { ...game.state, activeSabotages: [] },
+    };
     await this.#store.save(finished);
 
     return { ok: true, game: finished };
@@ -312,6 +337,8 @@ export class GameService {
     if (!player) {
       return { ok: false, code: "PLAYER_NOT_FOUND" };
     }
+
+    if (isFrozen(game, playerId)) return { ok: false, code: "PLAYER_FROZEN" };
 
     if (items.length === 0 || !items.every(isValidPurchaseItem)) {
       return { ok: false, code: "INVALID_ITEM" };
@@ -387,6 +414,8 @@ export class GameService {
     if (!game.state.players.some((player) => player.id === playerId)) {
       return { ok: false, code: "PLAYER_NOT_FOUND" };
     }
+    if (isFrozen(game, playerId)) return { ok: false, code: "PLAYER_FROZEN" };
+
     if (interfaceState !== "store" && interfaceState !== "recipe") {
       return { ok: false, code: "INVALID_INTERFACE_STATE" };
     }
@@ -414,6 +443,8 @@ export class GameService {
 
     const player = game.state.players.find((entry) => entry.id === playerId);
     if (!player) return { ok: false, code: "PLAYER_NOT_FOUND" };
+    if (isFrozen(game, playerId)) return { ok: false, code: "PLAYER_FROZEN" };
+
     if (!items.every(isValidPurchaseItem)) {
       return { ok: false, code: "INVALID_ITEM" };
     }
@@ -446,6 +477,8 @@ export class GameService {
 
     const player = game.state.players.find((entry) => entry.id === playerId);
     if (!player) return { ok: false, code: "PLAYER_NOT_FOUND" };
+    if (isFrozen(game, playerId)) return { ok: false, code: "PLAYER_FROZEN" };
+
     if (items.length === 0 || !items.every(isValidPurchaseItem)) {
       return { ok: false, code: "INVALID_ITEM" };
     }
@@ -492,6 +525,8 @@ export class GameService {
     const player = game.state.players.find((entry) => entry.id === playerId);
     if (!player) return { ok: false, code: "PLAYER_NOT_FOUND" };
 
+    if (isFrozen(game, playerId)) return { ok: false, code: "PLAYER_FROZEN" };
+
     const recipe = game.state.recipeOrder[player.recipeIndex];
     if (!recipe) return { ok: false, code: "ALREADY_FINISHED" };
 
@@ -505,6 +540,17 @@ export class GameService {
             player.score +
             POINTS_PER_RECIPE -
             countInventory(player.inventory) * WASTE_PENALTY_PER_ITEM,
+          sabotages: player.isHost
+            ? player.sabotages
+            : [
+                ...player.sabotages,
+                {
+                  id: randomUUID(),
+                  definitionId: null,
+                  acquiredAt: now,
+                  usedAt: null,
+                },
+              ],
           recipeIndex: player.recipeIndex + 1,
           recipeStageIndex: 0,
           inventory: {},
@@ -529,6 +575,107 @@ export class GameService {
     await this.#store.save(next);
 
     return { ok: true, game: next };
+  }
+
+  /** Spend an earned choice credit only after the entire action is validated. */
+  async useSabotage(
+    code: string,
+    playerId: string,
+    payload: unknown,
+  ): Promise<UseSabotageResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+    if (!game) return { ok: false, code: "GAME_NOT_FOUND" };
+    const now = Date.now();
+    if (
+      game.status !== "active" ||
+      (game.state.roundEndsAt !== null && game.state.roundEndsAt <= now)
+    )
+      return { ok: false, code: "GAME_NOT_ACTIVE" };
+    const source = game.state.players.find((player) => player.id === playerId);
+    if (!source || source.isHost || !source.connected)
+      return { ok: false, code: "PLAYER_NOT_FOUND" };
+    if (isFrozen(game, playerId, now))
+      return { ok: false, code: "PLAYER_FROZEN" };
+    const input =
+      typeof payload === "object" && payload !== null
+        ? (payload as Record<string, unknown>)
+        : {};
+    const definition =
+      typeof input.definitionId === "string"
+        ? getSabotageDefinition(input.definitionId)
+        : undefined;
+    if (!definition) return { ok: false, code: "SABOTAGE_NOT_FOUND" };
+    const credit = source.sabotages.find((entry) => entry.usedAt === null);
+    if (!credit) return { ok: false, code: "SABOTAGE_ALREADY_USED" };
+    const target =
+      definition.targetScope === "single"
+        ? game.state.players.find(
+            (player) => player.id === input.targetPlayerId,
+          )
+        : undefined;
+    if (
+      definition.targetScope === "single" &&
+      (!target || target.id === source.id || target.isHost || !target.connected)
+    )
+      return { ok: false, code: "INVALID_TARGET" };
+    let ingredientId: number | null = null;
+    const sourceInventory = { ...source.inventory };
+    const targetInventory = { ...target?.inventory };
+    if (definition.id === "steal" || definition.id === "trash") {
+      const ids = Object.keys(targetInventory)
+        .map(Number)
+        .filter((id) => targetInventory[id] > 0);
+      if (!ids.length) return { ok: false, code: "INVALID_TARGET" };
+      ingredientId = ids[getRandomIntInclusive(0, ids.length - 1)];
+      targetInventory[ingredientId] -= 1;
+      if (targetInventory[ingredientId] === 0)
+        delete targetInventory[ingredientId];
+      if (definition.id === "steal")
+        sourceInventory[ingredientId] =
+          (sourceInventory[ingredientId] ?? 0) + 1;
+    }
+    const application: SabotageApplication = {
+      id: credit.id,
+      definition: { ...definition },
+      sourcePlayerId: source.id,
+      targetPlayerId: target?.id ?? null,
+      appliedAt: now,
+      expiresAt:
+        definition.durationMs === null ? null : now + definition.durationMs,
+      ingredientId,
+    };
+    const players = game.state.players.map((player) => {
+      if (player.id === source.id) {
+        const updated = {
+          ...player,
+          inventory: sourceInventory,
+          sabotages: player.sabotages.map((entry) =>
+            entry.id === credit.id
+              ? { ...entry, definitionId: definition.id, usedAt: now }
+              : entry,
+          ),
+        };
+        // Stolen ingredients can satisfy an existing missing-ingredient deadline.
+        return {
+          ...updated,
+          stageDeadlineAt: isMissingForStage(updated, game.state.recipeOrder)
+            ? updated.stageDeadlineAt
+            : null,
+        };
+      }
+      return player.id === target?.id && ingredientId !== null
+        ? { ...player, inventory: targetInventory }
+        : player;
+    });
+    const next = this.#withPlayers(game, players);
+    next.state.activeSabotages = [
+      ...game.state.activeSabotages.filter(
+        (entry) => entry.expiresAt !== null && entry.expiresAt > now,
+      ),
+      ...(application.expiresAt === null ? [] : [application]),
+    ];
+    await this.#store.save(next);
+    return { ok: true, game: next, application };
   }
 
   async expireStages(
@@ -637,4 +784,14 @@ function isValidPurchaseItem(item: PurchaseItem): boolean {
 
 function countInventory(inventory: Inventory): number {
   return Object.values(inventory).reduce((total, count) => total + count, 0);
+}
+
+function isFrozen(game: Game, playerId: string, now = Date.now()): boolean {
+  return game.state.activeSabotages.some(
+    (effect) =>
+      effect.definition.id === "freeze" &&
+      effect.targetPlayerId === playerId &&
+      effect.expiresAt !== null &&
+      effect.expiresAt > now,
+  );
 }

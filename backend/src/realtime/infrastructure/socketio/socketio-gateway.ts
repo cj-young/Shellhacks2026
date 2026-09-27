@@ -1,3 +1,4 @@
+import { normalizeGameCode } from "../../../game/domain/code.ts";
 import type { Server as HttpServer } from "node:http";
 
 import { Server, type Socket } from "socket.io";
@@ -46,13 +47,13 @@ export function createSocketIoGateway(
   // Socket.IO can deliver multiple events before an async state write finishes.
   // Serialize room mutations so checkout and screen changes cannot overwrite each other.
   const pendingActions = new Map<string, Promise<void>>();
-  function enqueue(
-    gameCode: string,
-    action: () => Promise<void>,
-  ): Promise<void> {
+  function enqueue<T>(gameCode: string, action: () => Promise<T>): Promise<T> {
     const pending = pendingActions.get(gameCode) ?? Promise.resolve();
     const next = pending.then(action);
-    const settled = next.catch(() => {});
+    const settled = next.then(
+      () => {},
+      () => {},
+    );
     pendingActions.set(gameCode, settled);
     void settled.then(() => {
       if (pendingActions.get(gameCode) === settled)
@@ -93,7 +94,9 @@ export function createSocketIoGateway(
 
     let result;
     try {
-      result = await session.join({ code, name, hostToken, reconnectToken });
+      result = await enqueue(normalizeGameCode(code), () =>
+        session.join({ code, name, hostToken, reconnectToken }),
+      );
     } catch {
       socket.emit("game_error", {
         code: "INTERNAL_ERROR",
@@ -204,6 +207,25 @@ export function createSocketIoGateway(
 
     socket.on("consume_ingredients", (items) => {
       runAction(() => handleConsumeIngredients(items));
+    });
+
+    socket.on("use_sabotage", (payload) => {
+      runAction(async () => {
+        const result = await session.useSabotage({
+          code: gameCode,
+          playerId: player.id,
+          payload,
+        });
+        if (!result.ok) {
+          socket.emit("game_error", {
+            code: result.code,
+            message: result.message,
+          });
+          return;
+        }
+        io.to(room).emit("sabotage_applied", result.application);
+        io.to(room).emit("update_state", result.state);
+      });
     });
 
     socket.on("finish_stage", () => {

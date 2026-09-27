@@ -1,3 +1,5 @@
+import type { SabotageAppliedPayload } from "./sabotages";
+
 export function MakeEmptyState() {
   return {
     recipeOrder: [],
@@ -22,9 +24,13 @@ export type PlayerSummary = {
   recipeStageIndex: number;
   score: number;
   stageDeadlineAt: number | null;
+  /** Authoritative balance; absent only in local preview fixtures. */
+  sabotageCredits?: number;
 };
 
 export type GameState = {
+  activeSabotages?: Omit<SabotageAppliedPayload, "serverNow">[];
+  serverNow?: number;
   recipeOrder: Recipe[];
   players: PlayerSummary[];
 };

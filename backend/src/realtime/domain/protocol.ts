@@ -1,7 +1,15 @@
+import type {
+  SabotageApplication,
+  UseSabotagePayload,
+} from "../../game/domain/sabotage.ts";
 import type { PlayerInterfaceState } from "../../game/domain/player.ts";
 import type { GameState } from "../../game/domain/game.ts";
 import type { PurchaseItem } from "../../game/domain/inventory.ts";
 import type { PlayerSummary } from "./player.ts";
+
+export type SabotageAppliedPayload = SabotageApplication & {
+  serverNow: number;
+};
 
 export interface JoinedPayload {
   playerId: string;
@@ -34,11 +42,14 @@ export interface GameEndedPayload {
  * The sanitized view of game state sent to clients: players are stripped of
  * their reconnect tokens.
  */
-export type ClientGameState = Omit<GameState, "players"> & {
+export type ClientGameState = Omit<GameState, "players" | "activeSabotages"> & {
   players: PlayerSummary[];
+  serverNow: number;
+  activeSabotages: SabotageAppliedPayload[];
 };
 
 export interface ServerToClientEvents {
+  sabotage_applied: (payload: SabotageAppliedPayload) => void;
   joined: (payload: JoinedPayload) => void;
   player_joined: (player: PlayerSummary) => void;
   player_disconnected: (payload: { playerId: string }) => void;
@@ -52,6 +63,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
+  use_sabotage: (payload: UseSabotagePayload) => void;
   start_game: () => void;
   send_recipe_order: (order: number[]) => void; //order of recipe IDs
   purchase_items: (items: PurchaseItem[]) => void;

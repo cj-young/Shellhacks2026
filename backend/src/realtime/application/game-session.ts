@@ -3,7 +3,11 @@ import type { GameState, GameStatus } from "../../game/domain/game.ts";
 import type { PurchaseItem } from "../../game/domain/inventory.ts";
 import { toPlayerSummary } from "../domain/player.ts";
 import type { PlayerSummary } from "../domain/player.ts";
-import type { ClientGameState, PlayerResult } from "../domain/protocol.ts";
+import type {
+  ClientGameState,
+  PlayerResult,
+  SabotageAppliedPayload,
+} from "../domain/protocol.ts";
 
 export type JoinResult =
   | {
@@ -104,6 +108,7 @@ const PURCHASE_MESSAGES: Record<string, string> = {
   GAME_NOT_ACTIVE: "The game is not active",
   PLAYER_NOT_FOUND: "Player not found in this game",
   INVALID_ITEM: "One or more items are invalid",
+  PLAYER_FROZEN: "You are frozen. Wait for the freeze to end.",
 };
 
 const CHARACTER_MESSAGES: Record<string, string> = {
@@ -129,6 +134,7 @@ const FINISH_MESSAGES: Record<string, string> = {
   GAME_NOT_ACTIVE: "The game is not active",
   PLAYER_NOT_FOUND: "Player not found in this game",
   ALREADY_FINISHED: "This player has already finished all recipes",
+  PLAYER_FROZEN: "You are frozen. Wait for the freeze to end.",
 };
 
 const EXPIRE_MESSAGES: Record<string, string> = {
@@ -311,7 +317,8 @@ export class GameSession {
       return {
         ok: false,
         code: result.code,
-        message: END_MESSAGES[result.code] ?? "Unable to end the round",
+        message:
+          CONSUME_MESSAGES[result.code] ?? "Unable to consume ingredients",
       };
     }
 
@@ -343,6 +350,41 @@ export class GameSession {
     };
   }
 
+  async useSabotage(input: {
+    code: string;
+    playerId: string;
+    payload: unknown;
+  }): Promise<
+    | { ok: true; state: ClientGameState; application: SabotageAppliedPayload }
+    | { ok: false; code: string; message: string }
+  > {
+    const result = await this.#gameService.useSabotage(
+      input.code,
+      input.playerId,
+      input.payload,
+    );
+    if (!result.ok) {
+      const messages: Record<string, string> = {
+        ...PURCHASE_MESSAGES,
+        SABOTAGE_NOT_FOUND: "That sabotage does not exist",
+        SABOTAGE_ALREADY_USED:
+          "Finish a recipe to earn another sabotage credit",
+        INVALID_TARGET:
+          "Choose another connected chef with an unused ingredient for steal or trash",
+      };
+      return {
+        ok: false,
+        code: result.code,
+        message: messages[result.code] ?? "Unable to use sabotage",
+      };
+    }
+    return {
+      ok: true,
+      state: toClientGameState(result.game.state),
+      application: { ...result.application, serverNow: Date.now() },
+    };
+  }
+
   async expireStages(input: ExpireStagesInput): Promise<ExpireStagesResult> {
     const result = await this.#gameService.expireStages(input.code);
 
@@ -369,8 +411,7 @@ export class GameSession {
       return {
         ok: false,
         code: result.code,
-        message:
-          CONSUME_MESSAGES[result.code] ?? "Unable to consume ingredients",
+        message: END_MESSAGES[result.code] ?? "Unable to end the round",
       };
     }
 
@@ -392,7 +433,14 @@ export class GameSession {
 }
 
 function toClientGameState(state: GameState): ClientGameState {
+  const serverNow = Date.now();
   return {
+    serverNow,
+    activeSabotages: state.activeSabotages
+      .filter(
+        (effect) => effect.expiresAt !== null && effect.expiresAt > serverNow,
+      )
+      .map((effect) => ({ ...effect, serverNow })),
     recipeOrder: state.recipeOrder,
     players: state.players.map(toPlayerSummary),
     roundStartedAt: state.roundStartedAt,

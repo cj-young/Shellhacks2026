@@ -21,12 +21,16 @@ export function useSabotages({
   playerId,
   players,
   ended,
+  activeSabotages,
+  serverNow,
 }: {
   socket: Socket | null;
   room: string | undefined;
   playerId: string | null;
   players: PlayerSummary[];
   ended: boolean;
+  activeSabotages?: Omit<SabotageAppliedPayload, "serverNow">[];
+  serverNow?: number;
 }) {
   const [effects, setEffects] = useState<SabotageEffect[]>([]);
   const [spentIds, setSpentIds] = useState<string[]>([]);
@@ -91,6 +95,7 @@ export function useSabotages({
         ![
           "GAME_NOT_ACTIVE",
           "PLAYER_NOT_FOUND",
+          "PLAYER_FROZEN",
           "SABOTAGE_NOT_FOUND",
           "SABOTAGE_ALREADY_USED",
           "INVALID_TARGET",
@@ -139,7 +144,27 @@ export function useSabotages({
     return () => clearInterval(timer);
   }, [effects.length, ended]);
 
-  const credits = sabotageCredits(me?.recipeIndex ?? 0, spentIds);
+  // Restore timed effects from authoritative state without replaying old animations
+  // or spending credits a second time on reconnect.
+  useEffect(() => {
+    if (!activeSabotages || serverNow === undefined || ended) return;
+    const receivedAt = Date.now();
+    setNow(receivedAt);
+    setEffects((current) => [
+      ...current.filter(
+        (effect) =>
+          effect.localExpiresAt === null && effect.noticeUntil > receivedAt,
+      ),
+      ...activeSabotages.map((effect) => ({
+        ...localizeSabotage({ ...effect, serverNow }, receivedAt),
+        noticeUntil:
+          current.find((entry) => entry.id === effect.id)?.noticeUntil ?? 0,
+      })),
+    ]);
+  }, [activeSabotages, serverNow, ended, playerId, socket]);
+
+  const credits =
+    me?.sabotageCredits ?? sabotageCredits(me?.recipeIndex ?? 0, spentIds);
   const frozenMs = effectRemaining(effects, "freeze", playerId, now);
   const blackoutMs = effectRemaining(effects, "blackout", playerId, now);
 

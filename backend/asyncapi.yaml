@@ -21,6 +21,13 @@ info:
 
     A join can fail: the server emits `game_error` and then disconnects the socket.
 
+    While frozen, `purchase_items`, `update_cart`, `update_interface_state`,
+    `consume_ingredients`, `finish_stage`, and `use_sabotage` return `PLAYER_FROZEN`.
+    Freeze does not pause the round timer or existing spoil deadlines. Blackout is a
+    presentation effect for every player's store (including its sender); shopping remains
+    allowed. Active timed effects and credit balances are included in `update_state`,
+    including on reconnect. Expiry has no dedicated event.
+
 servers:
   local:
     host: localhost:8080
@@ -55,6 +62,16 @@ servers:
               player without consuming a new slot.
 
 channels:
+  updateState:
+    address: update_state
+    title: Shared game state
+    description: |
+      Authoritative game snapshot sent after mutations and on active-game reconnect.
+      Includes inventories, recipe progress, available choice credits, and unexpired
+      timed sabotages. Clients use serverNow to convert expiry timestamps locally.
+    messages:
+      updateState:
+        $ref: "#/components/messages/UpdateState"
   joined:
     address: joined
     title: Joined
@@ -63,7 +80,7 @@ channels:
       event: joined
     messages:
       joined:
-        $ref: '#/components/messages/Joined'
+        $ref: "#/components/messages/Joined"
   playerJoined:
     address: player_joined
     title: Player joined
@@ -72,7 +89,7 @@ channels:
       event: player_joined
     messages:
       playerJoined:
-        $ref: '#/components/messages/PlayerJoined'
+        $ref: "#/components/messages/PlayerJoined"
   playerDisconnected:
     address: player_disconnected
     title: Player disconnected
@@ -83,7 +100,7 @@ channels:
       event: player_disconnected
     messages:
       playerDisconnected:
-        $ref: '#/components/messages/PlayerDisconnected'
+        $ref: "#/components/messages/PlayerDisconnected"
   gameStarted:
     address: game_started
     title: Game started
@@ -92,7 +109,7 @@ channels:
       event: game_started
     messages:
       gameStarted:
-        $ref: '#/components/messages/GameStarted'
+        $ref: "#/components/messages/GameStarted"
   gameError:
     address: game_error
     title: Game error
@@ -103,7 +120,7 @@ channels:
       event: game_error
     messages:
       gameError:
-        $ref: '#/components/messages/GameError'
+        $ref: "#/components/messages/GameError"
   startGame:
     address: start_game
     title: Start game
@@ -114,7 +131,7 @@ channels:
       event: start_game
     messages:
       startGame:
-        $ref: '#/components/messages/StartGame'
+        $ref: "#/components/messages/StartGame"
   purchaseItems:
     address: purchase_items
     title: Purchase items
@@ -127,7 +144,7 @@ channels:
       event: purchase_items
     messages:
       purchaseItems:
-        $ref: '#/components/messages/PurchaseItems'
+        $ref: "#/components/messages/PurchaseItems"
   updateInterfaceState:
     address: update_interface_state
     title: Update interface state
@@ -137,7 +154,7 @@ channels:
       shopping or prep cards. Invalid values return INVALID_INTERFACE_STATE.
     messages:
       updateInterfaceState:
-        $ref: '#/components/messages/UpdateInterfaceState'
+        $ref: "#/components/messages/UpdateInterfaceState"
   updateCart:
     address: update_cart
     title: Update cart
@@ -149,7 +166,7 @@ channels:
       event: update_cart
     messages:
       updateCart:
-        $ref: '#/components/messages/UpdateCart'
+        $ref: "#/components/messages/UpdateCart"
   consumeIngredients:
     address: consume_ingredients
     title: Consume ingredients
@@ -162,7 +179,7 @@ channels:
       event: consume_ingredients
     messages:
       consumeIngredients:
-        $ref: '#/components/messages/ConsumeIngredients'
+        $ref: "#/components/messages/ConsumeIngredients"
   finishStage:
     address: finish_stage
     title: Finish stage
@@ -170,13 +187,14 @@ channels:
       Sent by a player when they complete the current recipe stage. The server advances the
       player's stage progress; completing the last stage of a recipe awards points, subtracts a
       waste penalty for leftover inventory, clears the inventory, and moves to the next recipe.
+      Each completed recipe grants non-host players one saved choice credit (including the last recipe).
       On success the server broadcasts `update_state`; on failure the sender receives
       `game_error` with `GAME_NOT_ACTIVE`, `PLAYER_NOT_FOUND` or `ALREADY_FINISHED`.
     x-socketio:
       event: finish_stage
     messages:
       finishStage:
-        $ref: '#/components/messages/FinishStage'
+        $ref: "#/components/messages/FinishStage"
   timerSync:
     address: timer_sync
     title: Timer sync
@@ -189,7 +207,7 @@ channels:
       event: timer_sync
     messages:
       timerSync:
-        $ref: '#/components/messages/TimerSync'
+        $ref: "#/components/messages/TimerSync"
   gameEnded:
     address: game_ended
     title: Game ended
@@ -200,23 +218,29 @@ channels:
       event: game_ended
     messages:
       gameEnded:
-        $ref: '#/components/messages/GameEnded'
+        $ref: "#/components/messages/GameEnded"
   useSabotage:
     address: use_sabotage
     title: Use sabotage
     description: |
-      Sent by a player to spend one of their unused sabotages during an active game.
+      Sent by a non-host player to spend one saved choice credit during an active game.
+      Credits are earned on recipe completion and may be spent on any known definition.
       `definitionId` names the sabotage; for `single`-target sabotages `targetPlayerId` is
-      required. The server consumes one unused instance, applies the effect, then broadcasts
-      `sabotage_applied` to the room (including the sender) and `update_state` whenever shared
-      state changed (e.g. inventories for steal/trash). On failure the sender receives
+      required and must identify another connected non-host in this room. Steal/trash remove
+      one randomly selected unused inventory ingredient (never a cart or consumed ingredient);
+      an empty inventory is INVALID_TARGET. Steal adds that item to the sender.
+      Freeze lasts 10000 ms, blackout 15000 ms; overlapping effects expire independently.
+      The server consumes a credit only after successful validation, broadcasts
+      `sabotage_applied` to the room (including the sender), then `update_state`.
+      Hosts and disconnected senders are rejected with PLAYER_NOT_FOUND. No available credit
+      returns SABOTAGE_ALREADY_USED. A failed action never spends a credit. On failure the sender receives
       `game_error` with `GAME_NOT_ACTIVE`, `PLAYER_NOT_FOUND`, `SABOTAGE_NOT_FOUND`,
-      `SABOTAGE_ALREADY_USED`, or `INVALID_TARGET`.
+      `SABOTAGE_ALREADY_USED`, `PLAYER_FROZEN`, or `INVALID_TARGET`.
     x-socketio:
       event: use_sabotage
     messages:
       useSabotage:
-        $ref: '#/components/messages/UseSabotage'
+        $ref: "#/components/messages/UseSabotage"
   sabotageApplied:
     address: sabotage_applied
     title: Sabotage applied
@@ -229,112 +253,121 @@ channels:
       event: sabotage_applied
     messages:
       sabotageApplied:
-        $ref: '#/components/messages/SabotageApplied'
+        $ref: "#/components/messages/SabotageApplied"
 
 operations:
+  sendUpdateState:
+    action: send
+    summary: Broadcast authoritative shared state, credit balances, and timed effects.
+    channel:
+      $ref: "#/channels/updateState"
   sendJoined:
     action: send
     summary: Notify a client that it joined, including the current roster.
     channel:
-      $ref: '#/channels/joined'
+      $ref: "#/channels/joined"
   sendPlayerJoined:
     action: send
     summary: Notify members that a player joined.
     channel:
-      $ref: '#/channels/playerJoined'
+      $ref: "#/channels/playerJoined"
   sendPlayerDisconnected:
     action: send
     summary: Notify members that a player disconnected.
     channel:
-      $ref: '#/channels/playerDisconnected'
+      $ref: "#/channels/playerDisconnected"
   sendGameStarted:
     action: send
     summary: Notify all members that the game started.
     channel:
-      $ref: '#/channels/gameStarted'
+      $ref: "#/channels/gameStarted"
   sendGameError:
     action: send
     summary: Report a failed operation to the affected client.
     channel:
-      $ref: '#/channels/gameError'
+      $ref: "#/channels/gameError"
   receiveStartGame:
     action: receive
     summary: Receive a start request from the host.
     channel:
-      $ref: '#/channels/startGame'
+      $ref: "#/channels/startGame"
   receivePurchaseItems:
     action: receive
     summary: Receive a purchase request from a player.
     channel:
-      $ref: '#/channels/purchaseItems'
+      $ref: "#/channels/purchaseItems"
   receiveUpdateInterfaceState:
     action: receive
     summary: Receive the player's active store/recipe screen.
     channel:
-      $ref: '#/channels/updateInterfaceState'
+      $ref: "#/channels/updateInterfaceState"
   receiveUpdateCart:
     action: receive
     summary: Receive a client-side cart snapshot from a player.
     channel:
-      $ref: '#/channels/updateCart'
+      $ref: "#/channels/updateCart"
   receiveConsumeIngredients:
     action: receive
     summary: Receive a request to consume ingredients for a recipe stage.
     channel:
-      $ref: '#/channels/consumeIngredients'
+      $ref: "#/channels/consumeIngredients"
   receiveFinishStage:
     action: receive
     summary: Receive a stage-completion request from a player.
     channel:
-      $ref: '#/channels/finishStage'
+      $ref: "#/channels/finishStage"
   sendTimerSync:
     action: send
     summary: Send the round end time and the server clock once.
     channel:
-      $ref: '#/channels/timerSync'
+      $ref: "#/channels/timerSync"
   sendGameEnded:
     action: send
     summary: Announce the end of the round with final rankings.
     channel:
-      $ref: '#/channels/gameEnded'
+      $ref: "#/channels/gameEnded"
   receiveUseSabotage:
     action: receive
     summary: Receive a request from a player to use a sabotage.
     channel:
-      $ref: '#/channels/useSabotage'
+      $ref: "#/channels/useSabotage"
   sendSabotageApplied:
     action: send
     summary: Broadcast that a sabotage was used, and what it affects.
     channel:
-      $ref: '#/channels/sabotageApplied'
+      $ref: "#/channels/sabotageApplied"
 
 components:
   messages:
+    UpdateState:
+      name: update_state
+      payload:
+        $ref: "#/components/schemas/ClientGameState"
     Joined:
       name: joined
       title: Joined
       payload:
-        $ref: '#/components/schemas/JoinedPayload'
+        $ref: "#/components/schemas/JoinedPayload"
     PlayerJoined:
       name: player_joined
       title: Player joined
       payload:
-        $ref: '#/components/schemas/PlayerSummary'
+        $ref: "#/components/schemas/PlayerSummary"
     PlayerDisconnected:
       name: player_disconnected
       title: Player disconnected
       payload:
-        $ref: '#/components/schemas/PlayerDisconnectedPayload'
+        $ref: "#/components/schemas/PlayerDisconnectedPayload"
     GameStarted:
       name: game_started
       title: Game started
       payload:
-        $ref: '#/components/schemas/GameStartedPayload'
+        $ref: "#/components/schemas/GameStartedPayload"
     GameError:
       name: game_error
       title: Game error
       payload:
-        $ref: '#/components/schemas/GameErrorPayload'
+        $ref: "#/components/schemas/GameErrorPayload"
     StartGame:
       name: start_game
       title: Start game
@@ -343,21 +376,21 @@ components:
       name: purchase_items
       title: Purchase items
       payload:
-        $ref: '#/components/schemas/PurchaseItemsPayload'
+        $ref: "#/components/schemas/PurchaseItemsPayload"
     UpdateInterfaceState:
       name: update_interface_state
       payload:
-        $ref: '#/components/schemas/PlayerInterfaceState'
+        $ref: "#/components/schemas/PlayerInterfaceState"
     UpdateCart:
       name: update_cart
       title: Update cart
       payload:
-        $ref: '#/components/schemas/PurchaseItemsPayload'
+        $ref: "#/components/schemas/PurchaseItemsPayload"
     ConsumeIngredients:
       name: consume_ingredients
       title: Consume ingredients
       payload:
-        $ref: '#/components/schemas/PurchaseItemsPayload'
+        $ref: "#/components/schemas/PurchaseItemsPayload"
     FinishStage:
       name: finish_stage
       title: Finish stage
@@ -366,23 +399,60 @@ components:
       name: timer_sync
       title: Timer sync
       payload:
-        $ref: '#/components/schemas/TimerSyncPayload'
+        $ref: "#/components/schemas/TimerSyncPayload"
     GameEnded:
       name: game_ended
       title: Game ended
       payload:
-        $ref: '#/components/schemas/GameEndedPayload'
+        $ref: "#/components/schemas/GameEndedPayload"
     UseSabotage:
       name: use_sabotage
       title: Use sabotage
       payload:
-        $ref: '#/components/schemas/UseSabotagePayload'
+        $ref: "#/components/schemas/UseSabotagePayload"
     SabotageApplied:
       name: sabotage_applied
       title: Sabotage applied
       payload:
-        $ref: '#/components/schemas/SabotageAppliedPayload'
+        $ref: "#/components/schemas/SabotageAppliedPayload"
   schemas:
+    ClientGameState:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          recipeOrder,
+          players,
+          roundStartedAt,
+          roundEndsAt,
+          serverNow,
+          activeSabotages,
+        ]
+      properties:
+        recipeOrder:
+          type: array
+          items:
+            type: object
+            description: Recipe definition with ingredients and gesture stages from the recipe catalogue.
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlayerSummary"
+        roundStartedAt:
+          type: [integer, "null"]
+        roundEndsAt:
+          type: [integer, "null"]
+        serverNow:
+          type: integer
+          description: Server clock (Unix milliseconds) when this snapshot was created.
+        activeSabotages:
+          type: array
+          description: |
+            Unexpired timed applications only, empty after round end. Snapshot entries restore
+            effects without replaying notifications or spending credits. serverNow is refreshed
+            for each snapshot; clients clear effects locally at expiresAt.
+          items:
+            $ref: "#/components/schemas/SabotageAppliedPayload"
     PlayerInterfaceState:
       type: string
       enum: [store, recipe]
@@ -403,6 +473,8 @@ components:
         - recipeStageIndex
         - score
         - stageDeadlineAt
+        - sabotageCredits
+        - character
       properties:
         id:
           type: string
@@ -440,7 +512,7 @@ components:
           examples:
             - { "0": 2 }
         interfaceState:
-          $ref: '#/components/schemas/PlayerInterfaceState'
+          $ref: "#/components/schemas/PlayerInterfaceState"
         recipeIndex:
           type: integer
           description: Index of the player's current recipe within the recipe order.
@@ -456,6 +528,13 @@ components:
           description: Current score (may be negative after waste penalties).
           examples:
             - 100
+        sabotageCredits:
+          type: integer
+          minimum: 0
+          description: Unspent choice credits; each completed recipe earns one, each successful sabotage spends one.
+        character:
+          type: [string, "null"]
+          description: Selected chef character.
         stageDeadlineAt:
           type:
             - integer
@@ -482,7 +561,7 @@ components:
           description: Identifier of the recipient.
         gameCode:
           type: string
-          pattern: '^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$'
+          pattern: "^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$"
         isHost:
           type: boolean
         reconnectToken:
@@ -492,7 +571,7 @@ components:
           type: array
           description: Full roster including the recipient.
           items:
-            $ref: '#/components/schemas/PlayerSummary'
+            $ref: "#/components/schemas/PlayerSummary"
     PlayerDisconnectedPayload:
       type: object
       additionalProperties: false
@@ -509,7 +588,7 @@ components:
       properties:
         gameCode:
           type: string
-          pattern: '^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$'
+          pattern: "^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$"
     PurchaseItem:
       type: object
       additionalProperties: false
@@ -533,7 +612,7 @@ components:
       type: array
       description: Items to purchase. Processed all-or-nothing.
       items:
-        $ref: '#/components/schemas/PurchaseItem'
+        $ref: "#/components/schemas/PurchaseItem"
     TimerSyncPayload:
       type: object
       additionalProperties: false
@@ -577,7 +656,7 @@ components:
           type: array
           description: Players ranked by score (highest first).
           items:
-            $ref: '#/components/schemas/PlayerResult'
+            $ref: "#/components/schemas/PlayerResult"
     SabotageTargetScope:
       type: string
       enum: [self, single, all]
@@ -610,7 +689,7 @@ components:
           examples:
             - Take an unused ingredient from another player's inventory.
         targetScope:
-          $ref: '#/components/schemas/SabotageTargetScope'
+          $ref: "#/components/schemas/SabotageTargetScope"
         durationMs:
           type:
             - integer
@@ -627,8 +706,8 @@ components:
         definitionId:
           type: string
           description: |
-            Which sabotage to use. The server consumes one of the sender's unused instances of
-            this definition. Must match a known definition the sender holds.
+            Which known sabotage definition to choose. The server consumes one of the sender's
+            saved choice credits, regardless of definition. Credits are awarded on recipe completion.
           examples:
             - steal
         targetPlayerId:
@@ -655,7 +734,7 @@ components:
           type: string
           description: Unique id for this application (clients key animations off it).
         definition:
-          $ref: '#/components/schemas/SabotageDefinition'
+          $ref: "#/components/schemas/SabotageDefinition"
         sourcePlayerId:
           type: string
           description: Player that used the sabotage.
@@ -707,6 +786,7 @@ components:
             - ALREADY_FINISHED
             - NOT_HOST
             - ALREADY_STARTED
+            - PLAYER_FROZEN
             - SABOTAGE_NOT_FOUND
             - SABOTAGE_ALREADY_USED
             - INVALID_TARGET
