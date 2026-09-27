@@ -47,7 +47,7 @@ import { CutDetector } from "../knife-cuts";
 const GESTURE_AREA = 210;
 
 /** How long a wrong gesture locks the player out of drawing, in ms. */
-const WRONG_LOCKOUT_MS = 2500;
+const WRONG_LOCKOUT_MS = 1500;
 
 interface ClientInterfaceProps {
   connection: GameConnection;
