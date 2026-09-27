@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 
-import { generateRecipeOrder, isKnownIngredientId } from "../../util.ts";
+import {
+  generateRecipeOrder,
+  getRandomIntInclusive,
+  isKnownIngredientId,
+} from "../../util.ts";
 import {
   generateGameCode,
   generateHostToken,
@@ -14,8 +18,10 @@ import {
 } from "../domain/game.ts";
 import type { Inventory, PurchaseItem } from "../domain/inventory.ts";
 import {
+  CHARACTERS,
   isCharacterId,
   normalizePlayerName,
+  type CharacterId,
   type Player,
 } from "../domain/player.ts";
 import type { Recipe } from "../domain/recipe.ts";
@@ -246,10 +252,12 @@ export class GameService {
     const order = generateRecipeOrder(3);
     const durationMs = options.durationMs ?? ROUND_DURATION_MS;
     const roundStartedAt = Date.now();
-    const players = game.state.players.map((player) => ({
-      ...player,
-      stageDeadlineAt: stageDeadlineFor(player, order, roundStartedAt),
-    }));
+    const players = assignMissingCharacters(game.state.players).map(
+      (player) => ({
+        ...player,
+        stageDeadlineAt: stageDeadlineFor(player, order, roundStartedAt),
+      }),
+    );
 
     const started: Game = {
       ...game,
@@ -568,6 +576,28 @@ export class GameService {
   #withPlayers(game: Game, players: Player[]): Game {
     return { ...game, state: { ...game.state, players } };
   }
+}
+
+/** Assigns a random unclaimed chef to every non-host player who didn't pick one. */
+function assignMissingCharacters(players: Player[]): Player[] {
+  const taken = new Set<CharacterId>(
+    players
+      .filter((player) => !player.isHost && player.character !== null)
+      .map((player) => player.character as CharacterId),
+  );
+
+  return players.map((player) => {
+    if (player.isHost || player.character !== null) {
+      return player;
+    }
+
+    // With more players than chefs, fall back to reusing one (duplicate avatars).
+    const free = CHARACTERS.filter((character) => !taken.has(character));
+    const pool = free.length > 0 ? free : CHARACTERS;
+    const character = pool[getRandomIntInclusive(0, pool.length - 1)];
+    taken.add(character);
+    return { ...player, character };
+  });
 }
 
 function stageDeadlineFor(
