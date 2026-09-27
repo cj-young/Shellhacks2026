@@ -48,6 +48,8 @@ export type RaceStack = {
       stepLabel: string;
       /** 1-based current step. */
       step: number;
+      /** Current stage within the step, e.g. 1A or 1B. */
+      stageLabel?: string;
       steps: number;
     }
 );
@@ -479,10 +481,12 @@ function Hourglass() {
 
 function StepTokens({
   current,
+  stageLabel,
   total,
   color,
 }: {
   current: number;
+  stageLabel?: string;
   total: number;
   color: string;
 }) {
@@ -521,13 +525,13 @@ function StepTokens({
             ) : (
               <span
                 style={{
-                  font: lilita(now ? 38 : 28, 1),
+                  font: lilita(now && !stageLabel ? 38 : 28, 1),
                   color: now ? fg : INK,
                   WebkitTextStroke: `${now && fg === "#fff" ? 6 : 0}px ${INK}`,
                   paintOrder: "stroke fill",
                 }}
               >
-                {n}
+                {now ? (stageLabel ?? n) : n}
               </span>
             )}
           </div>
@@ -614,6 +618,7 @@ function PrepPanel({
     <>
       <StepTokens
         current={stack.step}
+        stageLabel={stack.stageLabel}
         total={stack.steps}
         color={stack.color}
       />

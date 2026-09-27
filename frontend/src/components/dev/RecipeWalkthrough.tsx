@@ -9,6 +9,7 @@ import {
   gestureHint,
   menuRecipeIdFor,
   stepInfo,
+  stepProgress,
   stepTableLength,
   withStepArt,
 } from "#/data/recipe-steps";
@@ -176,10 +177,10 @@ function recipeChecks(recipe: Recipe): Check[] {
   else if (table !== recipe.stages.length)
     checks.push({
       level: "error",
-      text: `recipe-steps.json has ${table} steps but the recipe has ${recipe.stages.length}: names after the first mismatch are wrong`,
+      text: `recipe-steps.json has ${table} stages but the recipe has ${recipe.stages.length}: names after the first mismatch are wrong`,
     });
   else
-    checks.push({ level: "ok", text: `Step names cover all ${table} steps` });
+    checks.push({ level: "ok", text: `Stage names cover all ${table} stages` });
 
   checks.push(
     menuRecipeIdFor(recipe.name)
@@ -411,7 +412,7 @@ export function RecipeWalkthrough({
                   font: lilita(22, 1.1),
                 }}
               >
-                {r.name} · {r.stages.length} steps
+                {r.name} · {stepProgress(r, 0).total} steps
               </button>
             ))}
           </div>
@@ -481,19 +482,27 @@ function RecipePlayer({ recipe }: { recipe: Recipe }) {
     jump(0);
   };
 
-  const onStageChange = useCallback((i: number) => {
-    const prev = lastStage.current;
-    if (i === -1 || i > prev) {
-      const secs = ((Date.now() - stageStarted.current) / 1000).toFixed(1);
-      setDone((d) => new Set(d).add(prev));
-      setLog((l) => [`Step ${prev + 1} done in ${secs}s`, ...l].slice(0, 30));
-      stageStarted.current = Date.now();
-    }
-    if (i >= 0) {
-      lastStage.current = i;
-      setStageIndex(i);
-    }
-  }, []);
+  const onStageChange = useCallback(
+    (i: number) => {
+      const prev = lastStage.current;
+      if (i === -1 || i > prev) {
+        const secs = ((Date.now() - stageStarted.current) / 1000).toFixed(1);
+        setDone((d) => new Set(d).add(prev));
+        setLog((l) =>
+          [
+            `Step ${stepProgress(recipe, prev).label} done in ${secs}s`,
+            ...l,
+          ].slice(0, 30),
+        );
+        stageStarted.current = Date.now();
+      }
+      if (i >= 0) {
+        lastStage.current = i;
+        setStageIndex(i);
+      }
+    },
+    [recipe],
+  );
 
   const onComplete = useCallback(
     (c: boolean) => {
@@ -506,6 +515,7 @@ function RecipePlayer({ recipe }: { recipe: Recipe }) {
 
   const stage = stages.at(stageIndex);
   const info = stage ? stepInfo(recipe.name, stageIndex, stage) : undefined;
+  const progress = stepProgress(recipe, stageIndex);
   const dishId = menuRecipeIdFor(recipe.name);
 
   const stageLevel = (i: number): Level => {
@@ -566,7 +576,9 @@ function RecipePlayer({ recipe }: { recipe: Recipe }) {
                 }}
               >
                 <Badge level={stageLevel(i)} />
-                <span style={{ width: 18, opacity: 0.6 }}>{i + 1}.</span>
+                <span style={{ minWidth: 30, opacity: 0.6 }}>
+                  {stepProgress(recipe, i).label}.
+                </span>
                 <span style={{ flex: 1 }}>
                   {si.label}
                   <span style={{ opacity: 0.55 }}>
@@ -622,7 +634,7 @@ function RecipePlayer({ recipe }: { recipe: Recipe }) {
                   opacity: 0.75,
                 }}
               >
-                STEP {stageIndex + 1} OF {stages.length}
+                STEP {progress.label} OF {progress.total}
               </div>
               <div style={{ font: lilita(24, 1.1) }}>{info?.label}</div>
             </div>
@@ -767,7 +779,7 @@ function RecipePlayer({ recipe }: { recipe: Recipe }) {
             marginBottom: 10,
           }}
         >
-          STEP {stageIndex + 1} CHECKS
+          STEP {progress.label} CHECKS
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {stage &&

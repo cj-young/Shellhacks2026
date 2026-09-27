@@ -33,7 +33,7 @@ const menuIdByName = new Map(
 const recipeKey = (name) => name.toLowerCase().replace(/[^a-z]/g, "");
 
 function stationFor(recipeName, index, stage) {
-  const table = steps[recipeKey(recipeName)];
+  const table = steps[recipeKey(recipeName)]?.flatMap((step) => step.stages);
   if (table?.[index]) return table[index].station;
   if (stage.type === "spin") return "bowl";
   const [line] = stage.lines ?? [];

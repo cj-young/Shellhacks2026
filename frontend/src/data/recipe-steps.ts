@@ -8,7 +8,8 @@ import stepTable from "./recipe-steps.json";
  * Presentation for the team's recipes (backend/src/data/recipes.json). The
  * stages there only carry a gesture (lines/spin), geometry and what they
  * consume, so the names, host icons and placeholder art live in
- * recipe-steps.json, matched by recipe name and stage index. Gesture detection
+ * recipe-steps.json, grouped into master steps and matched by recipe name and
+ * flattened stage index. Gesture detection
  * is untouched. scripts/generate-step-art.mjs builds the art from the same file.
  */
 
@@ -51,12 +52,52 @@ const step = (
   station: Station,
 ): StepInfo => ({ label, gesture, word, station });
 
-// One entry per stage, in the same order as recipes.json.
-const STEPS = Object.fromEntries(
+export type MasterStep = {
+  label: string;
+  stages: StepInfo[];
+};
+
+// Flatten only the presentation: gameplay still advances its original stage index.
+const MASTER_STEPS = Object.fromEntries(
   Object.entries(stepTable).filter(([key]) => !key.startsWith("_")),
-) as unknown as Record<string, StepInfo[]>;
+) as unknown as Record<string, MasterStep[]>;
+const STEPS: Partial<Record<string, StepInfo[]>> = Object.fromEntries(
+  Object.entries(MASTER_STEPS).map(([key, steps]) => [
+    key,
+    steps.flatMap((entry) => entry.stages),
+  ]),
+);
 
 const normalize = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
+
+/** Letter within a master step; continues A…Z, AA…AZ for long steps. */
+function stageLetter(index: number): string {
+  let letter = "";
+  for (let n = index + 1; n > 0; n = Math.floor((n - 1) / 26)) {
+    letter = String.fromCharCode(65 + ((n - 1) % 26)) + letter;
+  }
+  return letter;
+}
+
+/** Translate the unchanged gameplay stage index into the visible step counter. */
+export function stepProgress(recipe: Recipe, stageIndex: number) {
+  const groups = MASTER_STEPS[normalize(recipe.name)] ?? [];
+  const positions = groups.flatMap((group, stepIndex) =>
+    group.stages.map((_, index) => ({
+      number: stepIndex + 1,
+      label: `${stepIndex + 1}${stageLetter(index)}`,
+    })),
+  );
+  // A missing or out-of-date presentation table must not misnumber live stages.
+  if (positions.length !== recipe.stages.length) {
+    return {
+      number: stageIndex + 1,
+      label: `${stageIndex + 1}A`,
+      total: recipe.stages.length,
+    };
+  }
+  return { ...positions[stageIndex], total: groups.length };
+}
 
 /** Fallback when a recipe or stage isn't in the table: read it off the gesture. */
 function derivedStep(stage: RecipeStage | undefined): StepInfo {
