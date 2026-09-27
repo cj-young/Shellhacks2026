@@ -1,6 +1,9 @@
 services:
   backend:
     build: ./backend
+    env_file:
+      - path: ./backend/.env
+        required: false
     volumes:
       - ./backend/src:/app/src
       - /app/node_modules
