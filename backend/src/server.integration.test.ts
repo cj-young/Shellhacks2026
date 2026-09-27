@@ -720,7 +720,10 @@ async function sabotageRoom() {
 }
 async function earnSocketCredit(
   room: Awaited<ReturnType<typeof sabotageRoom>>,
+  definitionId: string,
 ) {
+  // Awards are random; pin this one so the test knows what it holds.
+  gameModule.service.pickSabotage = () => definitionId;
   const player = room.state.players.find((p) => p.id === room.sourceId)!;
   const stages = room.state.recipeOrder[player.recipeIndex].stages.length;
   for (let stage = player.recipeStageIndex; stage < stages; stage++) {
@@ -740,7 +743,7 @@ test("sabotage websocket broadcasts exact inventory changes to host, sender, and
     room.source.close();
     room.target.close();
   });
-  await earnSocketCredit(room);
+  await earnSocketCredit(room, "steal");
   const stock = waitFor<ClientGameState>(room.source, "update_state");
   room.target.emit("purchase_items", [{ id: ITEM_ID, count: 2 }]);
   await stock;
@@ -798,7 +801,7 @@ test("rapid sabotage requests spend a single credit once and malformed input pre
     room.source.close();
     room.target.close();
   });
-  await earnSocketCredit(room);
+  await earnSocketCredit(room, "blackout");
   const malformed = waitFor<GameErrorPayload>(room.source, "game_error");
   room.source.emit("use_sabotage", null);
   assert.equal((await malformed).code, "SABOTAGE_NOT_FOUND");
@@ -828,7 +831,7 @@ test("freeze enforces server-side blocking and reconnect restores active effects
     room.source.close();
     room.target.close();
   });
-  await earnSocketCredit(room);
+  await earnSocketCredit(room, "freeze");
   const applied = waitFor<SabotageAppliedPayload>(
     room.target,
     "sabotage_applied",
@@ -887,3 +890,29 @@ function waitForState(
     socket.on("update_state", onState);
   });
 }
+
+test("a player can only use the sabotage they were awarded", async (t) => {
+  const room = await sabotageRoom();
+  t.after(() => {
+    room.host.close();
+    room.source.close();
+    room.target.close();
+  });
+  await earnSocketCredit(room, "freeze");
+  assert.deepEqual(
+    room.state.players.find((p) => p.id === room.sourceId)?.heldSabotages,
+    ["freeze"],
+  );
+  const denied = waitFor<GameErrorPayload>(room.source, "game_error");
+  room.source.emit("use_sabotage", { definitionId: "blackout" });
+  assert.equal((await denied).code, "SABOTAGE_NOT_HELD");
+  const applied = waitFor<SabotageAppliedPayload>(
+    room.source,
+    "sabotage_applied",
+  );
+  room.source.emit("use_sabotage", {
+    definitionId: "freeze",
+    targetPlayerId: room.targetId,
+  });
+  assert.equal((await applied).definition.id, "freeze");
+});

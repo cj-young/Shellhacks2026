@@ -26,6 +26,8 @@ export type PlayerSummary = {
   stageDeadlineAt: number | null;
   /** Authoritative balance; absent only in local preview fixtures. */
   sabotageCredits?: number;
+  /** Unused awarded sabotages by id, oldest first (e.g. ["freeze"]). */
+  heldSabotages?: string[];
 };
 
 export type GameState = {

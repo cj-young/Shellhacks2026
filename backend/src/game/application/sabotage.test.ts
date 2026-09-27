@@ -4,9 +4,15 @@ import { GameService } from "./game-service.ts";
 import { InMemoryGameStore } from "../infrastructure/in-memory-game-store.ts";
 import type { Game } from "../domain/game.ts";
 
+/** These tests cover the untyped credit rules: any sabotage can spend one. */
+function untypedCredits(service: GameService): GameService {
+  service.pickSabotage = () => null;
+  return service;
+}
+
 async function fixture() {
   const store = new InMemoryGameStore();
-  const service = new GameService(store);
+  const service = untypedCredits(new GameService(store));
   const created = await service.createGame();
   const host = await service.joinPlayer(created.code, {
     name: "Host",

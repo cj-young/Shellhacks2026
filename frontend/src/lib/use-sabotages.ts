@@ -165,6 +165,32 @@ export function useSabotages({
 
   const credits =
     me?.sabotageCredits ?? sabotageCredits(me?.recipeIndex ?? 0, spentIds);
+  // Awarded sabotages by id. Untyped credits (older servers, the dev playground)
+  // can be spent on any sabotage, so they count as holding every one ("*").
+  const typed = me?.heldSabotages ?? [];
+  const held =
+    typed.length >= credits
+      ? typed
+      : [
+          ...typed,
+          ...Array.from({ length: credits - typed.length }, () => "*"),
+        ];
+  const holds = (id: string) => held.includes(id) || held.includes("*");
+
+  // Show a pop-up when a new sabotage is awarded (not for ones held on load).
+  const [awarded, setAwarded] = useState<string | null>(null);
+  const heldCount = useRef<number | null>(null);
+  useEffect(() => {
+    heldCount.current = null;
+    setAwarded(null);
+  }, [room, playerId]);
+  const newest = held.at(-1) ?? null;
+  useEffect(() => {
+    if (!me || ended) return;
+    const previous = heldCount.current;
+    heldCount.current = held.length;
+    if (previous !== null && held.length > previous) setAwarded(newest);
+  }, [held.length, newest, me, ended]);
   const frozenMs = effectRemaining(effects, "freeze", playerId, now);
   const blackoutMs = effectRemaining(effects, "blackout", playerId, now);
 
@@ -172,7 +198,7 @@ export function useSabotages({
     if (
       ended ||
       me?.isHost ||
-      credits < 1 ||
+      !holds(payload.definitionId) ||
       pendingRef.current ||
       effectRemaining(effects, "freeze", playerId, Date.now()) > 0
     )
@@ -216,6 +242,10 @@ export function useSabotages({
 
   return {
     credits,
+    held,
+    holds,
+    awarded,
+    dismissAward: () => setAwarded(null),
     effects,
     now,
     frozenMs,

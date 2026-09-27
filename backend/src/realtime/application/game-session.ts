@@ -367,8 +367,8 @@ export class GameSession {
       const messages: Record<string, string> = {
         ...PURCHASE_MESSAGES,
         SABOTAGE_NOT_FOUND: "That sabotage does not exist",
-        SABOTAGE_ALREADY_USED:
-          "Finish a recipe to earn another sabotage credit",
+        SABOTAGE_ALREADY_USED: "Finish a recipe to earn another sabotage",
+        SABOTAGE_NOT_HELD: "You don't have that sabotage",
         INVALID_TARGET:
           "Choose another connected chef with an unused ingredient for steal or trash",
       };

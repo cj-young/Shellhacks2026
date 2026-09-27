@@ -139,3 +139,203 @@
     animation: none !important;
   }
 }
+
+/* ---- Sabotage menu: 3 cards, details, chef picker ---- */
+.sabotage-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.sabotage-dialog .sabotage-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 6px 8px;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 3px 8px #3d281722;
+  text-align: center;
+  transition: transform 0.12s ease-out;
+}
+.sabotage-card img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.sabotage-card strong {
+  font:
+    400 18px/1.1 "Sniglet",
+    sans-serif;
+}
+.sabotage-card span {
+  font:
+    800 11px/1.2 Nunito,
+    sans-serif;
+  opacity: 0.75;
+}
+.sabotage-dialog .sabotage-card[aria-pressed="true"] {
+  background: #fff3c2;
+  box-shadow:
+    0 0 0 3px #ffc20e,
+    0 4px 10px #3d281733;
+  transform: translateY(-2px);
+}
+.sabotage-dialog .sabotage-card:disabled {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+.sabotage-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  background: #ef4128;
+  color: #fff;
+  font:
+    900 13px/26px Nunito,
+    sans-serif;
+  font-style: normal;
+}
+.sabotage-details {
+  margin: 12px 0 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff;
+  font:
+    700 14px/1.35 Nunito,
+    sans-serif;
+}
+.sabotage-label {
+  margin: 12px 0 6px;
+  font:
+    900 12px Nunito,
+    sans-serif;
+  letter-spacing: 0.14em;
+  opacity: 0.7;
+}
+.sabotage-dialog .sabotage-chef {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 6px #3d28171f;
+}
+.sabotage-dialog .sabotage-chef[aria-checked="true"] {
+  background: #fff3c2;
+  box-shadow: 0 0 0 3px #ffc20e;
+}
+.sabotage-avatar {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px #3d281726;
+}
+.sabotage-avatar img {
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  width: 68px;
+  transform: translateX(-50%);
+}
+.sabotage-status {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #3d281714;
+  font:
+    800 12px Nunito,
+    sans-serif;
+}
+.sabotage-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 4px;
+  font:
+    700 12px Nunito,
+    sans-serif;
+}
+
+/* ---- "You've earned a sabotage!" pop-up ---- */
+.sabotage-award {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px;
+  background: #0b1030d9;
+  animation: sabotage-award-fade 0.25s ease-out both;
+}
+.sabotage-award img {
+  width: min(100%, 520px);
+  animation: sabotage-award-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.sabotage-award-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(100%, 320px);
+  animation: sabotage-award-fade 0.3s 0.4s ease-out both;
+}
+.sabotage-award-actions button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px;
+  background: #fff6e3;
+  color: #3d2817;
+  font:
+    900 16px Nunito,
+    sans-serif;
+  cursor: pointer;
+}
+.sabotage-award-actions .sabotage-award-use {
+  background: #ffc20e;
+  font:
+    400 22px "Sniglet",
+    sans-serif;
+}
+@keyframes sabotage-award-pop {
+  from {
+    transform: scale(0.3) rotate(-8deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sabotage-award-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sabotage-award,
+  .sabotage-award img,
+  .sabotage-award-actions {
+    animation: none !important;
+  }
+}
