@@ -53,12 +53,15 @@ export function Store({
   score,
   progress,
   notice,
+  hint,
 }: {
   uploadInventory: (inv: Ingredient[]) => void;
   onCartChange: (cart: Ingredient[]) => void;
   score: number;
   progress: number;
   notice?: string;
+  /** Short instruction between the shelves and the cart. */
+  hint?: string;
 }) {
   const [inventory, setInventory] = useState<Ingredient[]>([]);
   const [aisle, setAisle] = useState(0);
@@ -89,6 +92,7 @@ export function Store({
       shelf={page.items.map((ing) => ({ kind: iconIdFor(ing) }))}
       basket={inventory.map(iconIdFor)}
       notice={notice}
+      hint={hint}
       onPrevAisle={() => flip(-1)}
       onNextAisle={() => flip(1)}
       onTake={(slot) => {

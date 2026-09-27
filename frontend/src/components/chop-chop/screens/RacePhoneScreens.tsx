@@ -129,9 +129,9 @@ export function StoreScreen({
   onNextAisle,
   onTake,
   onBasketTap,
-  onTrash,
   onLeave,
   notice,
+  hint,
   illustrateDrag,
 }: Common & {
   aisleName: string;
@@ -144,9 +144,12 @@ export function StoreScreen({
   onNextAisle?: () => void;
   onTake?: (slot: number) => void;
   onBasketTap?: (index: number) => void;
+  /** No longer shown in the store (tap cart items to put them back); kept for callers. */
   onTrash?: () => void;
   onLeave?: () => void;
   notice?: string;
+  /** Short instruction between the shelves and the cart. */
+  hint?: string;
   /** The design's static "dragging into the basket" illustration. */
   illustrateDrag?: string;
 }) {
@@ -198,7 +201,7 @@ export function StoreScreen({
           top: 138,
           left: 18,
           right: 18,
-          height: 404,
+          height: 394,
           background: SHELF_BACKING,
           boxSizing: "border-box",
           padding: "10px 14px 12px",
@@ -364,16 +367,32 @@ export function StoreScreen({
         <DragGhost kind={drag.kind} left={drag.x - 60} top={drag.y - 92} />
       )}
 
-      <div style={{ position: "absolute", top: 566, left: 84 }}>
+      {hint && (
+        <div
+          style={{
+            position: "absolute",
+            top: 536,
+            left: 18,
+            right: 18,
+            textAlign: "center",
+            font: nunito(800, 15),
+            opacity: 0.8,
+          }}
+        >
+          {hint}
+        </div>
+      )}
+
+      {/* Cart fills the space between the shelves/hint and Leave store (736). */}
+      <div style={{ position: "absolute", top: 558, left: 18 }}>
         <Basket
           items={basket}
-          width={296}
-          height={148}
+          width={354}
+          height={172}
           token={62}
           onItemTap={onBasketTap}
         />
       </div>
-      <TrashButton position={{ left: 18, top: 650 }} onClick={onTrash} />
 
       {notice && <Toast style={{ bottom: 128 }}>{notice}</Toast>}
 
@@ -1464,6 +1483,7 @@ export function RacePhoneStore() {
     <StoreScreen
       score={1800}
       progress={20}
+      hint="Look up to see your shopping list"
       aisleName="DAIRY"
       aisleIndex={1}
       aisleCount={6}

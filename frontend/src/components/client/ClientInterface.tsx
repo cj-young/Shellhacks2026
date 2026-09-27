@@ -21,6 +21,7 @@ import {
 } from "#/components/chop-chop/race";
 import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
 import { NewRecipeCard } from "./NewRecipeCard";
+import { Countdown } from "#/components/chop-chop/Countdown";
 import { gestureHint, stepInfo, withStepArt } from "#/data/recipe-steps";
 
 /** Visible square of the recipe box; stage gestures sit within its 0–200px. */
@@ -55,6 +56,21 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const me = connection.state.players.find(
     (entry) => entry.id === connection.playerId,
   );
+  /** 3-2-1 over everything when the game starts (the host shows the same). */
+  const [showCountdown, setShowCountdown] = useState(true);
+  // The recipe view uses real pixels (gestures are measured in them), so it
+  // sizes itself to the screen height instead of scaling.
+  const [viewport, setViewport] = useState(() =>
+    typeof window === "undefined"
+      ? { width: 390, height: 844 }
+      : { width: window.innerWidth, height: window.innerHeight },
+  );
+  useEffect(() => {
+    const onResize = () =>
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   // The current recipe with placeholder step art swapped in for test pictures.
   const currentRecipe = recipeOrder.at(recipeState);
   const stepRecipe = useMemo(
@@ -264,15 +280,53 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     );
   }
 
+  const countdownOverlay = showCountdown && (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 90,
+        background: "rgba(61,40,23,.6)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 30,
+        padding: 24,
+        boxSizing: "border-box",
+        textAlign: "center",
+      }}
+    >
+      <div
+        style={{
+          ...paper(18, 2),
+          background: CARD_BG,
+          padding: "6px 24px",
+          font: lilita(32, 1.2),
+          color: INK,
+          transform: "rotate(-2deg)",
+        }}
+      >
+        Get ready!
+      </div>
+      <Countdown cardWidth={110} onDone={() => setShowCountdown(false)} />
+      <div style={{ font: nunito(800, 17), color: CARD_BG, maxWidth: 280 }}>
+        Your first order is on the big screen. Look up!
+      </div>
+    </div>
+  );
+
   const testFinishButton = SHOW_TEST_CONTROLS && recipe && !finished && (
     <button
       type="button"
       onClick={completeRecipe}
       style={{
         position: "fixed",
-        top: 8,
-        left: "50%",
-        transform: "translateX(-50%)",
+        // Store: top centre (its top bar sits lower). Recipe view: bottom right,
+        // clear of the top bar, which moves up on short screens.
+        ...(interfaceState === "store"
+          ? { top: 8, left: "50%", transform: "translateX(-50%)" }
+          : { bottom: 12, right: 12 }),
         zIndex: 70,
         background: "rgba(255,255,255,.9)",
         border: `3px dashed ${INK}`,
@@ -296,11 +350,28 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
           score={myPoints}
           progress={progress}
           notice={total === 0 ? "Waiting for the recipes…" : undefined}
+          hint="Look up to see your shopping list"
         />
         {testFinishButton}
+        {countdownOverlay}
       </>
     );
   }
+
+  // Fit the column to the screen: top bar, cart, recipe title, then the card.
+  const compact = viewport.height < 760;
+  const topBarTop = compact ? 12 : 58;
+  const contentTop = topBarTop + 66 + 10;
+  const cardHeight = 324;
+  const titleHeight = 58;
+  const gaps = 14 * 3 + 16;
+  const cartHeight = Math.max(
+    70,
+    Math.min(
+      ready ? 170 : 230,
+      viewport.height - contentTop - cardHeight - titleHeight - gaps,
+    ),
+  );
 
   return (
     <div
@@ -325,20 +396,24 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
           flexDirection: "column",
           alignItems: "center",
           gap: 14,
-          paddingTop: 132,
+          paddingTop: contentTop,
+          paddingBottom: 16,
           boxSizing: "border-box",
+          // Last resort on very short screens: scroll rather than clip.
+          overflowY: "auto",
         }}
       >
         <PhoneTopBar
           mood={finished ? "delighted" : ready ? "focused" : "worried"}
           progress={progress}
           score={myPoints}
+          top={topBarTop}
         />
 
         <Basket
           items={inventory.map(iconIdFor)}
-          width={354}
-          height={ready ? 170 : 230}
+          width={Math.min(354, viewport.width - 24)}
+          height={cartHeight}
           token={48}
         />
 
@@ -457,6 +532,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
       </div>
 
       {testFinishButton}
+      {countdownOverlay}
     </div>
   );
 }
