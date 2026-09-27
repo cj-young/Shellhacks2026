@@ -40,3 +40,9 @@ export type { GameStore } from "./ports/game-store.ts";
 export type { Game, GameStatus } from "./domain/game.ts";
 export type { Inventory, PurchaseItem } from "./domain/inventory.ts";
 export type { Player } from "./domain/player.ts";
+export type {
+  Sabotage,
+  SabotageDefinition,
+  SabotageId,
+  SabotageTargetScope,
+} from "./domain/sabotage.ts";

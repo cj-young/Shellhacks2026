@@ -42,6 +42,7 @@ function makeGame(overrides: Partial<Player> = {}): Game {
     inventory: {},
     score: 0,
     stageDeadlineAt: null,
+    sabotages: [],
     ...overrides,
   };
   return {
@@ -200,6 +201,7 @@ test("joinPlayer creates and persists a player, resolving the host", async () =>
   assert.equal(guest.player.name, "Player");
   assert.ok(host.player.reconnectToken.length > 0);
   assert.notEqual(host.player.reconnectToken, guest.player.reconnectToken);
+  assert.deepEqual(host.player.sabotages, []);
   assert.equal((await service.getGame(game.code))?.state.players.length, 2);
 });
 
