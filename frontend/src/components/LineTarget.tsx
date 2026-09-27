@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CursorPoint } from "./CursorPathTracker";
 
 export type LineTargetProps = {
-  /** First endpoint of the target line, in viewport coordinates. */
+  /** First endpoint of the target line, in gesture-canvas coordinates. */
   origin: CursorPoint;
-  /** Second endpoint of the target line, in viewport coordinates. */
+  /** Second endpoint of the target line, in gesture-canvas coordinates. */
   end: CursorPoint;
   /** Width of the accepted corridor on either side of the line, in pixels. */
   radius: number;
@@ -97,56 +97,12 @@ export function LineTarget({
   allowStartOutsideTarget = false,
   onMatchChange,
 }: LineTargetProps) {
-  const targetElement = useRef<SVGSVGElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const element = targetElement.current;
-    if (!element) return;
-
-    const updatePosition = () => {
-      const bounds = element.getBoundingClientRect();
-      setPosition((currentPosition) =>
-        currentPosition.x === bounds.left && currentPosition.y === bounds.top
-          ? currentPosition
-          : { x: bounds.left, y: bounds.top },
-      );
-    };
-
-    updatePosition();
-
-    const observer = new ResizeObserver(updatePosition);
-    observer.observe(element);
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
-    };
-  }, []);
-
-  const positionedOrigin = {
-    x: origin.x + position.x,
-    y: origin.y + position.y,
-  };
-  const positionedEnd = {
-    x: end.x + position.x,
-    y: end.y + position.y,
-  };
-  const targetKey = `${positionedOrigin.x}:${positionedOrigin.y}:${positionedEnd.x}:${positionedEnd.y}:${radius}:${allowStartOutsideTarget}`;
+  const targetKey = `${origin.x}:${origin.y}:${end.x}:${end.y}:${radius}:${allowStartOutsideTarget}`;
   const [matchedTargetKey, setMatchedTargetKey] = useState<string | null>(null);
   const pathMatches = useMemo(
     () =>
-      doesPathConnectLine(
-        points,
-        positionedOrigin,
-        positionedEnd,
-        radius,
-        allowStartOutsideTarget,
-      ),
-    [allowStartOutsideTarget, points, positionedEnd, positionedOrigin, radius],
+      doesPathConnectLine(points, origin, end, radius, allowStartOutsideTarget),
+    [allowStartOutsideTarget, end, origin, points, radius],
   );
   const matches =
     pathMatches ||
@@ -173,7 +129,6 @@ export function LineTarget({
     <svg
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 h-full w-full"
-      ref={targetElement}
     >
       <line
         x1={origin.x}
