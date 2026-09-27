@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import type React from "react";
 import type { CSSProperties } from "react";
 import type { GameConnection } from "#/lib/use-game-connection";
 import definitions from "#/data/sabotages.json";
 import ingredients from "#/data/ingredients.json";
-import { canTarget, effectRemaining } from "#/lib/sabotages";
+import { NOTICE_MS, canTarget, effectRemaining } from "#/lib/sabotages";
+import { paper } from "#/components/chop-chop/paper";
 import { characterImage } from "#/data/characters";
 import { IngredientIcon } from "#/components/chop-chop/IngredientIcon";
 import { iconIdFor } from "#/components/client/Store";
@@ -18,12 +20,10 @@ export const SABOTAGE_BADGES: Record<string, string> = {
   blackout: "💡",
 };
 const panel: CSSProperties = {
+  ...paper(22, 3),
   background: CARD_BG,
   color: INK,
-  border: `3px solid ${INK}`,
-  borderRadius: 22,
   padding: 16,
-  boxShadow: "0 5px 0 #3d281733",
   font: nunito(800, 16),
 };
 
@@ -35,20 +35,30 @@ const panel: CSSProperties = {
 export function SabotageLaunchButton({
   credits,
   frozen = false,
+  inline = false,
   onClick,
 }: {
   credits: number;
   frozen?: boolean;
+  /** In the phone top bar instead of pinned to the screen corner. */
+  inline?: boolean;
   onClick?: () => void;
 }) {
   return (
     <button
       type="button"
-      className="sabotage-launch"
+      className={`sabotage-launch${inline ? " is-inline" : ""}`}
       disabled={frozen}
       onClick={onClick}
     >
-      ⚡ Sabotage · {credits}
+      <img
+        src="/assets/ingredient-tomato.svg"
+        alt=""
+        width={22}
+        height={22}
+        draggable={false}
+      />
+      Sabotage · {credits}
     </button>
   );
 }
@@ -185,40 +195,24 @@ export function SabotageMenu({
         })}
       </div>
 
-      {owned && definition && (
-        <div className="sabotage-details">
-          <strong>{definition.name}</strong> · {definition.description}
-          {definition.durationMs
-            ? ` Lasts ${definition.durationMs / 1000} seconds.`
-            : ""}
-          <div style={{ opacity: 0.7, marginTop: 2 }}>
-            {single
-              ? "Use on another player"
-              : "Hits everyone's store, including yours"}
-          </div>
-        </div>
-      )}
-
       {owned && definition && single && (
         <div role="radiogroup" aria-label="Choose a chef">
           <div className="sabotage-label">CHOOSE A CHEF</div>
-          {targets.map((option) => {
-            const open = option.connected && option.available && !pending;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                role="radio"
-                aria-checked={targetId === option.id}
-                className="sabotage-chef"
-                disabled={!open}
-                onClick={() => onTarget?.(option.id)}
-              >
-                <Avatar option={option} />
-                <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                  <strong style={{ display: "block", font: lilita(20, 1.1) }}>
-                    {option.name}
-                  </strong>
+          <div className="sabotage-chefs">
+            {targets.map((option) => {
+              const open = option.connected && option.available && !pending;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={targetId === option.id}
+                  className="sabotage-chef"
+                  disabled={!open}
+                  onClick={() => onTarget?.(option.id)}
+                >
+                  <Avatar option={option} />
+                  <strong>{option.name}</strong>
                   <span className="sabotage-status">
                     {option.connected ? option.status : "Disconnected"}
                   </span>
@@ -231,7 +225,7 @@ export function SabotageMenu({
                             <IngredientIcon
                               key={i}
                               id={iconIdFor(ing)}
-                              size={26}
+                              size={22}
                             />
                           ) : null;
                         })
@@ -240,10 +234,10 @@ export function SabotageMenu({
                       )}
                     </span>
                   )}
-                </span>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
           {!targets.length && <p>No other chefs to target yet.</p>}
         </div>
       )}
@@ -258,50 +252,117 @@ export function SabotageMenu({
       >
         {pending
           ? "Sending…"
-          : !owned || !definition
+          : !owned
             ? "Earn a sabotage by finishing a recipe"
-            : single
-              ? target
-                ? `Use ${definition.name} on ${target.name}`
-                : "Choose a chef"
-              : `Use ${definition.name}`}
+            : "Sabotage!"}
       </button>
     </div>
   );
 }
 
-/** Full-screen "You've earned a sabotage!" moment with the award artwork. */
+/** How long "Use it now" waits before the sabotage is saved for later. */
+export const AWARD_DECIDE_MS = 3000;
+const STORE_MS = 550;
+
+/**
+ * Full-screen "You've earned a sabotage!" moment with the award artwork. "Use
+ * it now" drains over AWARD_DECIDE_MS; tapping anywhere else or letting it run
+ * out saves it, shrinking the art into the Sabotage button.
+ */
 export function SabotageAwardPopup({
   definitionId,
   onUse,
   onClose,
+  timerMs = AWARD_DECIDE_MS,
 }: {
   definitionId: string;
   onUse?: () => void;
+  /** Called once the "stored away" animation has finished. */
   onClose?: () => void;
+  /** null holds the pop-up still (design sheet). */
+  timerMs?: number | null;
 }) {
+  const root = useRef<HTMLDivElement>(null);
+  const art = useRef<HTMLImageElement>(null);
+  const [flight, setFlight] = useState<{ x: number; y: number } | null>(null);
+  const storing = flight !== null;
+
+  // Fly the art to the Sabotage button (found beside this pop-up).
+  function store() {
+    if (storing) return;
+    const img = art.current;
+    const launch =
+      root.current?.parentElement?.querySelector(".sabotage-launch");
+    if (!img) return onClose?.();
+    const from = img.getBoundingClientRect();
+    // The pop-up may sit inside a scaled frame (dev pages): convert to its px.
+    const k = img.offsetWidth ? from.width / img.offsetWidth : 1;
+    const to = launch?.getBoundingClientRect() ?? {
+      left: from.right,
+      top: from.top,
+      width: 0,
+      height: 0,
+    };
+    setFlight({
+      x: (to.left + to.width / 2 - (from.left + from.width / 2)) / k,
+      y: (to.top + to.height / 2 - (from.top + from.height / 2)) / k,
+    });
+  }
+
+  // Latest onClose without restarting the timer when the parent re-renders
+  // (the game and the dev demo re-render every 100ms).
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    if (!storing) return;
+    const id = setTimeout(() => closeRef.current?.(), STORE_MS);
+    return () => clearTimeout(id);
+  }, [storing]);
+
   return (
     <div
-      className="sabotage-award"
+      ref={root}
+      className={`sabotage-award${storing ? " is-storing" : ""}`}
       role="dialog"
       aria-label="You've earned a sabotage"
-      onClick={onClose}
+      onClick={store}
     >
-      <img src={sabotageAwardArt(definitionId)} alt="" draggable={false} />
+      <img
+        ref={art}
+        src={sabotageAwardArt(definitionId)}
+        alt=""
+        draggable={false}
+        style={
+          flight
+            ? ({
+                "--fly-x": `${flight.x}px`,
+                "--fly-y": `${flight.y}px`,
+              } as React.CSSProperties)
+            : undefined
+        }
+      />
       <div className="sabotage-award-actions">
         <button
           type="button"
           className="sabotage-award-use"
           onClick={(e) => {
             e.stopPropagation();
-            onUse?.();
+            if (!storing) onUse?.();
           }}
         >
-          Use it now
+          {timerMs !== null && (
+            <span
+              className="sabotage-award-timer"
+              style={{ animationDuration: `${timerMs}ms` }}
+              onAnimationEnd={store}
+              aria-hidden
+            />
+          )}
+          <span style={{ position: "relative" }}>Use it now</span>
         </button>
-        <button type="button" onClick={onClose}>
-          Save it for later
-        </button>
+        <span className="sabotage-award-hint">
+          Tap anywhere else to save for later
+        </span>
       </div>
     </div>
   );
@@ -387,15 +448,81 @@ export function SabotageFreezeOverlay({ seconds }: { seconds: number }) {
   );
 }
 
+/** How long a paw takes to reach into the cart and pull an item out. */
+export const PAW_MS = 1700;
+const PAW_CHARACTERS = ["bear", "cat", "cow", "panda"];
+
+/**
+ * The sabotager's paw (their chef's colour) reaches down into your cart and
+ * pulls the trashed item out, so you can see who took it.
+ */
+export function SabotagePawGrab({
+  character,
+  ingredientId,
+}: {
+  character?: string | null;
+  ingredientId?: number | null;
+}) {
+  const paw = PAW_CHARACTERS.includes(character ?? "") ? character : "bear";
+  const ingredient = ingredients.find((entry) => entry.id === ingredientId);
+  return (
+    <div className="sabotage-paw" aria-hidden>
+      <div
+        className="sabotage-paw-arm"
+        style={{ animationDuration: `${PAW_MS}ms` }}
+      >
+        <img src={`/assets/paws/${paw}.png`} alt="" draggable={false} />
+        {ingredient && (
+          <span
+            className="sabotage-paw-item"
+            style={{ animationDuration: `${PAW_MS}ms` }}
+          >
+            <IngredientIcon id={iconIdFor(ingredient)} size={64} />
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** How long the host's "Blackout!" pop-up stays up. */
+export const BLACKOUT_BANNER_MS = 2600;
+
+/** Big "Blackout!" pop-up over the whole host screen. */
+export function SabotageBlackoutBanner({ source }: { source: string }) {
+  return (
+    <div className="sabotage-blackout-banner" role="status">
+      <div className="sabotage-blackout-card">
+        <img src={sabotageArt("blackout")} alt="" draggable={false} />
+        <strong>Blackout!</strong>
+        <span>{source} switched off every store's lights</span>
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------ Live components ----------------------------- */
 
 export function SabotageControls({
   connection,
+  open: openProp,
+  onOpenChange,
+  showLaunch = true,
 }: {
   connection: GameConnection;
+  /** Control the menu from outside (e.g. a button in the phone top bar). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Pin the ⚡ button to the screen corner (off when it lives in the top bar). */
+  showLaunch?: boolean;
 }) {
   const { sabotages } = connection;
-  const [open, setOpen] = useState(false);
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = (next: boolean) => {
+    setOpenState(next);
+    onOpenChange?.(next);
+  };
   const [picked, setPicked] = useState<string | null>(null);
   const [targetId, setTargetId] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -434,11 +561,13 @@ export function SabotageControls({
   if (connection.results) return null;
   return (
     <>
-      <SabotageLaunchButton
-        credits={sabotages.held.length}
-        frozen={sabotages.frozenMs > 0}
-        onClick={() => setOpen(true)}
-      />
+      {showLaunch && (
+        <SabotageLaunchButton
+          credits={sabotages.held.length}
+          frozen={sabotages.frozenMs > 0}
+          onClick={() => setOpen(true)}
+        />
+      )}
       {sabotages.awarded && sabotages.awarded !== "*" && !open && (
         <SabotageAwardPopup
           definitionId={sabotages.awarded}
@@ -508,8 +637,27 @@ export function SabotageEffects({
     .filter((effect) => effect.noticeUntil > now)
     .slice(-3);
   const timed = effects.filter((effect) => (effect.localExpiresAt ?? 0) > now);
+  // noticeUntil is 4.5s after the effect arrived; restored effects have none.
+  const grab = host
+    ? undefined
+    : effects.find(
+        (effect) =>
+          ["trash", "steal"].includes(effect.definition.id) &&
+          effect.targetPlayerId === connection.playerId &&
+          effect.noticeUntil - NOTICE_MS + PAW_MS > now,
+      );
+  const characterOf = (id: string | null) =>
+    connection.state.players.find((player) => player.id === id)?.character ??
+    connection.players.find((player) => player.id === id)?.character;
   return (
     <>
+      {grab && (
+        <SabotagePawGrab
+          key={grab.id}
+          character={characterOf(grab.sourcePlayerId)}
+          ingredientId={grab.ingredientId}
+        />
+      )}
       <div
         className={`sabotage-notices ${host ? "sabotage-host" : ""}`}
         aria-live="polite"

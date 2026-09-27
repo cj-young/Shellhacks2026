@@ -3,37 +3,58 @@
   top: max(8px, env(safe-area-inset-top));
   right: 8px;
   z-index: 75;
-  border: 3px solid #3d2817;
-  border-radius: 24px;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 20px 24px 18px 22px / 22px 18px 24px 20px;
   padding: 8px 14px;
-  background: #ffce55;
-  color: #3d2817;
+  /* The blue of the sabotage artwork, as a paper cut-out. */
+  background: #1654e6;
+  color: #fff6e3;
+  box-shadow: var(--paper-shadow);
   font:
-    900 15px Nunito,
+    400 17px "Sniglet",
     sans-serif;
+  white-space: nowrap;
   cursor: pointer;
+  transition:
+    transform 90ms ease-out,
+    box-shadow 90ms ease-out;
+}
+/* In the phone top bar, where the star score used to be. */
+.sabotage-launch.is-inline {
+  position: static;
+  flex-shrink: 0;
+  height: 38px;
+  padding: 0 11px;
+  gap: 2px;
+  font-size: 16px;
 }
 .sabotage-dialog {
   margin: auto;
   width: min(390px, calc(100vw - 24px));
   max-height: calc(100dvh - 32px);
   overflow: auto;
-  border: 3px solid #3d2817;
-  border-radius: 24px;
+  border: 0;
+  border-radius: 28px 34px 26px 32px / 30px 26px 34px 28px;
   padding: 0;
   background: #fff6e3;
+  box-shadow: var(--paper-shadow);
 }
 .sabotage-dialog::backdrop {
   background: #3d281799;
 }
 .sabotage-dialog button {
   cursor: pointer;
-  border: 2px solid #3d2817;
-  border-radius: 12px;
+  border: 0;
+  border-radius: 14px 18px 12px 16px / 16px 12px 18px 14px;
   padding: 10px;
   font: inherit;
-  background: white;
+  background: #fff;
   color: #3d2817;
+  box-shadow: var(--paper-shadow-pressed);
 }
 .sabotage-options {
   display: grid;
@@ -51,9 +72,19 @@
   padding: 10px 0;
 }
 .sabotage-dialog .sabotage-use {
-  background: #b5dd83;
   width: 100%;
   margin-top: 16px;
+  padding: 12px;
+  border-radius: 40px 46px 38px 48px / 34px 40px 36px 42px;
+  background: #ef4128;
+  color: #fff6e3;
+  box-shadow: var(--paper-shadow);
+  font:
+    400 24px "Sniglet",
+    sans-serif;
+  transition:
+    transform 90ms ease-out,
+    box-shadow 90ms ease-out;
 }
 .sabotage-dialog button:disabled,
 .sabotage-launch:disabled {
@@ -219,26 +250,44 @@
   letter-spacing: 0.14em;
   opacity: 0.7;
 }
+.sabotage-chefs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
 .sabotage-dialog .sabotage-chef {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 6px;
-  padding: 8px 12px;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 6px;
   border: 0;
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 2px 6px #3d28171f;
+  text-align: center;
+}
+.sabotage-chef strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font:
+    400 18px/1.1 "Sniglet",
+    sans-serif;
 }
 .sabotage-dialog .sabotage-chef[aria-checked="true"] {
   background: #fff3c2;
   box-shadow: 0 0 0 3px #ffc20e;
 }
+.sabotage-dialog .sabotage-chef:disabled {
+  opacity: 0.5;
+}
 .sabotage-avatar {
   position: relative;
-  width: 46px;
-  height: 46px;
+  width: 58px;
+  height: 58px;
   flex-shrink: 0;
   overflow: hidden;
   border-radius: 50%;
@@ -248,8 +297,8 @@
 .sabotage-avatar img {
   position: absolute;
   left: 50%;
-  top: 3px;
-  width: 68px;
+  top: 4px;
+  width: 86px;
   transform: translateX(-50%);
 }
 .sabotage-status {
@@ -265,6 +314,7 @@
 .sabotage-items {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 2px;
   margin-top: 4px;
   font:
@@ -309,7 +359,10 @@
   cursor: pointer;
 }
 .sabotage-award-actions .sabotage-award-use {
-  background: #ffc20e;
+  position: relative;
+  overflow: hidden;
+  padding: 14px;
+  background: #ffe7a0;
   font:
     400 22px "Sniglet",
     sans-serif;
@@ -337,5 +390,211 @@
   .sabotage-award img,
   .sabotage-award-actions {
     animation: none !important;
+  }
+}
+
+/* "Use it now" fills up as the decision time runs out. */
+.sabotage-award-timer {
+  position: absolute;
+  inset: 0;
+  background: #ffc20e;
+  transform-origin: left;
+  animation: sabotage-award-fill linear both;
+}
+.sabotage-award-hint {
+  text-align: center;
+  color: #fff6e3;
+  opacity: 0.8;
+  font:
+    800 14px Nunito,
+    sans-serif;
+}
+/* Saved for later: the art shrinks away into the ⚡ Sabotage button. */
+.sabotage-award.is-storing {
+  animation: sabotage-award-out 0.55s ease-in both;
+  pointer-events: none;
+}
+.sabotage-award.is-storing img {
+  animation: sabotage-award-store 0.55s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+.sabotage-award.is-storing .sabotage-award-actions {
+  animation: sabotage-award-hide 0.2s ease-in both;
+}
+@keyframes sabotage-award-hide {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sabotage-award-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes sabotage-award-store {
+  to {
+    transform: translate(var(--fly-x), var(--fly-y)) scale(0.06);
+    opacity: 0.4;
+  }
+}
+@keyframes sabotage-award-out {
+  to {
+    background-color: transparent;
+    opacity: 1;
+  }
+}
+
+/* Paper grain over the sabotage button and menu (same as paper.css). */
+.sabotage-launch::after,
+.sabotage-dialog .sabotage-use::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: var(--paper-grain);
+  background-size: 160px 160px;
+  mix-blend-mode: soft-light;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.sabotage-launch.is-inline,
+.sabotage-dialog .sabotage-use {
+  position: relative;
+  isolation: isolate;
+}
+.sabotage-launch:active:not(:disabled),
+.sabotage-dialog .sabotage-use:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: var(--paper-shadow-pressed);
+}
+.sabotage-launch img {
+  flex-shrink: 0;
+}
+
+/* ---- Trash: the sabotager's paw reaches into the cart ---- */
+.sabotage-paw {
+  position: fixed;
+  inset: 0;
+  z-index: 104;
+  overflow: hidden;
+  pointer-events: none;
+}
+.sabotage-paw-arm {
+  position: absolute;
+  /* Hand ends over the cart (lower middle of the phone). */
+  left: 16%;
+  top: 36%;
+  width: 48%;
+  aspect-ratio: 1 / 2;
+  transform-origin: 50% 0;
+  animation: sabotage-paw-reach ease-in-out both;
+  filter: drop-shadow(4px 8px 10px rgba(61, 40, 23, 0.35));
+}
+.sabotage-paw-arm img {
+  width: 100%;
+  height: 100%;
+}
+.sabotage-paw-item {
+  position: absolute;
+  left: 30%;
+  bottom: 6%;
+  animation: sabotage-paw-item ease-in-out both;
+}
+@keyframes sabotage-paw-reach {
+  0% {
+    transform: translate(40%, -120%) rotate(-24deg);
+  }
+  38% {
+    transform: translate(0, 0) rotate(-14deg);
+  }
+  48% {
+    transform: translate(-2%, 3%) rotate(-12deg);
+  }
+  58% {
+    transform: translate(0, 0) rotate(-14deg);
+  }
+  100% {
+    transform: translate(40%, -120%) rotate(-24deg);
+  }
+}
+@keyframes sabotage-paw-item {
+  0%,
+  44% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  52%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sabotage-paw-arm {
+    animation-name: sabotage-paw-fade;
+  }
+  @keyframes sabotage-paw-fade {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    20%,
+    80% {
+      opacity: 1;
+    }
+  }
+}
+
+/* ---- Host: "Blackout!" pop-up over everything ---- */
+.sabotage-blackout-banner {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: grid;
+  place-items: center;
+  background: #0b1030b3;
+  pointer-events: none;
+  animation: sabotage-banner 2.6s ease-out both;
+}
+.sabotage-blackout-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 22px 48px 28px;
+  border-radius: 34px 40px 30px 44px / 40px 32px 42px 30px;
+  background: #1654e6;
+  color: #fff6e3;
+  box-shadow: var(--paper-shadow);
+  transform: rotate(-2deg);
+  animation: sabotage-award-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.sabotage-blackout-card img {
+  width: min(420px, 60vw);
+}
+.sabotage-blackout-card strong {
+  font:
+    400 clamp(48px, 7vw, 110px) / 1 "Sniglet",
+    sans-serif;
+  -webkit-text-stroke: 0.05em currentColor;
+}
+.sabotage-blackout-card span {
+  font:
+    900 clamp(18px, 2vw, 30px) Nunito,
+    sans-serif;
+}
+@keyframes sabotage-banner {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }

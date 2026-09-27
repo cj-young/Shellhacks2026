@@ -12,6 +12,7 @@ import {
 import type { SabotageTargetOption } from "#/components/sabotage/SabotageUI";
 import { StoreScreen } from "#/components/chop-chop/screens/RacePhoneScreens";
 import { KitchenBackground } from "#/components/chop-chop/KitchenBackground";
+import { TopBarAction } from "#/components/chop-chop/race";
 import { iconIdFor } from "#/components/client/Store";
 import ingredients from "#/data/ingredients.json";
 import { INK, PAGE_BG, lilita, nunito } from "#/components/chop-chop/design";
@@ -158,20 +159,30 @@ function Frame({
 }
 
 /** The phone store behind phone-only pieces, for context. */
-function PhoneBackdrop({ blackout = false }: { blackout?: boolean }) {
+function PhoneBackdrop({
+  blackout = false,
+  frozen = false,
+}: {
+  blackout?: boolean;
+  frozen?: boolean;
+}) {
   return (
     <div style={{ position: "absolute", inset: 0 }}>
       <div style={{ transform: "scale(.951)", transformOrigin: "top left" }}>
-        <StoreScreen
-          score={200}
-          progress={40}
-          blackout={blackout}
-          aisleName="PRODUCE"
-          aisleCount={3}
-          aisleIndex={0}
-          shelf={shelf}
-          basket={[iconIdFor(ingredients[TOMATO_ID])]}
-        />
+        <TopBarAction.Provider
+          value={<SabotageLaunchButton inline credits={2} frozen={frozen} />}
+        >
+          <StoreScreen
+            score={200}
+            progress={40}
+            blackout={blackout}
+            aisleName="PRODUCE"
+            aisleCount={3}
+            aisleIndex={0}
+            shelf={shelf}
+            basket={[iconIdFor(ingredients[TOMATO_ID])]}
+          />
+        </TopBarAction.Provider>
       </div>
     </div>
   );
@@ -232,7 +243,7 @@ export function SabotageDesignSheet() {
         ).map(([label, credits, frozen]) => (
           <Labeled key={label} label={label}>
             <Frame width={240} height={70}>
-              <SabotageLaunchButton credits={credits} frozen={frozen} />
+              <SabotageLaunchButton inline credits={credits} frozen={frozen} />
             </Frame>
           </Labeled>
         ))}
@@ -246,7 +257,7 @@ export function SabotageDesignSheet() {
           <Labeled key={id} label={id}>
             <Frame {...PHONE}>
               <PhoneBackdrop />
-              <SabotageAwardPopup definitionId={id} />
+              <SabotageAwardPopup definitionId={id} timerMs={null} />
             </Frame>
           </Labeled>
         ))}
@@ -367,13 +378,11 @@ export function SabotageDesignSheet() {
         <Labeled label="Playing">
           <Frame {...PHONE}>
             <PhoneBackdrop />
-            <SabotageLaunchButton credits={2} />
           </Frame>
         </Labeled>
         <Labeled label="Stolen from">
           <Frame {...PHONE}>
             <PhoneBackdrop />
-            <SabotageLaunchButton credits={2} />
             <div className="sabotage-notices">
               <SabotageNotice
                 definitionId="steal"
@@ -385,15 +394,13 @@ export function SabotageDesignSheet() {
         </Labeled>
         <Labeled label="Frozen">
           <Frame {...PHONE}>
-            <PhoneBackdrop />
-            <SabotageLaunchButton credits={2} frozen />
+            <PhoneBackdrop frozen />
             <SabotageFreezeOverlay seconds={7} />
           </Frame>
         </Labeled>
         <Labeled label="Blackout">
           <Frame {...PHONE}>
             <PhoneBackdrop blackout />
-            <SabotageLaunchButton credits={2} />
             <SabotageBlackoutBar seconds={12} />
           </Frame>
         </Labeled>

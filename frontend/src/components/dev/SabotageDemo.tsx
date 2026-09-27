@@ -8,12 +8,19 @@ import {
   SabotageLaunchButton,
   SabotageMenu,
   SabotageNotice,
-  SabotageTimer,
+  SabotageBlackoutBanner,
+  BLACKOUT_BANNER_MS,
+  SabotagePawGrab,
+  PAW_MS,
   sabotageMessage,
 } from "#/components/sabotage/SabotageUI";
 import type { SabotageTargetOption } from "#/components/sabotage/SabotageUI";
 import { StoreScreen } from "#/components/chop-chop/screens/RacePhoneScreens";
-import { KitchenBackground } from "#/components/chop-chop/KitchenBackground";
+import {
+  DEMO_STACKS,
+  HostRaceStacks,
+} from "#/components/chop-chop/screens/HostRaceStacks";
+import { TopBarAction, TopBarCharacter } from "#/components/chop-chop/race";
 import { iconIdFor } from "#/components/client/Store";
 import definitions from "#/data/sabotages.json";
 import ingredients from "#/data/ingredients.json";
@@ -138,6 +145,9 @@ const button = (bg = "#fff"): React.CSSProperties => ({
 export function SabotageDemo() {
   const [chefs, setChefs] = useState(START);
   const [held, setHeld] = useState<string[]>(["trash", "freeze"]);
+  /** Every sabotage unlocked and never used up, for free play. */
+  const [unlimited, setUnlimited] = useState(true);
+  const hand = unlimited ? SABOTAGE_CARDS.map((c) => c.id as string) : held;
   const [effects, setEffects] = useState<Effect[]>([]);
   const [awarded, setAwarded] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -206,16 +216,17 @@ export function SabotageDemo() {
     const d = selected ? def(selected) : null;
     if (!d) return;
     apply(d.id, "you", d.targetScope === "single" ? targetId : null);
-    setHeld((h) => {
-      const i = h.indexOf(d.id);
-      return i < 0 ? h : [...h.slice(0, i), ...h.slice(i + 1)];
-    });
+    if (!unlimited)
+      setHeld((h) => {
+        const i = h.indexOf(d.id);
+        return i < 0 ? h : [...h.slice(0, i), ...h.slice(i + 1)];
+      });
     setTargetId("");
     setMenuOpen(false);
   }
 
-  const firstHeld = SABOTAGE_CARDS.find((c) => held.includes(c.id))?.id ?? null;
-  const selected = picked && held.includes(picked) ? picked : firstHeld;
+  const firstHeld = SABOTAGE_CARDS.find((c) => hand.includes(c.id))?.id ?? null;
+  const selected = picked && hand.includes(picked) ? picked : firstHeld;
   const youFrozen = remaining("freeze", "you") > 0;
   const targets: SabotageTargetOption[] = chefs
     .filter((c) => c.id !== "you")
@@ -265,29 +276,51 @@ export function SabotageDemo() {
           <div
             style={{ transform: "scale(.951)", transformOrigin: "top left" }}
           >
-            <StoreScreen
-              score={200}
-              progress={40}
-              blackout={blackout > 0}
-              disabled={frozen > 0}
-              aisleName="PRODUCE"
-              aisleCount={3}
-              aisleIndex={0}
-              shelf={shelf}
-              basket={items(chef.inventory).map((id) =>
-                iconIdFor(ingredients.find((i) => i.id === id)!),
-              )}
-            />
+            <TopBarAction.Provider
+              value={
+                <SabotageLaunchButton
+                  inline
+                  credits={me ? hand.length : 0}
+                  frozen={frozen > 0}
+                  onClick={me ? () => setMenuOpen(true) : undefined}
+                />
+              }
+            >
+              <TopBarCharacter.Provider value={chef.character}>
+                <StoreScreen
+                  score={200}
+                  progress={40}
+                  blackout={blackout > 0}
+                  disabled={frozen > 0}
+                  aisleName="PRODUCE"
+                  aisleCount={3}
+                  aisleIndex={0}
+                  shelf={shelf}
+                  basket={items(chef.inventory).map((id) =>
+                    iconIdFor(ingredients.find((i) => i.id === id)!),
+                  )}
+                />
+              </TopBarCharacter.Provider>
+            </TopBarAction.Provider>
           </div>
         </div>
-        {me && (
-          <SabotageLaunchButton
-            credits={held.length}
-            frozen={frozen > 0}
-            onClick={() => setMenuOpen(true)}
-          />
-        )}
         <div className="sabotage-notices">{noticesFor(chef.id)}</div>
+        {(() => {
+          // Fresh trash on this chef: the sabotager's paw grabs the item.
+          const grab = effects.find(
+            (e) =>
+              e.defId === "trash" &&
+              e.target === chef.id &&
+              e.noticeUntil - NOTICE_MS + PAW_MS > now,
+          );
+          return grab ? (
+            <SabotagePawGrab
+              key={grab.id}
+              character={chefs.find((c) => c.id === grab.source)?.character}
+              ingredientId={grab.ingredientId}
+            />
+          ) : null;
+        })()}
         {blackout > 0 && (
           <SabotageBlackoutBar seconds={Math.ceil(blackout / 1000)} />
         )}
@@ -328,7 +361,7 @@ export function SabotageDemo() {
               }}
             >
               <SabotageMenu
-                held={held}
+                held={hand}
                 selected={selected}
                 onSelect={(id) => {
                   setPicked(id);
@@ -346,8 +379,6 @@ export function SabotageDemo() {
       </>
     );
   }
-
-  const timed = effects.filter((e) => (e.expiresAt ?? 0) > now);
 
   return (
     <div
@@ -378,6 +409,30 @@ export function SabotageDemo() {
           A fake game in your browser. Use the ⚡ button on your phone, or try
           these:
         </p>
+        <label
+          style={{
+            ...button(unlimited ? "#CDE8B5" : "#fff"),
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={unlimited}
+            onChange={(e) => {
+              setUnlimited(e.target.checked);
+              setPicked(null);
+              setTargetId("");
+            }}
+          />
+          Unlimited sabotages
+        </label>
+        <span style={{ font: nunito(700, 12), opacity: 0.7, marginTop: -4 }}>
+          {unlimited
+            ? "All three unlocked and never used up. Play them on Jun or Ari."
+            : "Like the real game: earn them, and each one is used up."}
+        </span>
         <strong
           style={{
             font: nunito(900, 12),
@@ -443,7 +498,12 @@ export function SabotageDemo() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         <div style={{ display: "flex", gap: 20 }}>
-          <Frame label="Your phone (Mina)" width={390} height={820} scale={0.62}>
+          <Frame
+            label="Your phone (Mina)"
+            width={390}
+            height={820}
+            scale={0.62}
+          >
             {renderPhone(chefs[0])}
           </Frame>
           <Frame label="Jun's phone" width={390} height={820} scale={0.62}>
@@ -451,19 +511,49 @@ export function SabotageDemo() {
           </Frame>
         </div>
         <Frame label="TV" width={1920} height={1080} scale={0.27}>
-          <KitchenBackground />
-          <div className="sabotage-notices sabotage-host">
-            {noticesFor(null)}
-            {timed.map((e) => (
-              <SabotageTimer
-                key={`t${e.id}`}
-                definitionId={e.defId}
-                name={def(e.defId).name}
-                who={e.target ? name(e.target) : "Everyone"}
-                seconds={Math.ceil(((e.expiresAt ?? now) - now) / 1000)}
-              />
-            ))}
-          </div>
+          <HostRaceStacks
+            stacks={chefs.map((c, i) => {
+              const frozenMs = remaining("freeze", c.id);
+              const hit = [...effects]
+                .reverse()
+                .find((e) => e.target === c.id && e.noticeUntil > now);
+              const item = ingredients.find((x) => x.id === hit?.ingredientId);
+              return {
+                ...DEMO_STACKS[i],
+                id: c.id,
+                name: c.name,
+                character: c.character,
+                points: 200,
+                frozenSeconds: frozenMs > 0 ? Math.ceil(frozenMs / 1000) : 0,
+                sabotage: hit
+                  ? {
+                      id: String(hit.id),
+                      definitionId: hit.defId,
+                      message: sabotageMessage(
+                        hit.defId,
+                        name(hit.source),
+                        c.name,
+                        item?.name,
+                      ),
+                    }
+                  : null,
+              };
+            })}
+            totalRecipes={5}
+            secondsLeft={90}
+          />
+          {(() => {
+            const b = [...effects]
+              .reverse()
+              .find(
+                (e) =>
+                  e.target === null &&
+                  e.noticeUntil - NOTICE_MS + BLACKOUT_BANNER_MS > now,
+              );
+            return b ? (
+              <SabotageBlackoutBanner key={b.id} source={name(b.source)} />
+            ) : null;
+          })()}
         </Frame>
       </div>
     </div>

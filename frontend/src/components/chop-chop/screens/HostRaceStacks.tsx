@@ -38,6 +38,10 @@ export type RaceStack = {
   character?: string | null;
   /** Current score, shown on the tab. */
   points?: number;
+  /** Seconds left on a freeze aimed at this player (frost over their card). */
+  frozenSeconds?: number;
+  /** Latest sabotage aimed at this player, shown as a toast above their card. */
+  sabotage?: { id: string; definitionId: string; message: string } | null;
 } & (
   | { phase: "shop"; items: ShopItem[] }
   | {
@@ -171,6 +175,17 @@ const RACE_CSS = `
   100% { transform: scale(1) rotate(0); }
 }
 @keyframes rsCheckDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes rsSabToast {
+  0% { transform: translateY(30px) scale(.6); opacity: 0; }
+  8% { transform: translateY(-8px) scale(1.06); opacity: 1; }
+  14% { transform: none; }
+  85% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+@keyframes rsFrostIn {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: none; }
+}
 @keyframes rsToast {
   0% { transform: translateY(40px) scale(.5); opacity: 0; }
   14% { transform: translateY(-10px) scale(1.12); opacity: 1; }
@@ -888,7 +903,56 @@ function RecipeStack({
             animate={doneFrom !== null}
           />
         )}
+        {(stack.frozenSeconds ?? 0) > 0 && (
+          <FrostOverlay seconds={stack.frozenSeconds!} />
+        )}
       </div>
+
+      {stack.sabotage && (
+        <div
+          key={stack.sabotage.id}
+          className="rs-anim"
+          style={{
+            position: "absolute",
+            top: -30,
+            left: -10,
+            right: -10,
+            zIndex: 6,
+            display: "flex",
+            justifyContent: "center",
+            pointerEvents: "none",
+            animation: "rsSabToast 4500ms ease-out both",
+          }}
+        >
+          <div
+            style={{
+              ...paper(20, 4),
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              maxWidth: "100%",
+              background: "#1654e6",
+              color: "#fff6e3",
+              padding: "8px 16px 8px 8px",
+              font: nunito(900, 20),
+              transform: "rotate(-2deg)",
+            }}
+          >
+            <img
+              src={`/assets/sabotages/${stack.sabotage.definitionId}.png`}
+              alt=""
+              style={{
+                width: 66,
+                height: 44,
+                objectFit: "cover",
+                borderRadius: 10,
+                flexShrink: 0,
+              }}
+            />
+            <span>{stack.sabotage.message}</span>
+          </div>
+        </div>
+      )}
 
       {doneFrom && (
         <div
@@ -919,6 +983,40 @@ function RecipeStack({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Frosty cover over a frozen player's card, with the seconds left. */
+function FrostOverlay({ seconds }: { seconds: number }) {
+  return (
+    <div
+      className="rs-anim"
+      style={{
+        ...paper(38, 8, false),
+        position: "absolute",
+        inset: 0,
+        zIndex: 4,
+        background:
+          "linear-gradient(160deg, rgba(214,241,255,.88), rgba(150,205,240,.82))",
+        boxShadow: "inset 0 0 40px 10px #ffffffcc",
+        backdropFilter: "blur(3px)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        color: "#0b3a66",
+        animation: "rsFrostIn 350ms ease-out both",
+      }}
+    >
+      <img
+        src="/assets/sabotages/freeze.png"
+        alt=""
+        style={{ width: 230, borderRadius: 24 }}
+      />
+      <span style={{ font: lilita(64, 1) }}>Frozen!</span>
+      <span style={{ font: nunito(900, 26) }}>{seconds}s</span>
     </div>
   );
 }

@@ -28,6 +28,9 @@ export type SabotageEffect = SabotageAppliedPayload & {
   noticeUntil: number;
 };
 
+/** How long a sabotage announcement stays on screen after it arrives. */
+export const NOTICE_MS = 4500;
+
 export function localizeSabotage(
   payload: SabotageAppliedPayload,
   now: number,
@@ -38,7 +41,7 @@ export function localizeSabotage(
       payload.expiresAt === null
         ? null
         : now + payload.expiresAt - payload.serverNow,
-    noticeUntil: now + 4500,
+    noticeUntil: now + NOTICE_MS,
   };
 }
 

@@ -1,4 +1,9 @@
-import { SabotageEffects } from "../sabotage/SabotageUI";
+import {
+  BLACKOUT_BANNER_MS,
+  SabotageBlackoutBanner,
+  sabotageMessage,
+} from "../sabotage/SabotageUI";
+import { NOTICE_MS, effectRemaining } from "#/lib/sabotages";
 import type { GameConnection } from "#/lib/use-game-connection";
 import type { Ingredient, Recipe } from "#/lib/types";
 import { useEffect, useState } from "react";
@@ -150,9 +155,46 @@ export function HostInterface({ connection }: HostInterfaceProps) {
 
   const order = connection.state.recipeOrder;
   // Cart, inventory and recipe progress arrive with each state update from the server.
+  // Sabotages land on the affected player's card: a toast, and frost while frozen.
+  const { effects, now: sabNow } = connection.sabotages;
+  const nameOf = (id: string | null) =>
+    players.find((player) => player.id === id)?.name ?? "A chef";
+  const sabotageFor = (
+    id: string,
+  ): Pick<RaceStack, "frozenSeconds" | "sabotage"> => {
+    const frozenMs = effectRemaining(effects, "freeze", id, sabNow);
+    const latest = [...effects]
+      .reverse()
+      .find((e) => e.targetPlayerId === id && e.noticeUntil > sabNow);
+    const item = ingredients.find((i) => i.id === latest?.ingredientId)?.name;
+    return {
+      frozenSeconds: frozenMs > 0 ? Math.ceil(frozenMs / 1000) : 0,
+      sabotage: latest
+        ? {
+            id: latest.id,
+            definitionId: latest.definition.id,
+            message: sabotageMessage(
+              latest.definition.id,
+              nameOf(latest.sourcePlayerId),
+              nameOf(id),
+              item,
+            ),
+          }
+        : null,
+    };
+  };
   const liveStacks: RaceStack[] = players
     .map((player) => playerStack(player, serverPlayers.get(player.id), order))
-    .filter((stack): stack is RaceStack => stack !== null);
+    .filter((stack): stack is RaceStack => stack !== null)
+    .map((stack) => ({ ...stack, ...sabotageFor(stack.id) }));
+  // Everyone-sabotages (blackout) get a big pop-up for a couple of seconds.
+  const blackout = [...effects]
+    .reverse()
+    .find(
+      (e) =>
+        e.definition.targetScope === "all" &&
+        e.noticeUntil - NOTICE_MS + BLACKOUT_BANNER_MS > sabNow,
+    );
 
   const demo = liveStacks.length === 0;
 
@@ -171,7 +213,12 @@ export function HostInterface({ connection }: HostInterfaceProps) {
             : undefined
         }
       />
-      <SabotageEffects connection={connection} host />
+      {blackout && !results && (
+        <SabotageBlackoutBanner
+          key={blackout.id}
+          source={nameOf(blackout.sourcePlayerId)}
+        />
+      )}
       {results && <TimesUp />}
     </div>
   );
