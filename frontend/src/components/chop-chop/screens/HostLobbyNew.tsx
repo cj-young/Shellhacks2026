@@ -37,7 +37,6 @@ export const lobbyColor = (
 ) =>
   getCharacter(character)?.color ?? LOBBY_COLORS[index % LOBBY_COLORS.length];
 
-const DEFAULT_JOIN_TEXT = "CHOPCHOP.GAME";
 /** Below this width:height ratio the lobby stacks into a single column. */
 const PORTRAIT_RATIO = 1.15;
 
@@ -52,8 +51,6 @@ interface HostLobbyProps {
   roomCode?: string;
   /** In join order; the last one gets the "Hi!" sticker. */
   players?: LobbyPlayer[];
-  /** Shown on the badge's lower arc as "OR VISIT …". */
-  joinText?: string;
   /** Link encoded in the QR code; the badge shows a placeholder without it. */
   joinUrl?: string;
   onStart?: () => void;
@@ -108,7 +105,6 @@ export function HostLobbyNew(props: HostLobbyProps) {
 function LobbyLayout({
   roomCode = "YUMI",
   players = MOCK_PLAYERS,
-  joinText = DEFAULT_JOIN_TEXT,
   joinUrl,
   onStart,
   canStart = true,
@@ -175,11 +171,7 @@ function LobbyLayout({
           })}
         >
           <Parallax amount={UI_PAN}>
-            <JoinBadge
-              roomCode={roomCode}
-              joinText={joinText}
-              joinUrl={joinUrl}
-            />
+            <JoinBadge roomCode={roomCode} joinUrl={joinUrl} />
           </Parallax>
         </div>
         {portrait ? (
@@ -242,18 +234,11 @@ function Brand({ centered }: { centered: boolean }) {
 
 function JoinBadge({
   roomCode,
-  joinText,
   joinUrl,
 }: {
   roomCode: string;
-  joinText: string;
   joinUrl?: string;
 }) {
-  const arcText = `OR VISIT ${joinText.toUpperCase()}`;
-  const arcFontSize = Math.min(
-    36,
-    Math.floor((780 / arcText.length - 3) / 0.55),
-  );
   const codeFontSize = roomCode.length <= 4 ? 130 : 100;
 
   return (
@@ -283,22 +268,20 @@ function JoinBadge({
           style={{ position: "absolute", inset: 0 }}
         >
           <defs>
-            <path id="lobbyTop" d="M69 294 A225 225 0 0 1 519 294" />
-            <path id="lobbyBot" d="M32 294 A262 262 0 0 0 556 294" />
+            {/* A full circle (r 232) starting at the left, running clockwise. */}
+            <path
+              id="lobbyRing"
+              d="M62 294 A232 232 0 1 1 526 294 A232 232 0 1 1 62 294"
+            />
           </defs>
-          <text fontFamily="Sniglet" fontSize="44" fill={INK} letterSpacing="4">
-            <textPath href="#lobbyTop" startOffset="50%" textAnchor="middle">
-              SCAN TO JOIN ✦ SCAN TO JOIN
-            </textPath>
-          </text>
-          <text
-            fontFamily="Sniglet"
-            fontSize={arcFontSize}
-            fill={INK}
-            letterSpacing="3"
-          >
-            <textPath href="#lobbyBot" startOffset="50%" textAnchor="middle">
-              {arcText}
+          {/* Stretched to the ring's length so the repeats meet evenly. */}
+          <text fontFamily="Sniglet" fontSize="44" fill={INK}>
+            <textPath
+              href="#lobbyRing"
+              textLength={1440}
+              lengthAdjust="spacing"
+            >
+              SCAN QR CODE ✦ SCAN QR CODE ✦ SCAN QR CODE ✦
             </textPath>
           </text>
         </svg>
