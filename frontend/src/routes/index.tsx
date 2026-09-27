@@ -19,7 +19,17 @@ import {
 } from "#/components/chop-chop/design";
 
 import { paper } from "#/components/chop-chop/paper";
-export const Route = createFileRoute("/")({ component: MainMenu });
+
+export const Route = createFileRoute("/")({
+  component: MainMenu,
+  head: () => ({
+    meta: [
+      {
+        title: "chopchop",
+      },
+    ],
+  }),
+});
 
 const menuButton: React.CSSProperties = {
   ...paper(42, 0),

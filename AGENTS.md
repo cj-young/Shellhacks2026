@@ -159,6 +159,7 @@ of the repository, the architecture, commands, conventions, and gotchas.
         ├── styles.css        # Tailwind entry + fonts; imports styles/theme.css
         ├── styles/theme.css  # CSS custom-property design tokens
         ├── routes/           # File-based routes: /, /host, /join, /chop-chop-dev, __root
+        ├── audio/            # Web Audio engine, cue resolution, audio hooks
         ├── lib/
         │   ├── use-game-connection.ts  # Socket.IO client hook (lobby + game state)
         │   └── types.ts                # Shared GameState/Recipe types (mirror backend)
@@ -169,6 +170,7 @@ of the repository, the architecture, commands, conventions, and gotchas.
         │   └── chop-chop/             # Design system + dev screen gallery (see below)
         └── data/
             ├── recipes.json           # Mirror of backend catalogue
+            ├── sounds.ts              # Sound registry (edit to plug in audio)
             └── chop-chop-mock.ts      # Mock presentation data (dev screens only)
 ```
 
@@ -268,6 +270,23 @@ gallery. They do not share components today.
 - `MasterRecipe.tsx` — runs a recipe's stages in order, advancing after each match.
 - Tests: `gesture-recognizer.test.ts` (`node --test`) covers lines, zig-zags, loops, direction,
   proximity, path coverage and rotation requirements.
+
+**Sound and music (`src/audio/` + `src/data/sounds.ts`)**
+
+- `data/sounds.ts` — **the registry you edit to plug in audio**: a cue table plus the `SoundEvent`
+  union. Every entry is optional, so anything unregistered is simply silent.
+- `audio/engine.ts` — dependency-free engine: one-shot SFX go through Web Audio (low latency,
+  pitch jitter) while music/ambience **loop through streamed `HTMLAudioElement`s** (long tracks start
+  fast). Lazy `unlock()` from a user gesture, persisted mute + per-bus volumes, fades, and a silent
+  no-op for missing files. Host music starts on the Start click.
+- `audio/resolve.ts` — pure, tested key resolution, most-specific first: gesture
+  (`stage:<recipe name>:<index>` → `gesture.success.<gesture>` → `gesture.success`), ambience
+  (`ambient.<station>` → `ambient.default`), and exact keys for everything else.
+- `audio/use-audio.ts` — hooks: `useSfx`, `useAmbient` (phone-only station loops), `useMusic` (host),
+  `useAudioUnlock`.
+- Wired in: `HostInterface` (music + round sounds), `ClientInterface` (ambience, gesture success/fail,
+  recipe sounds), `Store` (`ui.*`), `SabotageUI` (`sabotage.*`).
+- Assets live in `frontend/public/assets/audio/`; add a file there and a line in `data/sounds.ts`.
 
 
 **Design system + dev gallery (`components/chop-chop/`) — dev/prototype, not wired to sockets**

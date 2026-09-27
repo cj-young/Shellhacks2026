@@ -8,6 +8,7 @@ import {
   classifyStroke,
   distanceToSegment,
   expectedGesture,
+  isDeliberateStroke,
   matchStage,
   pathLength,
 } from "./gesture-recognizer.ts";
@@ -448,6 +449,35 @@ test("pathLength measures the traversed distance", () => {
     5,
   );
   assert.equal(pathLength([{ x: 10, y: 10 }]), 0);
+});
+
+/* --------------------------- deliberate strokes --------------------------- */
+
+test("a deliberate stroke needs enough points and length", () => {
+  assert.equal(isDeliberateStroke([]), false);
+  assert.equal(isDeliberateStroke([{ x: 0, y: 0 }]), false);
+  // A tap: plenty of (near-duplicate) points, no travel.
+  assert.equal(
+    isDeliberateStroke(Array.from({ length: 12 }, () => ({ x: 100, y: 100 }))),
+    false,
+  );
+  // A small nudge below the recognizer's minimum path length.
+  assert.equal(
+    isDeliberateStroke([
+      { x: 0, y: 0 },
+      { x: 8, y: 0 },
+      { x: 16, y: 0 },
+      { x: 20, y: 0 },
+    ]),
+    false,
+  );
+});
+
+test("a long traced stroke is deliberate even if it does not match", () => {
+  assert.equal(
+    isDeliberateStroke(linePoints(horizontal.start, horizontal.end)),
+    true,
+  );
 });
 
 /** Widens the `as const` tuning values so the checks are not constant-folded. */

@@ -6,6 +6,7 @@ import {
   StoreScreen,
 } from "#/components/chop-chop/screens/RacePhoneScreens";
 import { getIngredient, menuIngredientIdFor } from "#/data/menu";
+import { useSfx } from "#/audio/use-audio";
 
 /** Uses our sticker art when the name matches a menu ingredient, otherwise the item's own image. */
 export const iconIdFor = (ing: Ingredient) =>
@@ -68,15 +69,18 @@ export function Store({
 }) {
   const [inventory, setInventory] = useState<Ingredient[]>([]);
   const [aisle, setAisle] = useState(0);
+  const sfx = useSfx();
 
   function checkout() {
     if (disabled) return;
+    sfx.play("ui.checkout");
     uploadInventory(inventory);
     setInventory([]);
   }
 
   function addToCart(ingredient: Ingredient) {
     if (disabled) return;
+    sfx.play("ui.take");
     const nextCart = [...inventory, ingredient];
     setInventory(nextCart);
     onCartChange(nextCart);
@@ -85,14 +89,17 @@ export function Store({
   /** Tapping a cart item puts it back on the shelf. */
   function removeFromCart(index: number) {
     if (disabled) return;
+    sfx.play("ui.remove");
     const nextCart = inventory.filter((_, i) => i !== index);
     setInventory(nextCart);
     onCartChange(nextCart);
   }
 
   const page = AISLES.at(aisle) ?? { name: "STORE", items: [] };
-  const flip = (step: number) =>
+  const flip = (step: number) => {
+    sfx.play("ui.aisle");
     setAisle((a) => (a + step + AISLES.length) % Math.max(1, AISLES.length));
+  };
 
   return (
     <StoreScreen

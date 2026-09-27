@@ -16,6 +16,10 @@ export type MasterRecipeProps = {
   onCompleteChange?: (complete: boolean) => void;
   /** Called whenever the active stage changes; -1 means the recipe is done. */
   onStageChange?: (stageIndex: number) => void;
+  /** Called once each time a stage's gesture is recognized. */
+  onStageMatch?: (stageIndex: number) => void;
+  /** Called when a deliberate stroke ends without matching the active stage. */
+  onWrong?: () => void;
 };
 
 /** Renders a recipe's stages one at a time and advances after each match. */
@@ -27,6 +31,8 @@ export function MasterRecipe({
   stageDelayMs = 1100,
   onCompleteChange,
   onStageChange,
+  onStageMatch,
+  onWrong,
 }: MasterRecipeProps) {
   const recipeKey = useMemo(() => JSON.stringify(recipe), [recipe]);
   const [progress, setProgress] = useState({
@@ -35,6 +41,7 @@ export function MasterRecipe({
     completedStageIndex: null as number | null,
   });
   const completedRecipeKey = useRef<string | null>(null);
+  const matchedStageKey = useRef<string | null>(null);
 
   // A new recipe must begin at stage zero immediately, before effects run.
   const currentProgress =
@@ -44,6 +51,7 @@ export function MasterRecipe({
 
   useEffect(() => {
     completedRecipeKey.current = null;
+    matchedStageKey.current = null;
     setProgress((current) =>
       current.recipeKey === recipeKey
         ? current
@@ -98,11 +106,19 @@ export function MasterRecipe({
       key={`${recipeKey}:${currentProgress.stageIndex}`}
       points={paused ? [] : points}
       stage={activeStage}
+      paused={paused}
       completed={
         currentProgress.completedStageIndex === currentProgress.stageIndex
       }
+      onWrong={onWrong}
       onMatchChange={(matches) => {
         if (paused || !matches) return;
+
+        const matchKey = `${recipeKey}:${currentProgress.stageIndex}`;
+        if (matchedStageKey.current !== matchKey) {
+          matchedStageKey.current = matchKey;
+          onStageMatch?.(currentProgress.stageIndex);
+        }
 
         setProgress((current) =>
           current.recipeKey === recipeKey &&

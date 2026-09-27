@@ -9,13 +9,24 @@ import {
 } from "#/lib/host-game";
 import type { HostGame } from "#/lib/host-game";
 import { HostInterface } from "#/components/host/HostInterface";
+import { audio } from "#/audio/engine";
+import { usePreloadStoreArt } from "#/lib/use-preload-store-art";
 import { PAGE_BG } from "#/components/chop-chop/design";
 import {
   HostLobbyNew,
   lobbyColor,
 } from "#/components/chop-chop/screens/HostLobbyNew";
 
-export const Route = createFileRoute("/host")({ component: HostScreen });
+export const Route = createFileRoute("/host")({
+  component: HostScreen,
+  head: () => ({
+    meta: [
+      {
+        title: "chopchop | host",
+      },
+    ],
+  }),
+});
 
 const CONNECTION_PROBLEMS = ["Connection failed", "Disconnected", "Error"];
 
@@ -28,6 +39,7 @@ function HostScreen() {
   const connection = useGameConnection(
     game ? { code: game.code, token: game.hostToken, name: game.name } : null,
   );
+  usePreloadStoreArt();
 
   useEffect(() => {
     setJoinText(`${window.location.host}/join`);
@@ -84,6 +96,8 @@ function HostScreen() {
   }, [game]);
 
   const startGame = useCallback(() => {
+    // Unlock audio from this click so host music can start immediately.
+    audio.unlock();
     connection.socketRef.current?.emit("start_game");
   }, [connection.socketRef]);
 

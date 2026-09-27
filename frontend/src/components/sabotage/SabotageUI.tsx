@@ -15,6 +15,8 @@ import { characterImage } from "#/data/characters";
 import { IngredientIcon } from "#/components/chop-chop/IngredientIcon";
 import { iconIdFor } from "#/components/client/Store";
 import { CARD_BG, INK, lilita, nunito } from "#/components/chop-chop/design";
+import { useSfx } from "#/audio/use-audio";
+import type { SoundKey } from "#/data/sounds";
 import "./sabotage.css";
 
 /** Swap these badges and the CSS animations when final sabotage artwork is ready. */
@@ -23,6 +25,14 @@ export const SABOTAGE_BADGES: Record<string, string> = {
   trash: "🗑️",
   freeze: "❄️",
   blackout: "💡",
+};
+
+/** Sound per sabotage; anything unregistered is silent. */
+const SABOTAGE_SOUNDS: Record<string, SoundKey> = {
+  steal: "sabotage.steal",
+  trash: "sabotage.trash",
+  freeze: "sabotage.freeze",
+  blackout: "sabotage.blackout",
 };
 const panel: CSSProperties = {
   ...paper(22, 3),
@@ -661,6 +671,21 @@ export function SabotageEffects({
   host?: boolean;
 }) {
   const { effects, now, frozenMs, blackoutMs } = connection.sabotages;
+  const sfx = useSfx();
+  const announced = useRef(new Set<string>());
+  // Play a sting the first time each sabotage notice appears, on host and phone.
+  useEffect(() => {
+    for (const effect of effects) {
+      if (announced.current.has(effect.id)) continue;
+      announced.current.add(effect.id);
+      if (effect.noticeUntil <= Date.now()) continue;
+      sfx.play(SABOTAGE_SOUNDS[effect.definition.id] ?? "sabotage.notice");
+      if (effect.sourcePlayerId === connection.playerId) {
+        sfx.play("sabotage.applied");
+      }
+    }
+  }, [effects, sfx, connection.playerId]);
+
   if (connection.results) return null;
   const name = (id: string | null) =>
     connection.state.players.find((player) => player.id === id)?.name ??
