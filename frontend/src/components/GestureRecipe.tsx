@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import type { CursorPoint } from "./CursorPathTracker";
 import { LineTarget } from "./LineTarget";
 import { SpinGesture } from "./SpinGesture";
+import { matchStage } from "./gesture-recognizer";
 import type { LineType, RecipeStage, SpinType } from "../lib/types";
 
 import { paper } from "#/components/chop-chop/paper";
+
 export type GestureRecipeLine = LineType;
 export type GestureRecipeStage = Omit<RecipeStage, "ingredientsConsumed"> &
   ({ type: "lines"; lines: LineType[] } | { type: "spin"; spins: SpinType[] });
@@ -20,15 +22,15 @@ export type GestureRecipeProps = {
   points: CursorPoint[];
   /** Holds the finished appearance while the parent waits to advance. */
   completed?: boolean;
-  /** True only while every target in this stage has been matched. */
+  /** True only while the stage's gesture has been recognized. */
   onMatchChange?: (matches: boolean) => void;
 };
 
-type MatchState = {
-  stageKey: string;
-  targets: boolean[];
-};
-
+/**
+ * Recognizes the drawn stroke against a stage's gesture and draws the stage's
+ * targets as guides. Matching is forgiving (feature-based, rough proximity,
+ * capped rotations); once a stroke matches it stays matched until it clears.
+ */
 export function GestureRecipe({
   stage,
   points,
@@ -36,38 +38,23 @@ export function GestureRecipe({
   onMatchChange,
 }: GestureRecipeProps) {
   const stageKey = useMemo(() => JSON.stringify(stage), [stage]);
-  const targetCount =
-    stage.type === "spin" ? stage.spins.length : stage.lines.length;
-  const [matchState, setMatchState] = useState<MatchState>({
-    stageKey,
-    targets: Array(targetCount).fill(false),
-  });
+  const [matchedKey, setMatchedKey] = useState<string | null>(null);
 
+  const result = useMemo(() => matchStage(points, stage), [points, stage]);
   const matches =
-    targetCount > 0 &&
-    matchState.stageKey === stageKey &&
-    matchState.targets.length === targetCount &&
-    matchState.targets.every(Boolean);
+    result.matched || (points.length > 0 && matchedKey === stageKey);
+
+  useEffect(() => {
+    if (points.length === 0) {
+      setMatchedKey(null);
+      return;
+    }
+    if (result.matched) setMatchedKey(stageKey);
+  }, [points.length, result.matched, stageKey]);
 
   useEffect(() => {
     onMatchChange?.(matches);
   }, [matches, onMatchChange]);
-
-  const updateTargetMatch = (index: number, targetMatches: boolean) => {
-    setMatchState((currentState) => {
-      const currentMatches =
-        currentState.stageKey === stageKey
-          ? currentState.targets
-          : Array(targetCount).fill(false);
-
-      if (currentMatches[index] === targetMatches) return currentState;
-
-      const nextMatches = [...currentMatches];
-      nextMatches[index] = targetMatches;
-
-      return { stageKey, targets: nextMatches };
-    });
-  };
 
   const foregroundImage = completed
     ? stage.finishedImage || stage.image
@@ -116,19 +103,15 @@ export function GestureRecipe({
               <SpinGesture
                 key={`${stageKey}:${index}`}
                 {...spin}
-                allowStartOutsideTarget
-                points={points}
-                onMatchChange={(matches) => updateTargetMatch(index, matches)}
+                matched={matches}
               />
             ))
           : stage.lines.map((line, index) => (
               <LineTarget
                 key={`${stageKey}:${index}`}
-                allowStartOutsideTarget
+                matched={matches}
                 end={line.end}
-                onMatchChange={(matches) => updateTargetMatch(index, matches)}
                 origin={line.start}
-                points={points}
                 radius={line.radius}
               />
             ))}
