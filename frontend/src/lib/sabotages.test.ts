@@ -16,12 +16,12 @@ const freeze: SabotageAppliedPayload = {
     name: "Freeze",
     description: "",
     targetScope: "single",
-    durationMs: 10000,
+    durationMs: 3000,
   },
   sourcePlayerId: "ada",
   targetPlayerId: "jun",
   appliedAt: 900000,
-  expiresAt: 910000,
+  expiresAt: 903000,
   serverNow: 902000,
   ingredientId: null,
 };
@@ -39,7 +39,7 @@ test("server clock skew and elapsed duration are accounted for; expiry clears lo
   assert.equal(effect.localExpiresAt, 9000);
   assert.equal(effectRemaining([effect], "freeze", "jun", 1000), 8000);
   assert.equal(effectRemaining([effect], "freeze", "jun", 9000), 0);
-  assert.equal(effectRemaining([effect], "freeze", "jun", 10000), 0);
+  assert.equal(effectRemaining([effect], "freeze", "jun", 3000), 0);
   assert.equal(effectRemaining([effect], "freeze", "ada", 1000), 0);
 });
 
