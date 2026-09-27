@@ -10,6 +10,7 @@
     "stages": [
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
@@ -29,6 +30,7 @@
       },
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {
@@ -57,6 +59,7 @@
     "stages": [
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
@@ -74,6 +77,7 @@
       },
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {
@@ -102,6 +106,7 @@
     "stages": [
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
@@ -119,6 +124,7 @@
       },
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {
@@ -147,6 +153,7 @@
     "stages": [
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
@@ -164,6 +171,7 @@
       },
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {
@@ -192,6 +200,7 @@
     "stages": [
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest.jpg",
         "lines": [
           {
@@ -209,6 +218,7 @@
       },
       {
         "type": "lines",
+        "timeLimitMs": 30000,
         "image": "/SlicedBreadTest2.jpg",
         "lines": [
           {

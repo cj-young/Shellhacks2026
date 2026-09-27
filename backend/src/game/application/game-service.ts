@@ -14,6 +14,7 @@ import {
 } from "../domain/game.ts";
 import type { Inventory, PurchaseItem } from "../domain/inventory.ts";
 import { normalizePlayerName, type Player } from "../domain/player.ts";
+import type { Recipe } from "../domain/recipe.ts";
 import type { GameStore } from "../ports/game-store.ts";
 
 const MAX_CODE_ATTEMPTS = 5;
@@ -88,6 +89,10 @@ export type FinishStageResult =
         | "PLAYER_NOT_FOUND"
         | "ALREADY_FINISHED";
     };
+
+export type ExpireStagesResult =
+  | { ok: true; game: Game; changed: boolean }
+  | { ok: false; code: "GAME_NOT_FOUND" | "GAME_NOT_ACTIVE" };
 
 export class GameService {
   readonly #store: GameStore;
@@ -171,6 +176,7 @@ export class GameService {
       cart: {},
       inventory: {},
       score: 0,
+      stageDeadlineAt: null,
     };
 
     const joinedGame = this.#withPlayers(game, [...game.state.players, player]);
@@ -209,6 +215,10 @@ export class GameService {
     const order = generateRecipeOrder(3);
     const durationMs = options.durationMs ?? ROUND_DURATION_MS;
     const roundStartedAt = Date.now();
+    const players = game.state.players.map((player) => ({
+      ...player,
+      stageDeadlineAt: stageDeadlineFor(player, order, roundStartedAt),
+    }));
 
     const started: Game = {
       ...game,
@@ -218,6 +228,7 @@ export class GameService {
         recipeOrder: order,
         roundStartedAt,
         roundEndsAt: roundStartedAt + durationMs,
+        players,
       },
     };
     await this.#store.save(started);
@@ -272,7 +283,14 @@ export class GameService {
       inventory[item.id] = (inventory[item.id] ?? 0) + item.count;
     }
 
-    const updated: Player = { ...player, cart: {}, inventory };
+    const merged: Player = { ...player, inventory };
+    const updated: Player = {
+      ...merged,
+      cart: {},
+      stageDeadlineAt: isMissingForStage(merged, game.state.recipeOrder)
+        ? player.stageDeadlineAt
+        : null,
+    };
     const next = this.#withPlayers(
       game,
       game.state.players.map((entry) =>
@@ -354,7 +372,7 @@ export class GameService {
       else inventory[ingredientId] = remaining;
     }
 
-    const updated: Player = { ...player, inventory };
+    const updated: Player = { ...player, inventory, stageDeadlineAt: null };
     const next = this.#withPlayers(
       game,
       game.state.players.map((entry) =>
@@ -380,8 +398,9 @@ export class GameService {
     if (!recipe) return { ok: false, code: "ALREADY_FINISHED" };
 
     const isLastStage = player.recipeStageIndex + 1 >= recipe.stages.length;
+    const now = Date.now();
 
-    const updated: Player = isLastStage
+    const progressed: Player = isLastStage
       ? {
           ...player,
           score:
@@ -394,6 +413,15 @@ export class GameService {
         }
       : { ...player, recipeStageIndex: player.recipeStageIndex + 1 };
 
+    const updated: Player = {
+      ...progressed,
+      stageDeadlineAt: stageDeadlineFor(
+        progressed,
+        game.state.recipeOrder,
+        now,
+      ),
+    };
+
     const next = this.#withPlayers(
       game,
       game.state.players.map((entry) =>
@@ -405,9 +433,77 @@ export class GameService {
     return { ok: true, game: next };
   }
 
+  async expireStages(
+    code: string,
+    now: number = Date.now(),
+  ): Promise<ExpireStagesResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+    if (!game) return { ok: false, code: "GAME_NOT_FOUND" };
+    if (game.status !== "active") return { ok: false, code: "GAME_NOT_ACTIVE" };
+
+    let changed = false;
+    const players = game.state.players.map((player) => {
+      if (player.stageDeadlineAt === null || player.stageDeadlineAt > now) {
+        return player;
+      }
+
+      changed = true;
+
+      // Remove the timer if the user retrieved their items
+      if (!isMissingForStage(player, game.state.recipeOrder)) {
+        return { ...player, stageDeadlineAt: null };
+      }
+
+      const reset: Player = {
+        ...player,
+        recipeStageIndex: 0,
+        inventory: {},
+      };
+      return {
+        ...reset,
+        stageDeadlineAt: stageDeadlineFor(reset, game.state.recipeOrder, now),
+      };
+    });
+
+    if (!changed) {
+      return { ok: true, game, changed: false };
+    }
+
+    const next = this.#withPlayers(game, players);
+    await this.#store.save(next);
+
+    return { ok: true, game: next, changed: true };
+  }
+
   #withPlayers(game: Game, players: Player[]): Game {
     return { ...game, state: { ...game.state, players } };
   }
+}
+
+function stageDeadlineFor(
+  player: Player,
+  recipeOrder: Recipe[],
+  now: number,
+): number | null {
+  const stage =
+    recipeOrder[player.recipeIndex]?.stages[player.recipeStageIndex];
+  const limit = stage?.timeLimitMs;
+
+  if (limit === undefined || limit === null) return null;
+  if (!isMissingForStage(player, recipeOrder)) return null;
+
+  return now + limit;
+}
+
+function isMissingForStage(player: Player, recipeOrder: Recipe[]): boolean {
+  const stage =
+    recipeOrder[player.recipeIndex]?.stages[player.recipeStageIndex];
+
+  if (!stage) return false;
+
+  return Object.entries(stage.ingredientsConsumed).some(
+    ([id, count]) => (player.inventory[Number(id)] ?? 0) < count,
+  );
 }
 
 function isValidPurchaseItem(item: PurchaseItem): boolean {

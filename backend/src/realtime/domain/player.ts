@@ -12,6 +12,7 @@ export interface PlayerSummary {
   readonly recipeIndex: number;
   readonly recipeStageIndex: number;
   readonly score: number;
+  readonly stageDeadlineAt: number | null;
 }
 
 export function toPlayerSummary(player: Player): PlayerSummary {
@@ -26,5 +27,6 @@ export function toPlayerSummary(player: Player): PlayerSummary {
     recipeIndex: player.recipeIndex,
     recipeStageIndex: player.recipeStageIndex,
     score: player.score,
+    stageDeadlineAt: player.stageDeadlineAt,
   };
 }

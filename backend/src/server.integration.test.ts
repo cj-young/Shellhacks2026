@@ -53,6 +53,7 @@ interface GameStatePayload {
     recipeIndex: number;
     recipeStageIndex: number;
     score: number;
+    stageDeadlineAt: number | null;
   }>;
 }
 

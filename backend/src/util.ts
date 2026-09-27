@@ -17,6 +17,7 @@ export function generateRecipeOrder(length: number): Recipe[] {
       image: stage.image,
       lines: stage.lines,
       ingredientsConsumed: { ...stage.ingredientsConsumed },
+      timeLimitMs: stage.timeLimitMs,
     })),
   })) as Recipe[];
 

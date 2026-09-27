@@ -29,6 +29,7 @@ export type {
   AddItemsResult,
   ConsumeItemsResult,
   EndRoundResult,
+  ExpireStagesResult,
   FinishStageResult,
   JoinPlayerInput,
   JoinPlayerResult,

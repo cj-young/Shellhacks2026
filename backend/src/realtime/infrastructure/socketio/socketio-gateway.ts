@@ -32,6 +32,7 @@ export interface SocketIoGatewayOptions {
   session: GameSession;
   allowedOrigins?: readonly string[];
   roundDurationMs: number;
+  stageSweepIntervalMs: number;
 }
 
 export interface SocketIoGateway {
@@ -43,6 +44,7 @@ export function createSocketIoGateway(
 ): SocketIoGateway {
   const { session } = options;
   const timers = new Map<string, NodeJS.Timeout>();
+  const stageSweeps = new Map<string, NodeJS.Timeout>();
   const io: GameServer = new Server(options.server, {
     path: SOCKET_PATH,
     serveClient: false,
@@ -139,6 +141,8 @@ export function createSocketIoGateway(
       if (startResult.state.roundEndsAt !== null) {
         armRoundTimers(gameCode, startResult.state.roundEndsAt);
       }
+
+      startStageSweep(gameCode);
     }
 
     socket.on("purchase_items", (items) => {
@@ -297,6 +301,7 @@ export function createSocketIoGateway(
 
   async function finishRound(gameCode: string): Promise<void> {
     clearRoundTimers(gameCode);
+    stopStageSweep(gameCode);
     const room = roomFor(gameCode);
     const result = await session.endRound({ code: gameCode });
 
@@ -308,9 +313,35 @@ export function createSocketIoGateway(
     io.to(room).emit("update_state", result.state);
   }
 
+  function startStageSweep(gameCode: string): void {
+    stopStageSweep(gameCode);
+    const sweep = setInterval(() => {
+      void checkStages(gameCode);
+    }, options.stageSweepIntervalMs);
+    sweep.unref();
+    stageSweeps.set(gameCode, sweep);
+  }
+
+  function stopStageSweep(gameCode: string): void {
+    const sweep = stageSweeps.get(gameCode);
+    if (!sweep) return;
+    clearInterval(sweep);
+    stageSweeps.delete(gameCode);
+  }
+
+  async function checkStages(gameCode: string): Promise<void> {
+    const result = await session.expireStages({ code: gameCode });
+    if (!result.ok || !result.changed) return;
+    io.to(roomFor(gameCode)).emit("update_state", result.state);
+  }
+
   function close(): Promise<void> {
     for (const gameCode of [...timers.keys()]) {
       clearRoundTimers(gameCode);
+    }
+
+    for (const gameCode of [...stageSweeps.keys()]) {
+      stopStageSweep(gameCode);
     }
 
     return new Promise((resolve) => {

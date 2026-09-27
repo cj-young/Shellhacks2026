@@ -291,3 +291,20 @@ test("finishStage returns the updated state", async () => {
   }
   assert.equal(result.state.players[0]?.recipeStageIndex, 1);
 });
+
+test("expireStages reports no change before a deadline", async () => {
+  const { gameService, session } = setup();
+  const game = await gameService.createGame();
+  const joined = await session.join({ code: game.code, name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await gameService.startGame(game.code);
+
+  const result = await session.expireStages({ code: game.code });
+
+  if (!result.ok) {
+    assert.fail("expected expire to succeed");
+  }
+  assert.equal(result.changed, false);
+});

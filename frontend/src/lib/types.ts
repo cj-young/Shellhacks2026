@@ -16,6 +16,7 @@ export type PlayerSummary = {
   recipeIndex: number;
   recipeStageIndex: number;
   score: number;
+  stageDeadlineAt: number | null;
 };
 
 export type GameState = {
@@ -34,6 +35,7 @@ export type RecipeStage = {
   image?: string;
   lines: LineType[];
   ingredientsConsumed: Record<number, number>;
+  timeLimitMs?: number | null;
 };
 
 export type LineType = {
