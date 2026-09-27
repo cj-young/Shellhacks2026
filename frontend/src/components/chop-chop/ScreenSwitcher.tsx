@@ -62,6 +62,7 @@ const RecipeCheeseburger = () => (
 );
 const RecipePancakes = () => <RecipeWalkthrough embedded only="Pancakes" />;
 const RecipeGuacamole = () => <RecipeWalkthrough embedded only="Guacamole" />;
+const RecipeSteak = () => <RecipeWalkthrough embedded only="Steak" />;
 
 const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
   {
@@ -186,6 +187,11 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
         id: "recipe-guacamole",
         label: "Guacamole",
         component: RecipeGuacamole,
+      },
+      {
+        id: "recipe-steak",
+        label: "Steak & Potatoes",
+        component: RecipeSteak,
       },
       { id: "recipe-all", label: "All recipes", component: RecipeAll },
     ],

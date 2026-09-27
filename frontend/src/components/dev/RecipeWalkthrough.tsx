@@ -54,12 +54,12 @@ const once = <T,>(socket: Socket, event: string, ms = 8000) =>
  */
 /**
  * A game only gets a random few recipes, so keep starting throwaway games
- * until a few in a row turn up nothing new; that collects every recipe.
+ * until five in a row turn up nothing new; that collects every recipe.
  */
 async function loadAllRecipes(): Promise<Recipe[]> {
   const byName = new Map<string, Recipe>();
   let quiet = 0;
-  for (let game = 0; game < 12 && quiet < 3; game++) {
+  for (let game = 0; game < 20 && quiet < 5; game++) {
     const before = byName.size;
     for (const r of await loadRecipesFromServer()) byName.set(r.name, r);
     quiet = byName.size > before ? 0 : quiet + 1;
