@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { io } from "socket.io-client";
 import type { Socket } from "socket.io-client";
+import { SOCKET_PATH, SOCKET_URL, apiUrl } from "#/lib/api";
 import type { Recipe, RecipeStage } from "#/lib/types";
 import ingredients from "#/data/ingredients.json";
 import { menuIngredientIdFor } from "#/data/menu";
@@ -69,14 +70,14 @@ async function loadAllRecipes(): Promise<Recipe[]> {
 }
 
 async function loadRecipesFromServer(): Promise<Recipe[]> {
-  const res = await fetch("/api/games", { method: "POST" });
+  const res = await fetch(apiUrl("/games"), { method: "POST" });
   if (!res.ok) throw new Error(`Creating a game failed (${res.status})`);
   const { code, hostToken } = (await res.json()) as {
     code: string;
     hostToken: string;
   };
   const connect = (auth: Record<string, string>) =>
-    io({ path: "/api/socket.io/", auth });
+    io(SOCKET_URL || undefined, { path: SOCKET_PATH, auth });
 
   const host = connect({ code, token: hostToken, name: "Walkthrough host" });
   const player = connect({ code, name: "Walkthrough" });

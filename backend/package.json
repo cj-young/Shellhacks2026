@@ -6,6 +6,9 @@
   "author": "",
   "type": "module",
   "main": "app.ts",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "test": "node --test --test-timeout=10000 \"src/**/*.test.ts\"",
     "test:watch": "node --test --watch \"src/**/*.test.ts\"",

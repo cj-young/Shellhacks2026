@@ -83,6 +83,14 @@ export function Store({
     onCartChange(nextCart);
   }
 
+  /** Tapping a cart item puts it back on the shelf. */
+  function removeFromCart(index: number) {
+    if (disabled) return;
+    const nextCart = inventory.filter((_, i) => i !== index);
+    setInventory(nextCart);
+    onCartChange(nextCart);
+  }
+
   const page = AISLES.at(aisle) ?? { name: "STORE", items: [] };
   const flip = (step: number) =>
     setAisle((a) => (a + step + AISLES.length) % Math.max(1, AISLES.length));
@@ -107,6 +115,7 @@ export function Store({
         const ing = page.items.at(slot);
         if (ing) addToCart(ing);
       }}
+      onBasketTap={removeFromCart}
       onLeave={checkout}
     />
   );

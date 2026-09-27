@@ -4,6 +4,7 @@ import type { Server as HttpServer } from "node:http";
 import { Server, type Socket } from "socket.io";
 
 import type { PurchaseItem } from "../../../game/domain/inventory.ts";
+import { isOriginAllowed } from "../../../origins.ts";
 import type { GameSession } from "../../application/game-session.ts";
 import type {
   ClientToServerEvents,
@@ -68,6 +69,16 @@ export function createSocketIoGateway(
     path: SOCKET_PATH,
     serveClient: false,
     maxHttpBufferSize: MAX_BUFFER_BYTES,
+    // The frontend is hosted on a different origin, so the polling handshake
+    // needs CORS headers; the allowRequest gate below rejects other origins.
+    cors: {
+      origin: (origin, callback) => {
+        callback(
+          null,
+          isOriginAllowed(origin, undefined, options.allowedOrigins),
+        );
+      },
+    },
     allowRequest: (request, callback) => {
       callback(
         null,
@@ -460,18 +471,4 @@ function isPurchaseItems(value: unknown): value is PurchaseItem[] {
         typeof (item as { count?: unknown }).count === "number",
     )
   );
-}
-
-function isOriginAllowed(
-  origin: string | undefined,
-  host: string | undefined,
-  allowedOrigins: readonly string[] | undefined,
-): boolean {
-  if (!origin) {
-    return true;
-  }
-
-  const allowed =
-    allowedOrigins ?? (host ? [`http://${host}`, `https://${host}`] : []);
-  return allowed.length === 0 || allowed.includes(origin);
 }

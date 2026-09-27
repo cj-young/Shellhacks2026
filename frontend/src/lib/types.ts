@@ -9,6 +9,8 @@ export function MakeEmptyState() {
 
 export type PlayerInterfaceState = "store" | "recipe";
 
+export type GameStatus = "lobby" | "active" | "finished";
+
 export type PlayerSummary = {
   id: string;
   name: string;
