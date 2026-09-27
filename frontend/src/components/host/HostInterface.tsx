@@ -14,6 +14,7 @@ import { RoundLeaderboard } from "#/components/chop-chop/screens/RoundLeaderboar
 import { iconIdFor } from "#/components/client/Store";
 import { menuRecipeIdFor, stepInfo, stepProgress } from "#/data/recipe-steps";
 import { useAudioUnlock, useMusic, useSfx } from "#/audio/use-audio";
+import { usePreloadStoreArt } from "#/lib/use-preload-store-art";
 
 const TIMES_UP_MS = 3000;
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
@@ -96,6 +97,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
   const sfx = useSfx();
   useAudioUnlock();
   useMusic("music.game", true);
+  usePreloadStoreArt();
 
   // Round stingers: the go, the time-up, and the leaderboard reveal.
   useEffect(() => {

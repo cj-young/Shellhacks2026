@@ -9,6 +9,15 @@ const stickerFilter = (size: number) => {
 };
 
 /**
+ * Resolves a design kind / ingredient id to an image URL. An id that already
+ * looks like a path is used as-is; otherwise it is a menu ingredient.
+ */
+export function ingredientIconSrc(id: string, silhouette = false): string {
+  const isImageUrl = id.startsWith("/") || id.startsWith("http");
+  return isImageUrl ? id : ingredientAsset(id, silhouette);
+}
+
+/**
  * `id` can be a menu ingredient (renders its public/assets file), an image URL starting
  * with "/" or "http", or a design-handoff kind (inline art, used by the dev mockups).
  */
@@ -42,7 +51,7 @@ export function IngredientIcon({
   }
   return (
     <img
-      src={isImageUrl ? id : ingredientAsset(id, silhouette)}
+      src={ingredientIconSrc(id, silhouette)}
       alt={
         silhouette ? "Mystery ingredient" : isImageUrl ? "" : ingredientName(id)
       }

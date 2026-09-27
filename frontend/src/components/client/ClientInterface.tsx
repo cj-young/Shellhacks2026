@@ -32,6 +32,7 @@ import {
   withStepArt,
 } from "#/data/recipe-steps";
 import { useAmbient, useAudioUnlock, useSfx } from "#/audio/use-audio";
+import { usePreloadStoreArt } from "#/lib/use-preload-store-art";
 
 /** Visible square of the recipe box; stage gestures sit within its 0–200px. */
 const GESTURE_AREA = 210;
@@ -48,6 +49,7 @@ const SHOW_TEST_CONTROLS = import.meta.env.DEV;
 
 export function ClientInterface({ connection }: ClientInterfaceProps) {
   const frozen = connection.sabotages.frozenMs > 0;
+  usePreloadStoreArt();
   return (
     <>
       <div inert={frozen}>
