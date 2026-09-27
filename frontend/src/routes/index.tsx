@@ -3,6 +3,7 @@ import { useState } from "react";
 import type React from "react";
 import { createHostGame } from "#/lib/host-game";
 import {
+  ChopChopLogo,
   DOT,
   Food,
   INK,
@@ -13,22 +14,19 @@ import {
   SKY,
   SUN,
   Sparkle,
-  TOMATO,
   lilita,
   nunito,
 } from "#/components/chop-chop/design";
 
+import { paper } from "#/components/chop-chop/paper";
 export const Route = createFileRoute("/")({ component: MainMenu });
 
 const menuButton: React.CSSProperties = {
+  ...paper(42, 0),
   position: "relative",
   width: "100%",
   height: 84,
-  borderRadius: 42,
-  border: `4px solid ${INK}`,
   boxSizing: "border-box",
-  boxShadow:
-    "inset 0 -8px 0 rgba(43,42,107,.16),0 0 0 6px #fff,0 10px 0 6px rgba(43,42,107,.16)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -43,23 +41,6 @@ const caption: React.CSSProperties = {
   font: nunito(800, 17),
   textAlign: "center",
 };
-
-function Streak() {
-  return (
-    <span
-      style={{
-        position: "absolute",
-        left: 32,
-        top: 12,
-        width: 44,
-        height: 11,
-        borderRadius: 6,
-        background: "#fff",
-        opacity: 0.7,
-      }}
-    />
-  );
-}
 
 function MainMenu() {
   const navigate = useNavigate();
@@ -157,44 +138,19 @@ function MainMenu() {
           fontSize: "clamp(64px, 11vw, 170px)",
         }}
       >
+        <ChopChopLogo width="min(88vw, 620px)" />
         <div
           style={{
-            transform: "rotate(-4deg)",
-            background: "#fff",
-            border: `5px solid ${INK}`,
-            borderRadius: "0.41em",
-            padding: "0.16em 0.38em 0.26em",
-            boxShadow: "0 0 0 12px #fff,0 16px 0 12px rgba(43,42,107,.14)",
-          }}
-        >
-          <div
-            style={{
-              fontFamily: "'Lilita One'",
-              lineHeight: 1,
-              color: SUN,
-              WebkitTextStroke: `0.094em ${INK}`,
-              paintOrder: "stroke fill",
-              textShadow: `0 0.07em 0 ${INK}`,
-              letterSpacing: "-.01em",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Chop Chop!
-          </div>
-        </div>
-        <div
-          style={{
+            ...paper(40, 1, false),
             position: "relative",
             zIndex: 1,
-            marginTop: "-0.12em",
-            marginRight: "-0.2em",
-            transform: "rotate(4deg)",
+            marginTop: "-0.28em",
+            marginRight: "0",
+            transform: "rotate(3deg)",
             background: ROYAL,
-            border: `5px solid ${INK}`,
-            borderRadius: 40,
             padding: "0.23em 0.77em",
-            boxShadow: `0 0 0 8px ${SUN}`,
-            fontFamily: "'Lilita One'",
+            boxShadow: "var(--paper-shadow)",
+            fontFamily: "'Sniglet'",
             fontSize: "clamp(22px, 2.6vw, 44px)",
             color: "#fff",
             letterSpacing: ".06em",
@@ -245,14 +201,12 @@ function MainMenu() {
               cursor: creating ? "wait" : "pointer",
             }}
           >
-            <Streak />
             <span
               style={{
+                ...paper("50%", 2),
                 width: 52,
                 height: 52,
-                borderRadius: "50%",
                 background: SUN,
-                border: `4px solid ${INK}`,
                 boxSizing: "border-box",
                 display: "flex",
                 alignItems: "center",
@@ -284,7 +238,6 @@ function MainMenu() {
           }}
         >
           <Link to="/join" style={{ ...menuButton, background: SUN }}>
-            <Streak />
             Join game
           </Link>
           <span style={caption}>Grab your phone and a room code</span>
@@ -295,8 +248,7 @@ function MainMenu() {
         <div
           style={{
             background: "#FFE1DA",
-            border: `4px solid ${TOMATO}`,
-            borderRadius: 20,
+            ...paper(20, 20),
             padding: "10px 18px",
             font: nunito(800, 16),
           }}

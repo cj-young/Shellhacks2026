@@ -1,8 +1,6 @@
 import { useRef, useState } from "react";
 import type React from "react";
 import {
-  CARD_BG,
-  DOT,
   INK,
   PAGE_BG,
   PINK,
@@ -26,6 +24,7 @@ import {
 } from "../race";
 import type { AvatarMood } from "../race";
 
+import { paper } from "#/components/chop-chop/paper";
 type Common = {
   /** Draw the phone mockup frame (dev switcher) instead of filling the device. */
   framed?: boolean;
@@ -64,12 +63,11 @@ function Toast({
         right: 26,
         zIndex: 9,
         background: "#FFE1DA",
-        border: `4px solid ${TOMATO}`,
-        borderRadius: 22,
+        ...paper(22, 25),
         padding: "8px 16px",
         font: nunito(800, 18),
         textAlign: "center",
-        boxShadow: "0 6px 0 rgba(43,42,107,.16)",
+        boxShadow: "0 6px 0 rgba(122,78,30,.16)",
         ...style,
       }}
     >
@@ -80,21 +78,25 @@ function Toast({
 
 /* ---------------------------------- Store --------------------------------- */
 
+const SHELF_WOOD = "#E9A866";
+/** Shelf backing: a paler cut of the same wood as the planks. */
+const SHELF_BACKING = "#F3C992";
+const SHELF_COUNT = 3;
+const MAX_PER_SHELF = 3;
+/** Items one store page holds (3 shelves of up to 3). */
+export const STORE_PAGE_SIZE = SHELF_COUNT * MAX_PER_SHELF;
+
 const plank: React.CSSProperties = {
+  ...paper(8, 0),
   height: 16,
-  borderRadius: 8,
-  background: "#E9A866",
-  border: `4px solid ${INK}`,
-  boxShadow: "0 6px 0 rgba(43,42,107,.14)",
+  background: SHELF_WOOD,
 };
 
 const arrowButton: React.CSSProperties = {
+  ...paper("50%", 1),
   width: 52,
   height: 52,
-  borderRadius: "50%",
   background: "#fff",
-  border: `4px solid ${INK}`,
-  boxShadow: "0 5px 0 rgba(43,42,107,.16)",
   boxSizing: "border-box",
   display: "flex",
   alignItems: "center",
@@ -135,7 +137,7 @@ export function StoreScreen({
   aisleName: string;
   aisleIndex: number;
   aisleCount: number;
-  /** Up to 6 slots, two per shelf; `null` is an empty (taken) slot. */
+  /** Up to STORE_PAGE_SIZE slots, spread evenly over 3 shelves; `null` is an empty (taken) slot. */
   shelf: (ShelfItem | null)[];
   basket: string[];
   onPrevAisle?: () => void;
@@ -150,7 +152,16 @@ export function StoreScreen({
 }) {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
-  const rows = [0, 1, 2].map((r) => [shelf.at(r * 2), shelf.at(r * 2 + 1)]);
+  // Fill shelves evenly: 2 per shelf for up to 6 items, 3 per shelf beyond that.
+  const perShelf = Math.min(
+    MAX_PER_SHELF,
+    Math.max(2, Math.ceil(shelf.length / SHELF_COUNT)),
+  );
+  const rows = Array.from({ length: SHELF_COUNT }, (_, r) =>
+    Array.from({ length: perShelf }, (_, i) => shelf.at(r * perShelf + i)),
+  );
+  const itemSize = perShelf > 2 ? 76 : 82;
+  const nameSize = Math.min(40, Math.floor(210 / (0.62 * aisleName.length)));
 
   const itemHandlers = (slot: number, kind: string) =>
     onTake
@@ -182,15 +193,13 @@ export function StoreScreen({
 
       <div
         style={{
+          ...paper(34, 2),
           position: "absolute",
           top: 138,
           left: 18,
           right: 18,
           height: 404,
-          background: CARD_BG,
-          border: `5px solid ${INK}`,
-          borderRadius: 34,
-          boxShadow: `0 0 0 6px ${ROYAL},0 14px 0 6px rgba(43,42,107,.16)`,
+          background: SHELF_BACKING,
           boxSizing: "border-box",
           padding: "10px 14px 12px",
           display: "flex",
@@ -221,7 +230,13 @@ export function StoreScreen({
               gap: 4,
             }}
           >
-            <span style={{ font: lilita(40, 1), letterSpacing: ".04em" }}>
+            <span
+              style={{
+                font: lilita(nameSize, 1),
+                letterSpacing: ".04em",
+                whiteSpace: "nowrap",
+              }}
+            >
               {aisleName}
             </span>
             <span style={{ display: "flex", gap: 5 }}>
@@ -243,7 +258,7 @@ export function StoreScreen({
                       width: 8,
                       height: 8,
                       borderRadius: "50%",
-                      background: DOT,
+                      background: "rgba(61,40,23,.25)",
                     }}
                   />
                 ),
@@ -278,16 +293,16 @@ export function StoreScreen({
                 }}
               >
                 {row.map((item, i) => {
-                  const slot = r * 2 + i;
+                  const slot = r * perShelf + i;
                   if (item === undefined)
-                    return <div key={i} style={{ width: 78 }} />;
+                    return <div key={i} style={{ width: itemSize - 4 }} />;
                   if (item === null) {
                     return (
                       <div
                         key={i}
                         style={{
-                          width: 78,
-                          height: 78,
+                          width: itemSize - 4,
+                          height: itemSize - 4,
                           borderRadius: "50%",
                           border: `4px dashed ${INK}`,
                           opacity: 0.3,
@@ -309,7 +324,7 @@ export function StoreScreen({
                     >
                       <IngredientIcon
                         id={item.kind}
-                        size={item.size ?? 82}
+                        size={item.size ?? itemSize}
                         rotate={
                           item.rot ??
                           SHELF_ROTATIONS[slot % SHELF_ROTATIONS.length]
@@ -398,7 +413,7 @@ function DragGhost({
           top,
           zIndex: 4,
           pointerEvents: "none",
-          filter: "drop-shadow(0 16px 10px rgba(43,42,107,.28))",
+          filter: "drop-shadow(0 16px 10px rgba(122,78,30,.28))",
         }}
       >
         <IngredientIcon id={kind} size={100} rotate={-10} />
@@ -415,7 +430,7 @@ function DragGhost({
           borderRadius: "50%",
           background: "rgba(255,255,255,.45)",
           border: "4px solid #fff",
-          boxShadow: `0 0 0 3px ${INK}`,
+          boxShadow: "var(--paper-shadow)",
         }}
       />
     </>
@@ -426,21 +441,21 @@ function DragGhost({
 
 const BIT_COLORS: Partial<Record<string, [string, string]>> = {
   carrot: ["#FF9A3C", "#FFB870"],
-  tomato: ["#F2553D", "#FF8A7A"],
-  redpepper: ["#F2553D", "#FF8A7A"],
-  chili: ["#F2553D", "#FF8A7A"],
-  garlic: ["#FFFFFF", "#E3EAF6"],
+  tomato: ["#EF4128", "#FF8A7A"],
+  redpepper: ["#EF4128", "#FF8A7A"],
+  chili: ["#EF4128", "#FF8A7A"],
+  garlic: ["#FFFFFF", "#F8E6C4"],
   onion: ["#F2BE63", "#FFDD6B"],
   chicken: ["#E9A866", "#FFF1D2"],
   steak: ["#D9474A", "#FFF1D2"],
-  greenonion: ["#3CB54A", "#BFEBD9"],
-  leek: ["#1E8A4A", "#BFEBD9"],
+  greenonion: ["#2FA84F", "#CDE8B5"],
+  leek: ["#1E8A4A", "#CDE8B5"],
   mushroom: ["#E9A866", "#FFF1D2"],
-  "red-bell-pepper": ["#F2553D", "#FF8A7A"],
-  "green-onion": ["#3CB54A", "#BFEBD9"],
-  lettuce: ["#3CB54A", "#BFEBD9"],
+  "red-bell-pepper": ["#EF4128", "#FF8A7A"],
+  "green-onion": ["#2FA84F", "#CDE8B5"],
+  lettuce: ["#2FA84F", "#CDE8B5"],
   broccoli: ["#1E8A4A", "#8FD14F"],
-  celery: ["#8FD14F", "#BFEBD9"],
+  celery: ["#8FD14F", "#CDE8B5"],
   potato: ["#E9A866", "#FFF1D2"],
   avocado: ["#8FD14F", "#1E8A4A"],
 };
@@ -454,14 +469,10 @@ function QueueToken({ kind, current }: { kind: string; current: boolean }) {
   return (
     <div
       style={{
+        ...paper("50%", 3),
         width: current ? 64 : 50,
         height: current ? 64 : 50,
-        borderRadius: "50%",
         background: current ? SUN : "#fff",
-        border: `${current ? 5 : 4}px solid ${INK}`,
-        boxShadow: current
-          ? "0 0 0 5px #fff,0 6px 0 5px rgba(43,42,107,.16)"
-          : undefined,
         boxSizing: "border-box",
         display: "flex",
         alignItems: "center",
@@ -502,7 +513,7 @@ export function ChopScreen({
   const start = useRef<{ x: number; y: number } | null>(null);
   const kind = queue[current];
   const [bit, bitInner] = BIT_COLORS[kind] ?? [
-    getIngredient(kind)?.color ?? "#FFC928",
+    getIngredient(kind)?.color ?? "#FFC20E",
     "#FFFFFF",
   ];
 
@@ -561,17 +572,15 @@ export function ChopScreen({
       <div
         {...swipe}
         style={{
+          ...paper(46, 4),
           position: "absolute",
           top: 366,
           left: 26,
           right: 26,
           height: 366,
-          borderRadius: 46,
           backgroundColor: "#E9A866",
           backgroundImage:
             "repeating-linear-gradient(8deg,transparent 0 30px,rgba(201,128,63,.5) 30px 34px)",
-          border: `5px solid ${INK}`,
-          boxShadow: `inset 0 -12px 0 rgba(43,42,107,.12),0 0 0 6px ${ROYAL},0 14px 0 6px rgba(43,42,107,.16)`,
           boxSizing: "border-box",
           touchAction: "none",
           cursor: onChop ? "grab" : undefined,
@@ -579,14 +588,13 @@ export function ChopScreen({
       >
         <span
           style={{
+            ...paper("50%", 5),
             position: "absolute",
             right: 26,
             top: 22,
             width: 30,
             height: 30,
-            borderRadius: "50%",
             background: PAGE_BG,
-            border: `5px solid ${INK}`,
             boxSizing: "border-box",
           }}
         />
@@ -610,14 +618,13 @@ export function ChopScreen({
           <span
             key={i}
             style={{
+              ...paper("50%", 6, false),
               position: "absolute",
               left: s.left,
               top: s.top,
               width: s.size,
               height: s.size,
-              borderRadius: "50%",
               background: bit,
-              border: `4px solid ${INK}`,
               boxSizing: "border-box",
               boxShadow: `inset 0 0 0 ${s.inset}px ${bitInner}`,
             }}
@@ -656,7 +663,7 @@ export function ChopScreen({
             />
             <path
               d="M76 90 L76 176"
-              stroke="#CFE6FB"
+              stroke="#F6DDB0"
               strokeWidth="5"
               strokeLinecap="round"
             />
@@ -727,15 +734,13 @@ function Burner({
     <>
       <div
         style={{
+          ...paper("50%", 7),
           position: "absolute",
           top,
           left,
           width: outer,
           height: outer,
-          borderRadius: "50%",
-          background: "#3E4380",
-          border: `6px solid ${INK}`,
-          boxShadow: `0 0 0 6px ${ROYAL},0 14px 0 6px rgba(43,42,107,.18)`,
+          background: "#4A311E",
           boxSizing: "border-box",
         }}
       >
@@ -751,28 +756,26 @@ function Burner({
       </div>
       <div
         style={{
+          ...paper("50%", 8, false),
           position: "absolute",
           top: pan.top,
           left: pan.left,
           width: pan.size,
           height: pan.size,
-          borderRadius: "50%",
-          background: "#5E64A8",
-          border: `6px solid ${INK}`,
-          boxShadow: "inset 0 0 0 16px #6E75BE",
+          background: "#6E4E33",
+          boxShadow: "inset 0 0 0 16px #8A6445",
           boxSizing: "border-box",
         }}
       />
       <div
         style={{
+          ...paper(handle.height / 2, 9),
           position: "absolute",
           left: handle.left,
           top: handle.top,
           width: handle.width,
           height: handle.height,
-          borderRadius: handle.height / 2,
           background: TOMATO,
-          border: `5px solid ${INK}`,
           boxSizing: "border-box",
           transform: "rotate(42deg)",
           transformOrigin: "0 50%",
@@ -781,28 +784,26 @@ function Burner({
         {handle.knob && (
           <span
             style={{
+              ...paper("50%", 10),
               position: "absolute",
               right: 12,
               top: 10,
               width: 12,
               height: 12,
-              borderRadius: "50%",
               background: PAGE_BG,
-              border: `3px solid ${INK}`,
             }}
           />
         )}
       </div>
       <div
         style={{
+          ...paper("50%", 11),
           position: "absolute",
           top: inner.top,
           left: inner.left,
           width: inner.size,
           height: inner.size,
-          borderRadius: "50%",
-          background: "#4A4F8C",
-          border: `4px solid ${INK}`,
+          background: "#5A3D26",
           boxSizing: "border-box",
         }}
       />
@@ -876,14 +877,13 @@ function HeatDash({
   return (
     <span
       style={{
+        ...paper(4, 12),
         position: "absolute",
         left,
         top,
         width: 22,
         height: 8,
-        borderRadius: 4,
         background: SUN,
-        border: `3px solid ${INK}`,
         transform: `rotate(${rot}deg)`,
       }}
     />
@@ -1101,15 +1101,13 @@ export function PlatingScreen({
 
       <div
         style={{
+          ...paper("50%", 13),
           position: "absolute",
           top: 300,
           left: 25,
           width: 340,
           height: 340,
-          borderRadius: "50%",
           background: "#fff",
-          border: `6px solid ${INK}`,
-          boxShadow: `inset 0 0 0 26px #F2F4FF,inset 0 0 0 30px ${DOT},0 0 0 7px ${ROYAL},0 14px 0 7px rgba(43,42,107,.16)`,
           boxSizing: "border-box",
         }}
       />
@@ -1195,7 +1193,7 @@ export function PlatingScreen({
             rx="10"
             ry="6"
             transform="rotate(-30 150 130)"
-            fill="#3CB54A"
+            fill="#2FA84F"
             stroke={INK}
             strokeWidth="4"
           />
@@ -1205,7 +1203,7 @@ export function PlatingScreen({
             rx="9"
             ry="5.5"
             transform="rotate(25 96 136)"
-            fill="#3CB54A"
+            fill="#2FA84F"
             stroke={INK}
             strokeWidth="4"
           />
@@ -1302,6 +1300,7 @@ export function RobbedScreen({
 
       <div
         style={{
+          ...paper(28, 14),
           position: "absolute",
           top: 282,
           left: 26,
@@ -1309,9 +1308,6 @@ export function RobbedScreen({
           zIndex: 7,
           transform: "rotate(-3deg)",
           background: SUN,
-          border: `5px solid ${INK}`,
-          borderRadius: 28,
-          boxShadow: "0 0 0 6px #fff,0 12px 0 6px rgba(43,42,107,.18)",
           padding: "8px 14px 10px 10px",
           display: "flex",
           alignItems: "center",
@@ -1320,12 +1316,11 @@ export function RobbedScreen({
       >
         <div
           style={{
+            ...paper("50%", 15),
             width: 44,
             height: 44,
             flexShrink: 0,
-            borderRadius: "50%",
             background: thief.color,
-            border: `4px solid ${INK}`,
             boxSizing: "border-box",
           }}
         />

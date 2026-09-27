@@ -1,6 +1,7 @@
 import { INK, PAGE_BG, lilita, nunito } from "../design";
 import { VeggieBackground } from "../VeggieBackground";
 
+import { paper } from "#/components/chop-chop/paper";
 export const VEGGIE_SIZES_CANVAS = { width: 2560, height: 900 };
 
 const FRAMES = [
@@ -58,10 +59,9 @@ export function VeggieBackgroundSizes() {
           >
             <div
               style={{
+                ...paper(16, 0),
                 width: f.width * f.scale,
                 height: f.height * f.scale,
-                border: `4px solid ${INK}`,
-                borderRadius: 16,
                 overflow: "hidden",
                 boxSizing: "content-box",
               }}

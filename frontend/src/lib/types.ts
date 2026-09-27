@@ -11,6 +11,8 @@ export type PlayerSummary = {
   isHost: boolean;
   joinedAt: number;
   connected: boolean;
+  /** Chef picked in the lobby ("bear" | "cat" | "cow" | "panda"), or null while choosing. */
+  character: string | null;
   cart: Record<number, number>;
   inventory: Record<number, number>;
   recipeIndex: number;

@@ -135,7 +135,7 @@ export function LineTarget({
         y1={origin.y}
         x2={end.x}
         y2={end.y}
-        stroke={matches ? "#3CB54A" : "rgba(43,42,107,.28)"}
+        stroke={matches ? "#2FA84F" : "rgba(122,78,30,.28)"}
         strokeLinecap="round"
         strokeWidth={radius * 2}
       />
@@ -143,7 +143,7 @@ export function LineTarget({
         cx={origin.x}
         cy={origin.y}
         fill="#fff"
-        stroke="#2B2A6B"
+        stroke="#3D2817"
         strokeWidth="3"
         r="6"
       />
@@ -151,7 +151,7 @@ export function LineTarget({
         cx={end.x}
         cy={end.y}
         fill="#fff"
-        stroke="#2B2A6B"
+        stroke="#3D2817"
         strokeWidth="3"
         r="6"
       />

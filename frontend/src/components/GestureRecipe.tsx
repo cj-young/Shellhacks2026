@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CursorPoint } from "./CursorPathTracker";
 import { LineTarget } from "./LineTarget";
 
+import { paper } from "#/components/chop-chop/paper";
 export type GestureRecipeLine = {
   start: CursorPoint;
   end: CursorPoint;
@@ -82,12 +83,11 @@ export function GestureRecipe({
         <p
           className="absolute top-0 left-0 bottom-0 right-0 m-auto w-fit h-fit z-50"
           style={{
-            background: "#3CB54A",
-            border: "4px solid #2B2A6B",
-            borderRadius: 22,
+            ...paper(22, 0),
+            background: "#2FA84F",
             padding: "4px 16px",
-            font: "400 26px 'Lilita One'",
-            color: "#2B2A6B",
+            font: "400 26px 'Sniglet'",
+            color: "#3D2817",
           }}
         >
           Success!

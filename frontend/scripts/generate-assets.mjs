@@ -11,28 +11,28 @@ const menu = JSON.parse(readFileSync(join(root, "src/data/menu.json"), "utf8"));
 const outDir = join(root, "public/assets");
 mkdirSync(outDir, { recursive: true });
 
-const INK = "#2B2A6B";
+const INK = "#3D2817";
 const FONT = "Nunito, 'Arial Rounded MT Bold', Arial, sans-serif";
 
 // Palette from the Claude Design handoff (Ingredient.dc.html).
 const PALETTE = {
-  red: "#F2553D",
-  green: "#3CB54A",
+  red: "#EF4128",
+  green: "#2FA84F",
   dkgreen: "#1E8A4A",
-  ltgreen: "#BFEBD9",
+  ltgreen: "#CDE8B5",
   white: "#FFFFFF",
   cream: "#FFF1D2",
   lemon: "#FFD83A",
   lime: "#8FD14F",
   butter: "#FFE58A",
   butterTop: "#FFF3C2",
-  cheese: "#FFC928",
+  cheese: "#FFC20E",
   cheeseTop: "#FFDD6B",
   cheeseDk: "#E8A51C",
-  blue: "#1F4FD8",
-  sky: "#4FB3F0",
+  blue: "#127C78",
+  sky: "#F07F22",
   skyLt: "#CFE6FB",
-  pink: "#F48FB7",
+  pink: "#F7876B",
   bacon: "#FF8A7A",
   tan: "#E9A866",
   gold: "#F2BE63",
@@ -260,7 +260,7 @@ for (const ing of menu.ingredients) {
 const P = PALETTE;
 const plate = `
   <circle cx="60" cy="60" r="54" fill="#FFFFFF"/>
-  <circle cx="60" cy="60" r="43" fill="#F2F4FF" stroke="#D5E0F2" stroke-width="3"/>`;
+  <circle cx="60" cy="60" r="43" fill="#F2F4FF" stroke="#F2D7A0" stroke-width="3"/>`;
 const bowl = (fill) => `
   <circle cx="60" cy="60" r="54" fill="${P.blue}"/>
   <circle cx="60" cy="60" r="42" fill="${fill}"/>

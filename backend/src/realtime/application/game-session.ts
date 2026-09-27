@@ -66,6 +66,16 @@ export type ConsumeIngredientsResult = PurchaseResult;
 export type UpdateCartInput = PurchaseInput;
 export type UpdateCartResult = PurchaseResult;
 
+export interface SelectCharacterInput {
+  code: string;
+  playerId: string;
+  character: unknown;
+}
+
+export type SelectCharacterResult =
+  | { ok: true; player: PlayerSummary }
+  | { ok: false; code: string; message: string };
+
 export type FinishStageResult =
   | { ok: true; gameCode: string; state: ClientGameState }
   | { ok: false; code: string; message: string };
@@ -86,6 +96,15 @@ const PURCHASE_MESSAGES: Record<string, string> = {
   GAME_NOT_ACTIVE: "The game is not active",
   PLAYER_NOT_FOUND: "Player not found in this game",
   INVALID_ITEM: "One or more items are invalid",
+};
+
+const CHARACTER_MESSAGES: Record<string, string> = {
+  GAME_NOT_FOUND: "No game found for that code",
+  GAME_STARTED: "The game has already started",
+  PLAYER_NOT_FOUND: "Player not found in this game",
+  HOST_CANNOT_PICK: "The host doesn't pick a chef",
+  INVALID_CHARACTER: "That chef doesn't exist",
+  CHARACTER_TAKEN: "Someone already picked that chef",
 };
 
 const CONSUME_MESSAGES: Record<string, string> = {
@@ -198,6 +217,26 @@ export class GameSession {
       gameCode: result.game.code,
       state: toClientGameState(result.game.state),
     };
+  }
+
+  async selectCharacter(
+    input: SelectCharacterInput,
+  ): Promise<SelectCharacterResult> {
+    const result = await this.#gameService.selectCharacter(
+      input.code,
+      input.playerId,
+      input.character,
+    );
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message: CHARACTER_MESSAGES[result.code] ?? "Unable to pick that chef",
+      };
+    }
+
+    return { ok: true, player: toPlayerSummary(result.player) };
   }
 
   async updateCart(input: UpdateCartInput): Promise<UpdateCartResult> {

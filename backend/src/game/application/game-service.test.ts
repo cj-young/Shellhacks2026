@@ -586,3 +586,71 @@ test("finishStage rejects an unknown player", async () => {
   }
   assert.equal(result.code, "PLAYER_NOT_FOUND");
 });
+
+test("selectCharacter claims a chef and blocks other players from it", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const ada = await service.joinPlayer(game.code, { name: "Ada" });
+  const bo = await service.joinPlayer(game.code, { name: "Bo" });
+  if (!ada.ok || !bo.ok) {
+    assert.fail("expected both joins to succeed");
+  }
+
+  const first = await service.selectCharacter(game.code, ada.player.id, "bear");
+  assert.equal(first.ok, true);
+  if (first.ok) assert.equal(first.player.character, "bear");
+
+  const taken = await service.selectCharacter(game.code, bo.player.id, "bear");
+  assert.deepEqual(taken, { ok: false, code: "CHARACTER_TAKEN" });
+
+  const other = await service.selectCharacter(game.code, bo.player.id, "cat");
+  assert.equal(other.ok, true);
+});
+
+test("selectCharacter lets a player switch, freeing their old chef", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const ada = await service.joinPlayer(game.code, { name: "Ada" });
+  const bo = await service.joinPlayer(game.code, { name: "Bo" });
+  if (!ada.ok || !bo.ok) {
+    assert.fail("expected both joins to succeed");
+  }
+
+  await service.selectCharacter(game.code, ada.player.id, "bear");
+  await service.selectCharacter(game.code, ada.player.id, "panda");
+
+  const freed = await service.selectCharacter(game.code, bo.player.id, "bear");
+  assert.equal(freed.ok, true);
+  const stored = await service.getGame(game.code);
+  assert.equal(
+    stored?.state.players.find((p) => p.id === ada.player.id)?.character,
+    "panda",
+  );
+});
+
+test("selectCharacter rejects unknown chefs, the host, and picks after start", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const host = await service.joinPlayer(game.code, {
+    hostToken: game.hostToken,
+  });
+  const ada = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!host.ok || !ada.ok) {
+    assert.fail("expected both joins to succeed");
+  }
+
+  assert.deepEqual(
+    await service.selectCharacter(game.code, ada.player.id, "dragon"),
+    { ok: false, code: "INVALID_CHARACTER" },
+  );
+  assert.deepEqual(
+    await service.selectCharacter(game.code, host.player.id, "cow"),
+    { ok: false, code: "HOST_CANNOT_PICK" },
+  );
+
+  await service.startGame(game.code);
+  assert.deepEqual(
+    await service.selectCharacter(game.code, ada.player.id, "cow"),
+    { ok: false, code: "GAME_STARTED" },
+  );
+});

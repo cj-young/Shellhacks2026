@@ -121,6 +121,15 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
         );
       },
     );
+    socket.on("player_updated", (player: PlayerSummary) => {
+      const replace = (list: PlayerSummary[]) =>
+        list.map((entry) => (entry.id === player.id ? player : entry));
+      setPlayers(replace);
+      setState((current) => ({
+        ...current,
+        players: replace(current.players),
+      }));
+    });
     socket.on("game_started", () => {
       setStarted(true);
       setStatus("Game started");

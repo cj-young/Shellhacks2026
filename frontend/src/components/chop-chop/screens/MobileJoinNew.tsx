@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  ChopChopLogo,
   ChefPlaceholder,
   DOT,
   INK,
@@ -14,6 +15,7 @@ import {
   nunito,
 } from "../design";
 
+import { paper } from "#/components/chop-chop/paper";
 const ROOM_CODE = "YUMI";
 const CHEFS = [
   {
@@ -27,14 +29,14 @@ const CHEFS = [
     id: "bori",
     name: "Bori",
     who: "Bear · bandana",
-    color: "#F2553D",
+    color: "#EF4128",
     takenBy: "Jun",
   },
   {
     id: "tofu",
     name: "Tofu",
     who: "Cat · beanie",
-    color: "#159A6B",
+    color: "#0F7F3F",
     takenBy: null,
   },
   {
@@ -76,22 +78,15 @@ export function MobileJoinNew() {
         style={{ position: "absolute", right: 44, top: 68 }}
       />
 
-      <div
+      <ChopChopLogo
+        width={180}
         style={{
           position: "absolute",
-          top: 66,
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          font: lilita(52, 1),
-          color: SUN,
-          WebkitTextStroke: `8px ${INK}`,
-          paintOrder: "stroke fill",
-          textShadow: `0 5px 0 ${INK}`,
+          top: 50,
+          left: "50%",
+          transform: "translateX(-50%)",
         }}
-      >
-        Chop Chop!
-      </div>
+      />
 
       <div
         style={{
@@ -117,10 +112,9 @@ export function MobileJoinNew() {
               <div
                 key={i}
                 style={{
+                  ...paper(20, 0),
                   height: 76,
                   background: "#fff",
-                  border: `4px solid ${INK}`,
-                  borderRadius: 20,
                   boxSizing: "border-box",
                   display: "flex",
                   alignItems: "center",
@@ -143,14 +137,13 @@ export function MobileJoinNew() {
             style={{
               height: 64,
               background: "#fff",
-              border: `4px solid ${ROYAL}`,
-              borderRadius: 22,
+              ...paper(22, 26),
               boxSizing: "border-box",
               padding: "0 20px",
               font: nunito(800, 26),
               color: INK,
               caretColor: ROYAL,
-              boxShadow: "0 0 0 4px #DCE6FF",
+              boxShadow: "0 0 0 4px #FFE7A0",
               outline: "none",
             }}
           />
@@ -191,17 +184,16 @@ export function MobileJoinNew() {
                   disabled={isTaken}
                   onClick={() => setSelectedId(chef.id)}
                   style={{
+                    ...paper("50%", CHEFS.indexOf(chef)),
                     position: "relative",
                     height: 62,
                     aspectRatio: "1",
-                    borderRadius: "50%",
                     padding: 0,
                     boxSizing: "border-box",
-                    background: isSelected ? "#DCE6FF" : isTaken ? DOT : "#fff",
-                    border: isSelected
-                      ? `4px solid ${ROYAL}`
-                      : `3px solid ${INK}`,
-                    boxShadow: isSelected ? `0 0 0 3px ${INK}` : "none",
+                    background: isSelected ? "#FFE7A0" : isTaken ? DOT : "#fff",
+                    ...(isSelected && {
+                      boxShadow: `0 0 0 4px ${PAGE_BG}, 0 0 0 7px ${SUN}, var(--paper-shadow)`,
+                    }),
                     opacity: isTaken ? 0.45 : 1,
                     display: "flex",
                     alignItems: "flex-end",
@@ -214,14 +206,13 @@ export function MobileJoinNew() {
                   {isSelected && (
                     <span
                       style={{
+                        ...paper("50%", 1),
                         position: "absolute",
                         right: -6,
                         top: -8,
                         width: 24,
                         height: 24,
-                        borderRadius: "50%",
                         background: LEAF,
-                        border: `3px solid ${INK}`,
                         boxSizing: "border-box",
                         display: "flex",
                         alignItems: "center",
@@ -254,17 +245,14 @@ export function MobileJoinNew() {
 
       <div
         style={{
+          ...paper(42, 2),
           position: "absolute",
           left: 28,
           right: 28,
           bottom: 36,
           height: 84,
-          borderRadius: 42,
           background: SUN,
-          border: `4px solid ${INK}`,
           boxSizing: "border-box",
-          boxShadow:
-            "inset 0 -8px 0 rgba(43,42,107,.16),0 0 0 6px #fff,0 10px 0 6px rgba(43,42,107,.16)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -272,18 +260,6 @@ export function MobileJoinNew() {
           cursor: "pointer",
         }}
       >
-        <span
-          style={{
-            position: "absolute",
-            left: 32,
-            top: 12,
-            width: 44,
-            height: 11,
-            borderRadius: 6,
-            background: "#fff",
-            opacity: 0.7,
-          }}
-        />
         Join!
       </div>
     </PhoneFrame>

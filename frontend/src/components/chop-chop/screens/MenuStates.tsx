@@ -16,7 +16,7 @@ const recipe = (id: string) => getRecipe(id) as MenuRecipe;
 const players = [
   { id: "mina", name: "Mina", color: ROYAL },
   { id: "jun", name: "Jun", color: TOMATO },
-  { id: "ari", name: "Ari", color: "#159A6B" },
+  { id: "ari", name: "Ari", color: "#0F7F3F" },
   { id: "leo", name: "Leo", color: PINK },
 ];
 

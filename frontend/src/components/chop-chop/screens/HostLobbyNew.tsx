@@ -1,8 +1,9 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { VeggieBackground } from "../VeggieBackground";
 import type React from "react";
+import { PLATE_IMAGE, characterImage, getCharacter } from "#/data/characters";
 import {
-  ChefPlaceholder,
+  ChopChopLogo,
   DOT,
   INK,
   LEAF,
@@ -15,27 +16,35 @@ import {
   nunito,
 } from "../design";
 
+import { paper } from "#/components/chop-chop/paper";
 export type LobbyPlayer = {
   id: string;
   name: string;
   color: string;
   connected?: boolean;
+  /** Picked chef id, or null/undefined while the player is still choosing. */
+  character?: string | null;
 };
 
 /** Player colors in join order, from the design's cast. */
-export const LOBBY_COLORS = [ROYAL, "#F2553D", "#159A6B", PINK, SUN];
+export const LOBBY_COLORS = [ROYAL, "#EF4128", "#0F7F3F", PINK, SUN];
 
-const SLOT_ROTATIONS = [-4, 3, -2, 5];
-const MAX_SLOTS = 5;
+/** A player's color: their chef's color once picked, otherwise by join order. */
+export const lobbyColor = (
+  character: string | null | undefined,
+  index: number,
+) =>
+  getCharacter(character)?.color ?? LOBBY_COLORS[index % LOBBY_COLORS.length];
+
 const DEFAULT_JOIN_TEXT = "CHOPCHOP.GAME";
 /** Below this width:height ratio the lobby stacks into a single column. */
 const PORTRAIT_RATIO = 1.15;
 
 const MOCK_PLAYERS: LobbyPlayer[] = [
-  { id: "mina", name: "Mina", color: LOBBY_COLORS[0] },
-  { id: "jun", name: "Jun", color: LOBBY_COLORS[1] },
-  { id: "ari", name: "Ari", color: LOBBY_COLORS[2] },
-  { id: "leo", name: "Leo", color: LOBBY_COLORS[3] },
+  { id: "mina", name: "Mina", color: lobbyColor("bear", 0), character: "bear" },
+  { id: "jun", name: "Jun", color: lobbyColor("cat", 1), character: "cat" },
+  { id: "ari", name: "Ari", color: lobbyColor("panda", 2), character: "panda" },
+  { id: "leo", name: "Leo", color: lobbyColor(null, 3), character: null },
 ];
 
 interface HostLobbyProps {
@@ -126,15 +135,16 @@ function LobbyLayout({
             ? {
                 gridTemplateColumns: "minmax(0,1fr)",
                 gridTemplateRows: "auto auto 1fr auto",
-                gridTemplateAreas: '"brand" "side" "players" "start"',
+                gridTemplateAreas: '"brand" "side" "plate" "start"',
                 rowGap: 24 * scale,
                 justifyItems: "center",
               }
             : {
-                gridTemplateColumns: `minmax(0,1fr) ${640 * scale}px`,
+                // The plate is positioned separately, centred on the one-third line.
+                gridTemplateColumns: `${640 * scale}px minmax(0,1fr) ${640 * scale}px`,
                 gridTemplateRows: "auto 1fr auto",
                 gridTemplateAreas:
-                  '"brand side" "players side" "players start"',
+                  '"brand brand side" ". . side" ". start start"',
                 columnGap: 40 * scale,
                 rowGap: 30 * scale,
               }),
@@ -150,14 +160,30 @@ function LobbyLayout({
         >
           <JoinBadge roomCode={roomCode} joinText={joinText} />
         </div>
-        <div
-          style={zoom("players", {
-            alignSelf: "center",
-            justifySelf: portrait ? "center" : "start",
-          })}
-        >
-          <PlayerRow players={players} centered={portrait} />
-        </div>
+        {portrait ? (
+          <div
+            style={{
+              ...zoom("plate", { alignSelf: "center", justifySelf: "center" }),
+              zoom: scale,
+            }}
+          >
+            <PlateStage players={players} />
+          </div>
+        ) : (
+          // Plate is centred on the one-third line, halfway down the screen.
+          <div
+            style={{
+              position: "absolute",
+              left: "calc(100% / 3)",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <div style={{ zoom: scale * PLATE_ZOOM }}>
+              <PlateStage players={players} />
+            </div>
+          </div>
+        )}
         <div
           style={zoom("start", {
             alignSelf: "end",
@@ -185,62 +211,10 @@ function Brand({ centered }: { centered: boolean }) {
         alignItems: centered ? "center" : "flex-start",
       }}
     >
+      <ChopChopLogo width={600} style={{ marginTop: 24 }} />
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          padding: "24px 40px 0 0",
-        }}
-      >
-        <div
-          style={{
-            transform: "rotate(-4deg)",
-            background: "#fff",
-            border: `5px solid ${INK}`,
-            borderRadius: 70,
-            padding: "28px 64px 44px",
-            boxShadow: "0 0 0 12px #fff,0 16px 0 12px rgba(43,42,107,.14)",
-          }}
-        >
-          <div
-            style={{
-              font: lilita(170, 1),
-              color: SUN,
-              WebkitTextStroke: `16px ${INK}`,
-              paintOrder: "stroke fill",
-              textShadow: `0 12px 0 ${INK}`,
-              letterSpacing: "-.01em",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Chop Chop!
-          </div>
-        </div>
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            marginTop: -24,
-            marginRight: -40,
-            transform: "rotate(4deg)",
-            background: ROYAL,
-            border: `5px solid ${INK}`,
-            borderRadius: 40,
-            padding: "10px 34px",
-            boxShadow: `0 0 0 8px ${SUN}`,
-            font: lilita(44),
-            color: "#fff",
-            letterSpacing: ".06em",
-            whiteSpace: "nowrap",
-          }}
-        >
-          KITCHEN RELAY
-        </div>
-      </div>
-      <div
-        style={{
-          marginTop: 40,
+          marginTop: 20,
           paddingLeft: centered ? 0 : 30,
           font: nunito(900, 38),
         }}
@@ -276,13 +250,11 @@ function JoinBadge({
     >
       <div
         style={{
+          ...paper("50%", 0),
           position: "relative",
           width: 600,
           height: 600,
-          borderRadius: "50%",
           background: SKY,
-          border: `6px solid ${INK}`,
-          boxShadow: "0 0 0 16px #fff,0 22px 0 16px rgba(43,42,107,.15)",
           boxSizing: "border-box",
           transform: "rotate(3deg)",
         }}
@@ -297,18 +269,13 @@ function JoinBadge({
             <path id="lobbyTop" d="M69 294 A225 225 0 0 1 519 294" />
             <path id="lobbyBot" d="M32 294 A262 262 0 0 0 556 294" />
           </defs>
-          <text
-            fontFamily="Lilita One"
-            fontSize="44"
-            fill={INK}
-            letterSpacing="4"
-          >
+          <text fontFamily="Sniglet" fontSize="44" fill={INK} letterSpacing="4">
             <textPath href="#lobbyTop" startOffset="50%" textAnchor="middle">
               SCAN TO JOIN ✦ SCAN TO JOIN
             </textPath>
           </text>
           <text
-            fontFamily="Lilita One"
+            fontFamily="Sniglet"
             fontSize={arcFontSize}
             fill={INK}
             letterSpacing="3"
@@ -320,6 +287,7 @@ function JoinBadge({
         </svg>
         <div
           style={{
+            ...paper(34, 1),
             position: "absolute",
             left: "50%",
             top: "50%",
@@ -327,8 +295,6 @@ function JoinBadge({
             width: 270,
             height: 270,
             background: "#fff",
-            border: `5px solid ${INK}`,
-            borderRadius: 34,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -353,15 +319,13 @@ function JoinBadge({
 
       <div
         style={{
+          ...paper(36, 2),
           position: "relative",
           zIndex: 1,
           marginTop: -30,
           transform: "rotate(-3deg)",
           background: SUN,
-          border: `5px solid ${INK}`,
-          borderRadius: 36,
           padding: "14px 48px 18px",
-          boxShadow: "0 0 0 10px #fff,0 14px 0 10px rgba(43,42,107,.15)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -384,115 +348,197 @@ function JoinBadge({
   );
 }
 
-function PlayerRow({
-  players,
-  centered,
-}: {
-  players: LobbyPlayer[];
-  centered: boolean;
-}) {
-  const overflow = players.length > MAX_SLOTS;
-  const visible = overflow ? players.slice(0, MAX_SLOTS - 1) : players;
-  const showSlot = players.length !== MAX_SLOTS;
-  const newestId = players.at(-1)?.id;
-  const slotCaption = overflow
-    ? `+${players.length - visible.length} more chefs`
-    : `Room for ${MAX_SLOTS - players.length} more`;
+/** How much larger than its 600×520 design size the plate is drawn in landscape. */
+const PLATE_ZOOM = 1.25;
+
+/** Max distance (px, design units) the plate and chefs drift toward the mouse. */
+const PLATE_PAN = 16;
+
+// Fixed 2×2 spots on the 600×520 plate stage (bottom-centre anchor, design px), filled in
+// join order: top-left, top-right, bottom-left, bottom-right.
+const PLATE_SLOTS = [
+  { x: 190, y: 300 },
+  { x: 410, y: 300 },
+  { x: 190, y: 470 },
+  { x: 410, y: 470 },
+];
+const CHEF_HEIGHT = 230;
+
+const PLATE_CSS = `
+@keyframes lobbyChefPop {
+  0% { transform: translateY(40px) scale(.2); opacity: 0; }
+  60% { transform: translateY(-8px) scale(1.12); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes lobbyDot {
+  0%, 80%, 100% { transform: translateY(0); opacity: .35; }
+  40% { transform: translateY(-12px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lobby-chef, .lobby-dot { animation: none !important; }
+}
+`;
+
+/** Players' chefs standing on a plate; players still choosing show an animated "…". */
+function PlateStage({ players }: { players: LobbyPlayer[] }) {
+  const panRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const onMove = (e: MouseEvent) => {
+      const el = panRef.current;
+      if (!el) return;
+      const dx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const dy = (e.clientY / window.innerHeight - 0.5) * 2;
+      el.style.transform = `translate(${dx * PLATE_PAN}px, ${dy * PLATE_PAN}px)`;
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
+  const shown = players.slice(0, PLATE_SLOTS.length);
+  const slots = PLATE_SLOTS;
+  const newestWithChef = [...shown].reverse().find((p) => p.character)?.id;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: centered ? "center" : "flex-start",
-        gap: 30,
-        alignItems: "flex-end",
-        padding: "40px 20px 20px 0",
-      }}
-    >
-      {visible.map((p, i) => {
-        const isNewest = p.id === newestId;
-        return (
-          <div
-            key={p.id}
-            style={{
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 14,
-              opacity: p.connected === false ? 0.4 : 1,
-              transform: `rotate(${SLOT_ROTATIONS[i % SLOT_ROTATIONS.length]}deg)${isNewest ? " scale(1.06)" : ""}`,
-            }}
-          >
-            {isNewest && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: -24,
-                  right: -36,
-                  zIndex: 2,
-                  transform: "rotate(14deg)",
-                  width: 92,
-                  height: 92,
-                  borderRadius: "50%",
-                  background: SUN,
-                  border: `4px solid ${INK}`,
-                  boxShadow: "0 0 0 6px #fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  font: lilita(30),
-                }}
-              >
-                Hi!
-              </div>
-            )}
-            <ChefPlaceholder color={p.color} size={180} />
-            <NamePill name={p.name} color={p.color} maxWidth={200} />
-          </div>
-        );
-      })}
-
-      {showSlot && (
-        <div
+    <div style={{ position: "relative", width: 600, height: 520 }}>
+      <style>{PLATE_CSS}</style>
+      <div
+        ref={panRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          transition: "transform 450ms cubic-bezier(.2,.8,.2,1)",
+          willChange: "transform",
+        }}
+      >
+        <img
+          src={PLATE_IMAGE}
+          alt=""
+          draggable={false}
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 14,
+            position: "absolute",
+            left: 20,
+            bottom: 0,
+            width: 560,
+            filter: "drop-shadow(0 14px 0 rgba(122,78,30,.14))",
           }}
-        >
+        />
+
+        {shown.length === 0 && (
           <div
             style={{
-              width: 190,
-              height: 214,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: 230,
+              textAlign: "center",
+              font: lilita(38),
+              opacity: 0.45,
             }}
           >
+            Chefs appear here!
+          </div>
+        )}
+
+        {shown.map((player, i) => {
+          const slot = slots[i];
+          const character = player.character;
+          return (
             <div
+              key={player.id}
               style={{
-                width: 170,
-                height: 170,
-                borderRadius: "50%",
-                border: `5px dashed ${INK}`,
+                position: "absolute",
+                left: slot.x,
+                top: slot.y,
+                zIndex: Math.round(slot.y),
+                transform: "translate(-50%, -100%)",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                font: lilita(90),
-                opacity: 0.55,
+                opacity: player.connected === false ? 0.4 : 1,
               }}
             >
-              +
+              {character ? (
+                <div style={{ position: "relative" }}>
+                  <img
+                    key={character}
+                    className="lobby-chef"
+                    src={characterImage(character)}
+                    alt=""
+                    draggable={false}
+                    style={{
+                      display: "block",
+                      height: CHEF_HEIGHT,
+                      transformOrigin: "50% 100%",
+                      animation:
+                        "lobbyChefPop 520ms cubic-bezier(.2,.9,.3,1.2) both",
+                    }}
+                  />
+                  {player.id === newestWithChef && (
+                    <div
+                      style={{
+                        ...paper("50%", 3),
+                        position: "absolute",
+                        top: -18,
+                        right: -30,
+                        transform: "rotate(3deg)",
+                        width: 76,
+                        height: 76,
+                        background: SUN,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        font: lilita(26),
+                      }}
+                    >
+                      Hi!
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    ...paper("50%", 4),
+                    width: 150,
+                    height: 150,
+                    marginBottom: 40,
+                    background: "#fff",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 12,
+                  }}
+                  aria-label={`${player.name} is picking a chef`}
+                >
+                  {[0, 1, 2].map((d) => (
+                    <span
+                      key={d}
+                      className="lobby-dot"
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: "50%",
+                        background: INK,
+                        animation: `lobbyDot 1.1s ease-in-out ${d * 0.15}s infinite`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              <div style={{ marginTop: -14, position: "relative", zIndex: 1 }}>
+                <NamePill
+                  name={player.name}
+                  color={player.color}
+                  size={26}
+                  maxWidth={200}
+                />
+              </div>
             </div>
-          </div>
-          <div style={{ font: nunito(800, 26), padding: "10px 0" }}>
-            {slotCaption}
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -523,8 +569,7 @@ function StartRow({
         <span
           style={{
             background: "#FFE1DA",
-            border: `4px solid #F2553D`,
-            borderRadius: 22,
+            ...paper(22, 24),
             padding: "6px 18px",
             font: nunito(800, 22),
           }}
@@ -540,17 +585,14 @@ function StartRow({
         onClick={onStart}
         disabled={!canStart}
         style={{
+          ...paper(75, 5),
           position: "relative",
           display: "flex",
           alignItems: "center",
           gap: 22,
           height: 150,
           padding: "0 60px 0 30px",
-          borderRadius: 75,
           background: LEAF,
-          border: `5px solid ${INK}`,
-          boxShadow:
-            "inset 0 -12px 0 rgba(43,42,107,.18),0 0 0 10px #fff,0 16px 0 10px rgba(43,42,107,.15)",
           boxSizing: "border-box",
           color: INK,
           cursor: canStart ? "pointer" : "not-allowed",
@@ -571,11 +613,10 @@ function StartRow({
         />
         <div
           style={{
+            ...paper("50%", 6),
             width: 92,
             height: 92,
-            borderRadius: "50%",
             background: SUN,
-            border: `5px solid ${INK}`,
             boxSizing: "border-box",
             display: "flex",
             alignItems: "center",

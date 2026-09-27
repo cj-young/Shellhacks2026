@@ -41,6 +41,8 @@ export interface ServerToClientEvents {
   joined: (payload: JoinedPayload) => void;
   player_joined: (player: PlayerSummary) => void;
   player_disconnected: (payload: { playerId: string }) => void;
+  /** A player's summary changed in the lobby (e.g. they picked a chef). */
+  player_updated: (player: PlayerSummary) => void;
   game_started: (payload: GameStartedPayload) => void;
   game_error: (payload: { code: string; message: string }) => void;
   update_state: (state: ClientGameState) => void;
@@ -65,6 +67,8 @@ export interface ClientToServerEvents {
   update_cart: (items: PurchaseItem[]) => void;
   consume_ingredients: (items: PurchaseItem[]) => void;
   finish_stage: () => void;
+  /** Pick a chef in the lobby: "bear" | "cat" | "cow" | "panda". */
+  select_character: (character: string) => void;
 }
 
 export interface InterServerEvents {}

@@ -13,7 +13,11 @@ import {
   type Game,
 } from "../domain/game.ts";
 import type { Inventory, PurchaseItem } from "../domain/inventory.ts";
-import { normalizePlayerName, type Player } from "../domain/player.ts";
+import {
+  isCharacterId,
+  normalizePlayerName,
+  type Player,
+} from "../domain/player.ts";
 import type { GameStore } from "../ports/game-store.ts";
 
 const MAX_CODE_ATTEMPTS = 5;
@@ -25,6 +29,19 @@ export const WASTE_PENALTY_PER_ITEM = 10;
 export type StartGameResult =
   | { ok: true; game: Game }
   | { ok: false; code: "GAME_NOT_FOUND" | "ALREADY_STARTED" };
+
+export type SelectCharacterResult =
+  | { ok: true; game: Game; player: Player }
+  | {
+      ok: false;
+      code:
+        | "GAME_NOT_FOUND"
+        | "GAME_STARTED"
+        | "PLAYER_NOT_FOUND"
+        | "HOST_CANNOT_PICK"
+        | "INVALID_CHARACTER"
+        | "CHARACTER_TAKEN";
+    };
 
 export interface StartGameOptions {
   durationMs?: number;
@@ -165,6 +182,7 @@ export class GameService {
       reconnectToken: generateReconnectToken(),
       joinedAt: Date.now(),
       connected: true,
+      character: null,
 
       recipeIndex: 0,
       recipeStageIndex: 0,
@@ -282,6 +300,41 @@ export class GameService {
     await this.#store.save(next);
 
     return { ok: true, game: next };
+  }
+
+  /** Claims a chef character for a player in the lobby; switching frees their old one. */
+  async selectCharacter(
+    code: string,
+    playerId: string,
+    character: unknown,
+  ): Promise<SelectCharacterResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+
+    if (!game) return { ok: false, code: "GAME_NOT_FOUND" };
+    if (game.status !== "lobby") return { ok: false, code: "GAME_STARTED" };
+
+    const player = game.state.players.find((entry) => entry.id === playerId);
+    if (!player) return { ok: false, code: "PLAYER_NOT_FOUND" };
+    if (player.isHost) return { ok: false, code: "HOST_CANNOT_PICK" };
+    if (!isCharacterId(character)) {
+      return { ok: false, code: "INVALID_CHARACTER" };
+    }
+
+    const takenByOther = game.state.players.some(
+      (entry) => entry.id !== playerId && entry.character === character,
+    );
+    if (takenByOther) return { ok: false, code: "CHARACTER_TAKEN" };
+
+    const updated: Player = { ...player, character };
+    const next = this.#withPlayers(
+      game,
+      game.state.players.map((entry) =>
+        entry.id === updated.id ? updated : entry,
+      ),
+    );
+    await this.#store.save(next);
+
+    return { ok: true, game: next, player: updated };
   }
 
   async updateCart(

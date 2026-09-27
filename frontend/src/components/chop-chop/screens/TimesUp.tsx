@@ -12,6 +12,7 @@ import {
 import { FitToViewport } from "../FitToViewport";
 import { HostRaceStacks } from "./HostRaceStacks";
 
+import { paper } from "#/components/chop-chop/paper";
 const BURST_POINTS =
   "50,2 60,24 84,12 76,38 98,50 76,62 84,88 60,76 50,98 40,76 16,88 24,62 2,50 24,38 16,12 40,24";
 
@@ -22,7 +23,7 @@ function EmptyHourglass() {
       width="120"
       height="162"
       viewBox="0 0 92 124"
-      style={{ filter: "drop-shadow(0 8px 0 rgba(43,42,107,.16))" }}
+      style={{ filter: "drop-shadow(0 8px 0 rgba(122,78,30,.16))" }}
     >
       <rect
         x="6"
@@ -70,7 +71,7 @@ export function TimesUp() {
         position: "absolute",
         inset: 0,
         zIndex: 50,
-        background: "rgba(43,42,107,.55)",
+        background: "rgba(122,78,30,.55)",
         animation: "timesUpFade 250ms ease-out both",
       }}
     >
@@ -103,7 +104,7 @@ export function TimesUp() {
               top: 30,
               transform: "rotate(-8deg)",
               filter:
-                "drop-shadow(6px 0 0 #fff) drop-shadow(-6px 0 0 #fff) drop-shadow(0 6px 0 #fff) drop-shadow(0 -6px 0 #fff) drop-shadow(0 14px 0 rgba(43,42,107,.2))",
+                "drop-shadow(6px 0 0 #fff) drop-shadow(-6px 0 0 #fff) drop-shadow(0 6px 0 #fff) drop-shadow(0 -6px 0 #fff) drop-shadow(0 14px 0 rgba(122,78,30,.2))",
             }}
           >
             <polygon
@@ -128,15 +129,13 @@ export function TimesUp() {
 
           <div
             style={{
+              ...paper(48, 0),
               position: "absolute",
               left: "50%",
               top: 300,
-              transform: "translateX(-50%) rotate(-4deg)",
+              transform: "translateX(-50%) rotate(-3deg)",
               background: TOMATO,
-              border: `6px solid ${INK}`,
-              borderRadius: 48,
               padding: "10px 64px 22px",
-              boxShadow: `0 0 0 14px ${SUN},0 22px 0 14px rgba(43,42,107,.2)`,
               font: lilita(150, 1),
               color: "#fff",
               WebkitTextStroke: `14px ${INK}`,
@@ -150,15 +149,13 @@ export function TimesUp() {
 
           <div
             style={{
+              ...paper(26, 1),
               position: "absolute",
               left: "50%",
               top: 560,
               transform: "translateX(-50%) rotate(3deg)",
               background: "#fff",
-              border: `4px solid ${INK}`,
-              borderRadius: 26,
               padding: "8px 26px",
-              boxShadow: "0 0 0 6px #fff,0 10px 0 6px rgba(43,42,107,.16)",
               font: nunito(900, 34),
               whiteSpace: "nowrap",
             }}

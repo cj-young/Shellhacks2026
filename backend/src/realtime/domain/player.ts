@@ -1,5 +1,5 @@
 import type { Inventory } from "../../game/domain/inventory.ts";
-import type { Player } from "../../game/domain/player.ts";
+import type { CharacterId, Player } from "../../game/domain/player.ts";
 
 export interface PlayerSummary {
   readonly id: string;
@@ -7,6 +7,7 @@ export interface PlayerSummary {
   readonly isHost: boolean;
   readonly joinedAt: number;
   readonly connected: boolean;
+  readonly character: CharacterId | null;
   readonly cart: Inventory;
   readonly inventory: Inventory;
   readonly recipeIndex: number;
@@ -21,6 +22,7 @@ export function toPlayerSummary(player: Player): PlayerSummary {
     isHost: player.isHost,
     joinedAt: player.joinedAt,
     connected: player.connected,
+    character: player.character,
     cart: player.cart,
     inventory: player.inventory,
     recipeIndex: player.recipeIndex,

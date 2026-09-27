@@ -17,6 +17,7 @@ import {
   RacePhoneStove,
 } from "./screens/RacePhoneScreens";
 import { AssetSheet, ASSET_SHEET_SIZE } from "./screens/AssetSheet";
+import { StyleTest } from "./screens/StyleTest";
 import {
   HostMenuPrepping,
   HostMenuShopping,
@@ -28,10 +29,15 @@ import {
 } from "./screens/MenuStates";
 import { FitToViewport } from "./FitToViewport";
 import {
+  WaitingRoomPickPreview,
+  WaitingRoomPickedPreview,
+} from "#/components/client/WaitingRoom";
+import {
   VEGGIE_SIZES_CANVAS,
   VeggieBackgroundSizes,
 } from "./screens/VeggieBackgroundSizes";
 
+import { paper } from "./paper";
 type Screen = { id: string; label: string; component: React.ComponentType };
 type Device = "host" | "player" | "sheet" | "sizes";
 
@@ -76,6 +82,16 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
     device: "player",
     screens: [
       { id: "player-join", label: "Join", component: MobileJoinNew },
+      {
+        id: "player-pick-chef",
+        label: "Waiting · pick a chef",
+        component: WaitingRoomPickPreview,
+      },
+      {
+        id: "player-picked-chef",
+        label: "Waiting · chef picked",
+        component: WaitingRoomPickedPreview,
+      },
       { id: "player-waiting", label: "Waiting", component: MobileWaitingNew },
       { id: "player-store", label: "Store", component: RacePhoneStore },
       { id: "player-chop", label: "Chop", component: RacePhoneChop },
@@ -132,6 +148,13 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
     ],
   },
   {
+    title: "Style",
+    device: "host",
+    screens: [
+      { id: "style-test", label: "Style test · paper", component: StyleTest },
+    ],
+  },
+  {
     title: "Assets",
     device: "sheet",
     screens: [
@@ -172,7 +195,7 @@ export function ScreenSwitcher() {
       style={{
         display: "flex",
         height: "100vh",
-        backgroundColor: "#EEF3FB",
+        backgroundColor: "#FCEBC7",
         overflow: "hidden",
       }}
     >
@@ -180,8 +203,8 @@ export function ScreenSwitcher() {
       <div
         style={{
           width: "200px",
-          backgroundColor: "#F7F9FE",
-          borderRight: "3px solid #2B2A6B",
+          backgroundColor: "#FFF6E3",
+          borderRight: "3px solid rgba(61,40,23,.22)",
           padding: "24px",
           overflowY: "auto",
           fontFamily: '"Nunito", sans-serif',
@@ -190,10 +213,10 @@ export function ScreenSwitcher() {
       >
         <h2
           style={{
-            fontFamily: '"Lilita One", sans-serif',
+            fontFamily: '"Sniglet", sans-serif',
             fontSize: "24px",
             marginBottom: "24px",
-            color: "#2B2A6B",
+            color: "#3D2817",
             margin: "0 0 24px 0",
           }}
         >
@@ -210,7 +233,7 @@ export function ScreenSwitcher() {
                   font: "900 12px Nunito",
                   letterSpacing: ".14em",
                   textTransform: "uppercase",
-                  color: "#2B2A6B",
+                  color: "#3D2817",
                 }}
               >
                 {group.title}
@@ -220,14 +243,13 @@ export function ScreenSwitcher() {
                   key={screen.id}
                   onClick={() => setCurrentScreen(screen.id)}
                   style={{
+                    ...paper("12px", 0),
                     width: "100%",
                     textAlign: "left",
                     padding: "12px 16px",
-                    borderRadius: "12px",
-                    border: "3px solid #2B2A6B",
                     backgroundColor:
-                      currentScreen === screen.id ? "#1F4FD8" : "#fff",
-                    color: currentScreen === screen.id ? "#fff" : "#2B2A6B",
+                      currentScreen === screen.id ? "#127C78" : "#fff",
+                    color: currentScreen === screen.id ? "#fff" : "#3D2817",
                     font: "bold 14px Nunito",
                     cursor: "pointer",
                     transition: "all 150ms",

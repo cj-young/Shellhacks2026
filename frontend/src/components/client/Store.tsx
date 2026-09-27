@@ -1,7 +1,10 @@
 import type { Ingredient } from "#/lib/types";
 import { useState } from "react";
 import ingredients from "../../data/ingredients.json";
-import { StoreScreen } from "#/components/chop-chop/screens/RacePhoneScreens";
+import {
+  STORE_PAGE_SIZE,
+  StoreScreen,
+} from "#/components/chop-chop/screens/RacePhoneScreens";
 import { INGREDIENTS as MENU_INGREDIENTS } from "#/data/menu";
 
 const menuIdByName = new Map(
@@ -12,16 +15,16 @@ const menuIdByName = new Map(
 export const iconIdFor = (ing: Ingredient) =>
   menuIdByName.get(ing.name.toLowerCase()) ?? ing.image;
 
-/** One aisle per category, split into pages of 6 (3 shelves × 2 on the store screen). */
+/** One aisle per category, split into pages that fit the store screen. */
 const AISLES: { name: string; items: Ingredient[] }[] = (() => {
   const categories = [...new Set(ingredients.map((ing) => ing.category))];
   return categories.flatMap((category) => {
     const items = ingredients.filter((ing) => ing.category === category);
     const pages = [];
-    for (let i = 0; i < items.length; i += 6) {
+    for (let i = 0; i < items.length; i += STORE_PAGE_SIZE) {
       pages.push({
         name: category.toUpperCase(),
-        items: items.slice(i, i + 6),
+        items: items.slice(i, i + STORE_PAGE_SIZE),
       });
     }
     return pages;

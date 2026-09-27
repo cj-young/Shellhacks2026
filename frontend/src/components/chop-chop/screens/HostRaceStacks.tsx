@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
 import {
   CARD_BG,
-  DOT,
   INK,
   LEAF,
   PAGE_BG,
@@ -18,8 +17,9 @@ import { IngredientIcon } from "../IngredientIcon";
 import { dishAsset } from "#/data/menu";
 import type { Gesture, MenuRecipe } from "#/data/menu";
 import { GameIcon } from "../race";
-import { VeggieBackground } from "../VeggieBackground";
+import { KitchenBackground } from "../KitchenBackground";
 
+import { paper } from "#/components/chop-chop/paper";
 export type ShopItem = { kind: string; rot: number; done: boolean };
 
 export type RaceStack = {
@@ -46,10 +46,10 @@ export type RaceStack = {
 
 /** Card tint for each player color (from the design's stacks). */
 const TINTS: Record<string, string> = {
-  [ROYAL]: "#DCE6FF",
+  [ROYAL]: "#FFE7A0",
   [TOMATO]: "#FFE1DA",
-  "#159A6B": "#D4F1E3",
-  [PINK]: "#FFE4EF",
+  "#0F7F3F": "#D4F1E3",
+  [PINK]: "#FFE3CC",
   [SUN]: "#FFF3C2",
 };
 const tintFor = (color: string) => TINTS[color] ?? CARD_BG;
@@ -93,7 +93,7 @@ export const DEMO_STACKS: RaceStack[] = [
   {
     id: "ari",
     name: "Ari",
-    color: "#159A6B",
+    color: "#0F7F3F",
     recipe: 2,
     recipeName: "Garlic Steak & Chicken",
     phase: "shop",
@@ -167,7 +167,7 @@ export function HostRaceStacks({
         color: INK,
       }}
     >
-      <VeggieBackground />
+      <KitchenBackground />
       {size && (
         <div
           style={{
@@ -227,15 +227,13 @@ export function HostRaceStacks({
       {size && banner && (
         <div
           style={{
+            ...paper(22, 0),
             position: "absolute",
             left: 24 * scale,
             top: 24 * scale,
             zoom: scale,
             background: "#fff",
-            border: `4px solid ${INK}`,
-            borderRadius: 22,
             padding: "6px 18px",
-            boxShadow: "0 6px 0 rgba(43,42,107,.16)",
             font: nunito(800, 22),
           }}
         >
@@ -252,12 +250,10 @@ function Timer({ secondsLeft }: { secondsLeft: number }) {
       <Hourglass />
       <div
         style={{
+          ...paper("46% 54% 50% 50% / 56% 48% 52% 44%", 1),
           width: 240,
           height: 156,
-          borderRadius: "46% 54% 50% 50% / 56% 48% 52% 44%",
           background: SUN,
-          border: `6px solid ${INK}`,
-          boxShadow: "0 0 0 10px #fff,0 18px 0 10px rgba(43,42,107,.16)",
           boxSizing: "border-box",
           display: "flex",
           alignItems: "center",
@@ -266,19 +262,6 @@ function Timer({ secondsLeft }: { secondsLeft: number }) {
           position: "relative",
         }}
       >
-        <span
-          style={{
-            position: "absolute",
-            left: 34,
-            top: 20,
-            width: 44,
-            height: 13,
-            borderRadius: 7,
-            background: "#fff",
-            opacity: 0.7,
-            transform: "rotate(-14deg)",
-          }}
-        />
         <span style={{ font: lilita(132, 1), paddingTop: 6 }}>
           {secondsLeft}
         </span>
@@ -310,7 +293,7 @@ function Hourglass() {
       viewBox="0 0 92 124"
       style={{
         transform: "rotate(-10deg)",
-        filter: "drop-shadow(0 8px 0 rgba(43,42,107,.16))",
+        filter: "drop-shadow(0 8px 0 rgba(122,78,30,.16))",
       }}
     >
       <rect
@@ -386,14 +369,10 @@ function StepTokens({
           <div
             key={n}
             style={{
+              ...paper("50%", 2),
               width: now ? 66 : 50,
               height: now ? 66 : 50,
-              borderRadius: "50%",
               background: done ? LEAF : now ? color : "#fff",
-              border: `${now ? 5 : 4}px solid ${INK}`,
-              boxShadow: now
-                ? "0 0 0 5px #fff,0 6px 0 5px rgba(43,42,107,.16)"
-                : "none",
               boxSizing: "border-box",
               display: "flex",
               alignItems: "center",
@@ -441,9 +420,8 @@ function ShopGrid({ items }: { items: ShopItem[] }) {
             key={it.kind}
             style={{
               position: "relative",
-              borderRadius: 30,
+              ...paper(30, 27),
               background: it.done ? "#E3F5E8" : "#fff",
-              border: `4px solid ${it.done ? LEAF : DOT}`,
               boxSizing: "border-box",
               display: "flex",
               alignItems: "center",
@@ -454,20 +432,18 @@ function ShopGrid({ items }: { items: ShopItem[] }) {
             {it.done && (
               <div
                 style={{
+                  ...paper("50%", 3),
                   position: "absolute",
                   right: -12,
                   top: -12,
                   width: 62,
                   height: 62,
-                  borderRadius: "50%",
                   background: LEAF,
-                  border: `5px solid ${INK}`,
-                  boxShadow: "0 0 0 5px #fff",
                   boxSizing: "border-box",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  transform: "rotate(8deg)",
+                  transform: "rotate(3deg)",
                 }}
               >
                 <Tick size={34} />
@@ -516,12 +492,11 @@ function PrepPanel({
       >
         <div
           style={{
+            ...paper("50%", 4),
             position: "relative",
             width: 270,
             height: 270,
-            borderRadius: "50%",
             background: tintFor(stack.color),
-            border: `5px solid ${INK}`,
             boxSizing: "border-box",
             display: "flex",
             alignItems: "center",
@@ -531,26 +506,24 @@ function PrepPanel({
           {isChop && (
             <div
               style={{
+                ...paper(18, 5),
                 position: "absolute",
                 left: 34,
                 right: 34,
                 bottom: 52,
                 height: 62,
-                borderRadius: 18,
                 background: "#E9A866",
-                border: `5px solid ${INK}`,
                 boxSizing: "border-box",
               }}
             >
               <span
                 style={{
+                  ...paper("50%", 6),
                   position: "absolute",
                   right: 14,
                   top: 16,
                   width: 14,
                   height: 14,
-                  borderRadius: "50%",
-                  border: `4px solid ${INK}`,
                 }}
               />
             </div>
@@ -627,12 +600,10 @@ function RecipeStack({
   const isShop = stack.phase === "shop";
   const tint = tintFor(stack.color);
   const backCard: React.CSSProperties = {
+    ...paper(32, 7),
     position: "absolute",
     height: 220,
     background: tint,
-    border: `5px solid ${INK}`,
-    borderRadius: 32,
-    boxShadow: "0 10px 0 rgba(43,42,107,.12)",
     padding: "10px 20px",
     boxSizing: "border-box",
   };
@@ -671,15 +642,13 @@ function RecipeStack({
 
       <div
         style={{
+          ...paper(38, 8),
           position: "absolute",
           top: 52,
           left: 0,
           right: 0,
           bottom: 0,
           background: CARD_BG,
-          border: `5px solid ${INK}`,
-          borderRadius: 38,
-          boxShadow: `0 0 0 9px ${stack.color},0 18px 0 9px rgba(43,42,107,.16)`,
           padding: "22px 24px 24px",
           boxSizing: "border-box",
           display: "flex",
@@ -696,15 +665,13 @@ function RecipeStack({
         >
           <div
             style={{
+              ...paper(26, 9),
               display: "flex",
               alignItems: "center",
               gap: 8,
               background: isShop ? SKY : SUN,
-              border: `4px solid ${INK}`,
-              borderRadius: 26,
               padding: "2px 18px 2px 6px",
               transform: "rotate(-3deg)",
-              boxShadow: "0 6px 0 rgba(43,42,107,.16)",
               font: lilita(30, 1.2),
             }}
           >
@@ -738,13 +705,12 @@ function PlayerTab({ stack }: { stack: RaceStack }) {
   return (
     <div
       style={{
+        ...paper("38px 38px 0 0", 10),
         width: 392,
         height: 122,
         marginBottom: -8,
         background: tintFor(stack.color),
-        border: `5px solid ${INK}`,
         borderBottom: "none",
-        borderRadius: "38px 38px 0 0",
         boxSizing: "border-box",
         padding: "0 22px 8px",
         display: "flex",
@@ -754,24 +720,21 @@ function PlayerTab({ stack }: { stack: RaceStack }) {
     >
       <div
         style={{
+          ...paper("50%", 11),
           width: 80,
           height: 80,
           flexShrink: 0,
-          borderRadius: "50%",
           background: stack.color,
-          border: `5px solid ${INK}`,
-          boxShadow: "0 0 0 5px #fff",
           boxSizing: "border-box",
         }}
       />
       <div
         style={{
+          ...paper(34, 12, false),
           flex: 1,
           minWidth: 0,
           background: "#fff",
-          border: `5px solid ${INK}`,
-          borderRadius: 34,
-          boxShadow: `0 0 0 5px ${stack.color}`,
+          boxShadow: "var(--paper-shadow)",
           padding: "4px 20px",
           boxSizing: "border-box",
           font: lilita(44, 1.1),

@@ -3,31 +3,35 @@ import { useCallback, useState } from "react";
 import type React from "react";
 import { useGameConnection } from "#/lib/use-game-connection";
 import { ClientInterface } from "#/components/client/ClientInterface";
+import { WaitingRoom } from "#/components/client/WaitingRoom";
 import {
+  ChopChopLogo,
   INK,
   PAGE_BG,
   PINK,
   ROYAL,
   SUN,
   Sparkle,
-  TOMATO,
   lilita,
   nunito,
 } from "#/components/chop-chop/design";
 
+import { paper } from "#/components/chop-chop/paper";
 export const Route = createFileRoute("/join")({ component: JoinScreen });
 
 const CODE_LENGTH = 6;
-const PLAYER_COLORS = [ROYAL, TOMATO, "#159A6B", PINK, SUN];
 
 const label: React.CSSProperties = {
   font: nunito(900, 15),
   letterSpacing: ".14em",
 };
 
+// Pressed-in paper field; a sun glow shows focus. Spread after borderRadius.
 const focusRing = (focused: boolean): React.CSSProperties => ({
-  border: `4px solid ${focused ? ROYAL : INK}`,
-  boxShadow: focused ? "0 0 0 4px #DCE6FF" : "none",
+  border: "none",
+  boxShadow: focused
+    ? `0 0 0 5px ${SUN}, var(--paper-shadow)`
+    : "inset 1px 3px 0 rgba(122,78,30,.12), var(--paper-shadow-pressed)",
 });
 
 function JoinScreen() {
@@ -50,6 +54,10 @@ function JoinScreen() {
   }, [codeInput, nameInput]);
 
   if (connection.started) return <ClientInterface connection={connection} />;
+  // Joined: go to the lobby waiting room to pick a chef.
+  if (joined && connection.playerId) {
+    return <WaitingRoom connection={connection} />;
+  }
 
   const waiting =
     joined !== null &&
@@ -98,19 +106,10 @@ function JoinScreen() {
           style={{ position: "absolute", right: 44, top: 34 }}
         />
 
-        <div
-          style={{
-            textAlign: "center",
-            font: lilita(52, 1),
-            color: SUN,
-            WebkitTextStroke: `8px ${INK}`,
-            paintOrder: "stroke fill",
-            textShadow: `0 5px 0 ${INK}`,
-            marginBottom: 12,
-          }}
-        >
-          Chop Chop!
-        </div>
+        <ChopChopLogo
+          width={240}
+          style={{ alignSelf: "center", marginBottom: 4 }}
+        />
 
         <label style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <span style={label}>ROOM CODE</span>
@@ -199,66 +198,11 @@ function JoinScreen() {
           />
         </label>
 
-        {joined && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <span style={label}>
-              IN THE KITCHEN · {connection.players.length}
-            </span>
-            <div
-              style={{ display: "flex", flexWrap: "wrap", gap: 14, padding: 6 }}
-            >
-              {connection.players.map((player, i) => {
-                const color = PLAYER_COLORS[i % PLAYER_COLORS.length];
-                return (
-                  <div
-                    key={player.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      background: "#fff",
-                      border: `4px solid ${INK}`,
-                      borderRadius: 24,
-                      padding: "4px 14px 4px 6px",
-                      boxShadow: `0 0 0 5px ${color}`,
-                      opacity: player.connected ? 1 : 0.45,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: "50%",
-                        background: color,
-                        border: `3px solid ${INK}`,
-                        boxSizing: "border-box",
-                      }}
-                    />
-                    <span style={{ font: lilita(24) }}>{player.name}</span>
-                    {(player.id === connection.playerId ||
-                      player.isHost ||
-                      !player.connected) && (
-                      <span style={{ font: nunito(800, 14) }}>
-                        {player.id === connection.playerId
-                          ? "you"
-                          : player.isHost
-                            ? "host"
-                            : "offline"}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {connection.message && (
           <div
             style={{
               background: "#FFE1DA",
-              border: `4px solid ${TOMATO}`,
-              borderRadius: 20,
+              ...paper(20, 21),
               padding: "10px 16px",
               font: nunito(800, 16),
             }}
@@ -307,14 +251,11 @@ function JoinScreen() {
             type="submit"
             disabled={!canJoin}
             style={{
+              ...paper(42, 1),
               position: "relative",
               height: 84,
-              borderRadius: 42,
               background: SUN,
-              border: `4px solid ${INK}`,
               boxSizing: "border-box",
-              boxShadow:
-                "inset 0 -8px 0 rgba(43,42,107,.16),0 0 0 6px #fff,0 10px 0 6px rgba(43,42,107,.16)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -324,18 +265,6 @@ function JoinScreen() {
               opacity: canJoin ? 1 : 0.5,
             }}
           >
-            <span
-              style={{
-                position: "absolute",
-                left: 32,
-                top: 12,
-                width: 44,
-                height: 11,
-                borderRadius: 6,
-                background: "#fff",
-                opacity: 0.7,
-              }}
-            />
             Join!
           </button>
         )}

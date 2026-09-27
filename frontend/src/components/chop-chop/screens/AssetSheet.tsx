@@ -4,12 +4,12 @@ import { IngredientIcon } from "../IngredientIcon";
 import { INGREDIENTS, RECIPES, SHELVES, dishAsset } from "#/data/menu";
 import type { MenuIngredient } from "#/data/menu";
 
+import { paper } from "#/components/chop-chop/paper";
 export const ASSET_SHEET_SIZE = { width: 1920, height: 1400 };
 
 const card: React.CSSProperties = {
+  ...paper(22, 0),
   background: "#fff",
-  border: `4px solid ${INK}`,
-  borderRadius: 22,
   padding: "10px 12px 8px",
   display: "flex",
   flexDirection: "column",
@@ -74,7 +74,7 @@ export function AssetSheet() {
                 display: "flex",
                 flexWrap: "wrap",
                 gap: 14,
-                maxWidth: shelf.id === "produce" ? 1824 : undefined,
+                maxWidth: 1824,
               }}
             >
               {INGREDIENTS.filter((i) => i.shelf === shelf.id && !i.decoy).map(

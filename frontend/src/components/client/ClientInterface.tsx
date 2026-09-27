@@ -10,8 +10,6 @@ import {
   CARD_BG,
   INK,
   LEAF,
-  ROYAL,
-  TOMATO,
   lilita,
   nunito,
 } from "#/components/chop-chop/design";
@@ -22,7 +20,9 @@ import {
   StoreButton,
 } from "#/components/chop-chop/race";
 import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
+import { NewRecipeCard } from "./NewRecipeCard";
 
+import { paper } from "#/components/chop-chop/paper";
 interface ClientInterfaceProps {
   connection: GameConnection;
 }
@@ -41,18 +41,43 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const [canPrepareRecipe, setCanPrepareRecipe] = useState(false);
   const [finished, setFinished] = useState(false);
   const [currentPoints, setCurrentPoints] = useState<CursorPoint[]>([]);
+  /** True while the "new order" card for the next recipe is on screen. */
+  const [showNewRecipe, setShowNewRecipe] = useState(false);
+  /** Server recipe index we're finishing stages toward (see effect below). */
+  const [advanceTo, setAdvanceTo] = useState<number | null>(null);
+  const sentFinishFor = useRef<string | null>(null);
+  const completedRecipes = useRef(new Set<number>());
   const consumedStages = useRef(new Set<string>());
+  const me = connection.state.players.find(
+    (entry) => entry.id === connection.playerId,
+  );
   const inventory = useMemo(() => {
-    const player = connection.state.players.find(
-      (entry) => entry.id === connection.playerId,
-    );
-    if (!player) return [];
+    if (!me) return [];
 
-    return Object.entries(player.inventory).flatMap(([id, count]) => {
+    return Object.entries(me.inventory).flatMap(([id, count]) => {
       const ingredient = ingredients.find((entry) => entry.id === Number(id));
       return ingredient ? Array.from({ length: count }, () => ingredient) : [];
     });
-  }, [connection.playerId, connection.state.players]);
+  }, [me]);
+
+  // Finish the server-side stages of a completed recipe one at a time: each
+  // finish_stage waits for the state update from the previous one, since the
+  // server handles them concurrently. The last stage scores the recipe, moves
+  // the player to the next one and clears their inventory.
+  const serverRecipe = me?.recipeIndex;
+  const serverStage = me?.recipeStageIndex;
+  useEffect(() => {
+    if (advanceTo === null || serverRecipe === undefined) return;
+    if (serverRecipe >= advanceTo) {
+      setAdvanceTo(null);
+      sentFinishFor.current = null;
+      return;
+    }
+    const key = `${serverRecipe}:${serverStage}`;
+    if (sentFinishFor.current === key) return;
+    sentFinishFor.current = key;
+    connection.socketRef.current?.emit("finish_stage");
+  }, [advanceTo, serverRecipe, serverStage, connection.socketRef]);
 
   function checkoutFromStore(inv: Ingredient[]) {
     const purchaseMap = new Map<number, { id: number; count: number }>();
@@ -103,12 +128,21 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   }
 
   function completeRecipe() {
+    // Tracing and the test button can both land here; count each recipe once.
+    if (completedRecipes.current.has(recipeState)) return;
+    completedRecipes.current.add(recipeState);
+
     connection.socketRef.current?.emit("recipe_completed");
+    // Target by our own count so a server that's still catching up isn't under-shot.
+    setAdvanceTo(recipeState + 1);
+
     if (recipeState + 1 < recipeOrder.length) {
-      const nextRecipeIndex = recipeState + 1;
-      setRecipeState(nextRecipeIndex);
+      // Next recipe starts from scratch: new card, then back to the store.
+      setRecipeState(recipeState + 1);
       setActiveStageIndex(-1);
-      setCanPrepareRecipe(hasIngredientsForStage(nextRecipeIndex, 0));
+      setCanPrepareRecipe(false);
+      setCurrentPoints([]);
+      setShowNewRecipe(true);
     } else {
       setFinished(true);
     }
@@ -181,9 +215,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
         >
           <span
             style={{
+              ...paper(24, 0),
               background: "#fff",
-              border: `4px solid ${INK}`,
-              borderRadius: 24,
               padding: "8px 20px",
               font: nunito(900, 18),
               color: INK,
@@ -196,20 +229,60 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     );
   }
 
-  if (interfaceState == "store") {
+  const recipe = recipeOrder.at(recipeState);
+  const ready = canPrepareRecipe && !finished && recipe;
+
+  if (showNewRecipe && recipe) {
     return (
-      <Store
-        uploadInventory={checkoutFromStore}
-        onCartChange={syncCart}
-        score={myPoints}
-        progress={progress}
-        notice={total === 0 ? "Waiting for the recipes…" : undefined}
+      <NewRecipeCard
+        recipe={recipe}
+        number={recipeState + 1}
+        total={total}
+        onContinue={() => {
+          setShowNewRecipe(false);
+          setInterfaceState("store");
+        }}
       />
     );
   }
 
-  const recipe = recipeOrder.at(recipeState);
-  const ready = canPrepareRecipe && !finished && recipe;
+  const testFinishButton = SHOW_TEST_CONTROLS && recipe && !finished && (
+    <button
+      type="button"
+      onClick={completeRecipe}
+      style={{
+        position: "fixed",
+        top: 8,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 70,
+        background: "rgba(255,255,255,.9)",
+        border: `3px dashed ${INK}`,
+        borderRadius: 20,
+        padding: "5px 16px",
+        font: nunito(900, 14),
+        color: INK,
+        cursor: "pointer",
+      }}
+    >
+      Test: finish recipe
+    </button>
+  );
+
+  if (interfaceState == "store") {
+    return (
+      <>
+        <Store
+          uploadInventory={checkoutFromStore}
+          onCartChange={syncCart}
+          score={myPoints}
+          progress={progress}
+          notice={total === 0 ? "Waiting for the recipes…" : undefined}
+        />
+        {testFinishButton}
+      </>
+    );
+  }
 
   return (
     <div
@@ -247,7 +320,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
         <Basket
           items={inventory.map(iconIdFor)}
           width={354}
-          height={104}
+          height={230}
           token={48}
         />
 
@@ -266,10 +339,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
 
         <div
           style={{
+            ...paper(34, 1),
             background: CARD_BG,
-            border: `5px solid ${INK}`,
-            borderRadius: 34,
-            boxShadow: `0 0 0 6px ${ROYAL},0 14px 0 6px rgba(43,42,107,.16)`,
             padding: 12,
             minWidth: 300,
             minHeight: 300,
@@ -281,9 +352,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
           {finished ? (
             <div
               style={{
+                ...paper(26, 2),
                 background: LEAF,
-                border: `4px solid ${INK}`,
-                borderRadius: 26,
                 padding: "10px 22px",
                 font: lilita(32),
               }}
@@ -306,8 +376,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
                   maxWidth: 260,
                   textAlign: "center",
                   background: "#FFE1DA",
-                  border: `4px solid ${TOMATO}`,
-                  borderRadius: 22,
+                  ...paper(22, 22),
                   padding: "14px 18px",
                   font: nunito(900, 18),
                 }}
@@ -345,28 +414,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
         <StoreButton onClick={() => setInterfaceState("store")} />
       </div>
 
-      {SHOW_TEST_CONTROLS && ready && (
-        <button
-          type="button"
-          onClick={completeRecipe}
-          style={{
-            position: "fixed",
-            bottom: 24,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 40,
-            background: "#fff",
-            border: `4px dashed ${INK}`,
-            borderRadius: 24,
-            padding: "8px 20px",
-            font: nunito(900, 16),
-            color: INK,
-            cursor: "pointer",
-          }}
-        >
-          Test: finish recipe
-        </button>
-      )}
+      {testFinishButton}
     </div>
   );
 }

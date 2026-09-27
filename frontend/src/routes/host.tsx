@@ -7,7 +7,7 @@ import { HostInterface } from "#/components/host/HostInterface";
 import { PAGE_BG } from "#/components/chop-chop/design";
 import {
   HostLobbyNew,
-  LOBBY_COLORS,
+  lobbyColor,
 } from "#/components/chop-chop/screens/HostLobbyNew";
 
 export const Route = createFileRoute("/host")({ component: HostScreen });
@@ -56,8 +56,9 @@ function HostScreen() {
     .map((player, i) => ({
       id: player.id,
       name: player.name,
-      color: LOBBY_COLORS[i % LOBBY_COLORS.length],
+      color: lobbyColor(player.character, i),
       connected: player.connected,
+      character: player.character,
     }));
 
   const notice =

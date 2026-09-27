@@ -76,7 +76,7 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
           <polyline
             fill="none"
             points={points.map(({ x, y }) => `${x},${y}`).join(" ")}
-            stroke="#1F4FD8"
+            stroke="#127C78"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="6"

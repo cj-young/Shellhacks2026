@@ -17,6 +17,7 @@ import {
   ChopScreen,
   PlatingScreen,
   RobbedScreen,
+  STORE_PAGE_SIZE,
   StoreScreen,
   StoveScreen,
 } from "../screens/RacePhoneScreens";
@@ -29,15 +30,16 @@ import {
 } from "#/data/menu";
 import type { MenuRecipe, RecipeStep } from "#/data/menu";
 
-/** Shelves split into pages of 6 (the store screen shows 3 shelves × 2). */
+import { paper } from "#/components/chop-chop/paper";
+/** Shelves split into pages that fit the store screen (3 shelves of up to 3). */
 export const AISLES: { name: string; items: string[] }[] = SHELVES.flatMap(
   (shelf) => {
     const items = shelfItems(shelf.id);
     const pages: { name: string; items: string[] }[] = [];
-    for (let i = 0; i < items.length; i += 6)
+    for (let i = 0; i < items.length; i += STORE_PAGE_SIZE)
       pages.push({
         name: shelf.name.toUpperCase(),
-        items: items.slice(i, i + 6),
+        items: items.slice(i, i + STORE_PAGE_SIZE),
       });
     return pages;
   },
@@ -476,14 +478,12 @@ export function RecipeCard({
 
       <div
         style={{
+          ...paper(34, 0),
           position: "absolute",
           top: 150,
           left: 22,
           right: 22,
           background: CARD_BG,
-          border: `5px solid ${INK}`,
-          borderRadius: 34,
-          boxShadow: `0 0 0 6px ${ROYAL},0 14px 0 6px rgba(43,42,107,.16)`,
           boxSizing: "border-box",
           padding: "16px 18px 18px",
           display: "flex",
@@ -521,12 +521,11 @@ export function RecipeCard({
             </span>
             <div
               style={{
+                ...paper("50%", 1),
                 width: 44,
                 height: 44,
                 flexShrink: 0,
-                borderRadius: "50%",
                 background: "#fff",
-                border: `4px solid ${INK}`,
                 boxSizing: "border-box",
                 display: "flex",
                 alignItems: "center",
@@ -592,7 +591,7 @@ function Results({
       />
       <Sparkle
         kind="plus"
-        color="#F48FB7"
+        color="#F7876B"
         size={26}
         style={{ position: "absolute", right: 46, top: 120 }}
       />
@@ -615,15 +614,13 @@ function Results({
 
       <div
         style={{
+          ...paper(36, 2),
           position: "absolute",
           top: 250,
           left: "50%",
           transform: "translateX(-50%) rotate(-3deg)",
           background: SUN,
-          border: `5px solid ${INK}`,
-          borderRadius: 36,
           padding: "14px 48px 18px",
-          boxShadow: "0 0 0 10px #fff,0 14px 0 10px rgba(43,42,107,.15)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",

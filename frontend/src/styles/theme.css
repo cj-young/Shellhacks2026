@@ -1,30 +1,30 @@
 :root {
   /* Backgrounds */
-  --bg: #eef3fb;
-  --bg-dots: #d5e0f2;
-  --surface: #f7f9fe;
+  --bg: #fcebc7;
+  --bg-dots: #f2d7a0;
+  --surface: #fff6e3;
   --surface-white: #ffffff;
 
   /* Ink / Text */
-  --ink: #262a6b;
-  --ink-soft: #5a5f94;
+  --ink: #3d2817;
+  --ink-soft: #7a5a3e;
 
-  /* Brand Colors */
-  --royal: #1f4fd8;
-  --sky: #4fb3f0;
-  --sun: #ffc928;
+  /* Brand Colors (construction-paper palette) */
+  --royal: #127c78;
+  --sky: #f07f22;
+  --sun: #ffc20e;
   --leaf: #2fa84f;
-  --tomato: #ef4b3c;
-  --pink: #f48fb7;
+  --tomato: #ef4128;
+  --pink: #f7876b;
 
   /* Station Colors */
-  --station-blue: #1f4fd8;
-  --station-red: #e8583a;
-  --station-green: #1e9e5a;
-  --station-pink: #e06a9a;
+  --station-blue: #127c78;
+  --station-red: #ef4128;
+  --station-green: #0f7f3f;
+  --station-pink: #f07f22;
 
   /* Typography */
-  --font-display: "Fredoka", "Baloo 2", system-ui, sans-serif;
+  --font-display: "Sniglet", "Nunito", system-ui, sans-serif;
   --font-body: "Nunito", system-ui, sans-serif;
 
   /* Border radius */
@@ -36,10 +36,10 @@
   /* Border width */
   --border-width: 2.5px;
 
-  /* Shadows (hard offset, not blurry) */
-  --shadow-sm: 0 2px 0 var(--ink);
-  --shadow-md: 0 5px 0 var(--ink);
-  --shadow-lg: 0 8px 0 var(--ink);
+  /* Shadows: soft, paper lifted off the table */
+  --shadow-sm: var(--paper-shadow-pressed);
+  --shadow-md: var(--paper-shadow);
+  --shadow-lg: var(--paper-shadow);
 }
 
 /* Dot grid background pattern */
@@ -112,5 +112,5 @@ h6 {
 
 .active-press:active {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 var(--ink) !important;
+  box-shadow: var(--paper-shadow-pressed) !important;
 }

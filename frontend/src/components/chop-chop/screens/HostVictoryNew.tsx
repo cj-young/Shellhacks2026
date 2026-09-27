@@ -14,6 +14,7 @@ import {
 } from "../design";
 import type { FoodKind } from "../design";
 
+import { paper } from "#/components/chop-chop/paper";
 const RESULTS: {
   station: string;
   color: string;
@@ -36,7 +37,7 @@ const RESULTS: {
   },
   {
     station: "Stove",
-    color: "#F2553D",
+    color: "#EF4128",
     items: 22,
     dish: "dumpling",
     fast: "0:11",
@@ -46,7 +47,7 @@ const RESULTS: {
   },
   {
     station: "Sauce",
-    color: "#159A6B",
+    color: "#0F7F3F",
     items: 18,
     dish: "sauce",
     fast: "0:09",
@@ -70,11 +71,11 @@ const RESULTS: {
 export const CONFETTI = (() => {
   const cols = [
     ROYAL,
-    "#4FB3F0",
-    "#159A6B",
+    "#F07F22",
+    "#0F7F3F",
     LEAF,
     SUN,
-    "#F2553D",
+    "#EF4128",
     PINK,
     "#fff",
   ];
@@ -131,13 +132,12 @@ export function HostVictoryNew({
   return (
     <div
       style={{
+        ...paper(32, 0),
         width: 1920,
         height: 1080,
         position: "relative",
         overflow: "hidden",
         background: "#EEF8D6",
-        border: `5px solid ${INK}`,
-        borderRadius: 32,
         boxSizing: "border-box",
         fontFamily: "Nunito, sans-serif",
         color: INK,
@@ -147,14 +147,13 @@ export function HostVictoryNew({
         <span
           key={i}
           style={{
+            ...paper(c.r, 1),
             position: "absolute",
             left: c.x,
             top: c.y,
             width: c.w,
             height: c.h,
-            borderRadius: c.r,
             background: c.color,
-            border: `3px solid ${INK}`,
             transform: `rotate(${c.rot}deg)`,
           }}
         />
@@ -180,15 +179,13 @@ export function HostVictoryNew({
 
       <div
         style={{
+          ...paper(48, 2),
           position: "absolute",
           left: "50%",
           top: 44,
           transform: "translateX(-50%) rotate(-3deg)",
           background: ROYAL,
-          border: `6px solid ${INK}`,
-          borderRadius: 48,
           padding: "10px 70px 22px",
-          boxShadow: `0 0 0 14px ${SUN},0 22px 0 14px rgba(43,42,107,.18)`,
           font: lilita(130, 1),
           color: "#fff",
           WebkitTextStroke: `14px ${INK}`,
@@ -213,15 +210,13 @@ export function HostVictoryNew({
       >
         <div
           style={{
+            ...paper("50%", 3),
             position: "relative",
             width: 440,
             height: 440,
-            borderRadius: "50%",
             background: SUN,
-            border: `6px solid ${INK}`,
-            boxShadow: "0 0 0 16px #fff,0 22px 0 16px rgba(43,42,107,.15)",
             boxSizing: "border-box",
-            transform: "rotate(-4deg)",
+            transform: "rotate(-3deg)",
           }}
         >
           <svg
@@ -234,7 +229,7 @@ export function HostVictoryNew({
               <path id="arcScore" d="M44 214 A170 170 0 0 1 384 214" />
             </defs>
             <text
-              fontFamily="Lilita One"
+              fontFamily="Sniglet"
               fontSize="40"
               fill={INK}
               letterSpacing="5"
@@ -259,9 +254,8 @@ export function HostVictoryNew({
             <span style={{ font: lilita(128, 1) }}>3,480</span>
             <span
               style={{
+                ...paper(22, 4),
                 background: "#fff",
-                border: `4px solid ${INK}`,
-                borderRadius: 22,
                 padding: "4px 18px",
                 font: nunito(900, 22),
               }}
@@ -309,12 +303,10 @@ export function HostVictoryNew({
             />
             <div
               style={{
+                ...paper(32, 5),
                 position: "relative",
                 alignSelf: "stretch",
                 background: "#fff",
-                border: `4px solid ${INK}`,
-                borderRadius: 32,
-                boxShadow: `0 0 0 8px ${r.color},0 14px 0 8px rgba(43,42,107,.15)`,
                 padding: "40px 22px 24px",
                 display: "flex",
                 flexDirection: "column",
@@ -331,11 +323,10 @@ export function HostVictoryNew({
               >
                 <span
                   style={{
+                    ...paper("50%", 6),
                     width: 26,
                     height: 26,
-                    borderRadius: "50%",
                     background: r.color,
-                    border: `3px solid ${INK}`,
                   }}
                 />
                 <span style={{ font: lilita(34) }}>{r.station}</span>
@@ -386,18 +377,16 @@ export function HostVictoryNew({
             {r.mvp && (
               <div
                 style={{
+                  ...paper("50%", 7),
                   position: "absolute",
                   right: -34,
                   top: -30,
                   zIndex: 3,
                   width: 150,
                   height: 150,
-                  borderRadius: "50%",
                   background: PINK,
-                  border: `5px solid ${INK}`,
-                  boxShadow: `0 0 0 8px ${SUN},0 10px 0 8px rgba(43,42,107,.18)`,
                   boxSizing: "border-box",
-                  transform: "rotate(12deg)",
+                  transform: "rotate(3deg)",
                 }}
               >
                 <svg
@@ -410,7 +399,7 @@ export function HostVictoryNew({
                     <path id="arcMvp" d="M20 70 A50 50 0 0 1 120 70" />
                   </defs>
                   <text
-                    fontFamily="Lilita One"
+                    fontFamily="Sniglet"
                     fontSize="21"
                     fill={INK}
                     letterSpacing="2"
@@ -459,11 +448,10 @@ export function HostVictoryNew({
           onClick={onLobby}
           role={onLobby ? "button" : undefined}
           style={{
+            ...paper(52, 8),
             height: 104,
             padding: "0 44px",
-            borderRadius: 52,
             background: "#fff",
-            border: `5px solid ${INK}`,
             boxSizing: "border-box",
             display: "flex",
             alignItems: "center",
@@ -477,15 +465,12 @@ export function HostVictoryNew({
           onClick={onNextRound}
           role={onNextRound ? "button" : undefined}
           style={{
+            ...paper(62, 9),
             position: "relative",
             height: 124,
             padding: "0 64px",
-            borderRadius: 62,
             background: LEAF,
-            border: `5px solid ${INK}`,
             boxSizing: "border-box",
-            boxShadow:
-              "inset 0 -10px 0 rgba(43,42,107,.18),0 0 0 10px #fff,0 14px 0 10px rgba(43,42,107,.15)",
             display: "flex",
             alignItems: "center",
             font: lilita(70),

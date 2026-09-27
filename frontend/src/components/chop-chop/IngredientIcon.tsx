@@ -5,7 +5,7 @@ import type { IngredientKind } from "./Ingredient";
 
 const stickerFilter = (size: number) => {
   const d = Math.max(2, Math.round(size / 26));
-  return `drop-shadow(${d}px 0 0 #fff) drop-shadow(-${d}px 0 0 #fff) drop-shadow(0 ${d}px 0 #fff) drop-shadow(0 -${d}px 0 #fff) drop-shadow(0 ${d + 2}px 0 rgba(43,42,107,.16))`;
+  return `drop-shadow(${d}px 0 0 #fff) drop-shadow(-${d}px 0 0 #fff) drop-shadow(0 ${d}px 0 #fff) drop-shadow(0 -${d}px 0 #fff) drop-shadow(0 ${d + 2}px 0 rgba(122,78,30,.16))`;
 };
 
 /**

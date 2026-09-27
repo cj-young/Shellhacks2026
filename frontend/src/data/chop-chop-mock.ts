@@ -1,15 +1,15 @@
 export const STATION_COLORS = {
-  prep: "#1F4FD8", // blue
-  stove: "#E8583A", // red-orange
-  plating: "#1E9E5A", // green
-  assist: "#E06A9A", // pink
+  prep: "#127C78", // blue
+  stove: "#EF4128", // red-orange
+  plating: "#2FA84F", // green
+  assist: "#F07F22", // pink
 };
 
 export const PLAYER_COLORS = [
-  "#1F4FD8", // blue
-  "#E8583A", // red-orange
-  "#1E9E5A", // green
-  "#E06A9A", // pink
+  "#127C78", // blue
+  "#EF4128", // red-orange
+  "#2FA84F", // green
+  "#F07F22", // pink
 ];
 
 export interface MockPlayer {

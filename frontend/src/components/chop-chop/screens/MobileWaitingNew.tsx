@@ -12,6 +12,7 @@ import {
   nunito,
 } from "../design";
 
+import { paper } from "#/components/chop-chop/paper";
 const DOT_OPACITIES = [1, 0.6, 0.3];
 
 export function MobileWaitingNew() {
@@ -34,6 +35,7 @@ export function MobileWaitingNew() {
     >
       <div
         style={{
+          ...paper(30, 0),
           position: "absolute",
           top: 80,
           left: "50%",
@@ -42,8 +44,6 @@ export function MobileWaitingNew() {
           alignItems: "center",
           gap: 10,
           background: "#fff",
-          border: `4px solid ${INK}`,
-          borderRadius: 30,
           padding: "8px 20px",
           whiteSpace: "nowrap",
           font: nunito(900, 18),
@@ -51,11 +51,10 @@ export function MobileWaitingNew() {
       >
         <span
           style={{
+            ...paper("50%", 1),
             width: 18,
             height: 18,
-            borderRadius: "50%",
             background: ROYAL,
-            border: `3px solid ${INK}`,
           }}
         />
         Mina · PREP station
@@ -89,17 +88,16 @@ export function MobileWaitingNew() {
 
       <div
         style={{
+          ...paper("50%", 2, false),
           position: "absolute",
           top: 170,
           left: "50%",
           transform: "translateX(-50%)",
           width: 290,
           height: 290,
-          borderRadius: "50%",
           background: CARD_BG,
-          border: `5px solid ${INK}`,
           boxSizing: "border-box",
-          boxShadow: `0 0 0 10px ${SUN}`,
+          boxShadow: "var(--paper-shadow)",
         }}
       />
       <ChefPlaceholder
@@ -132,17 +130,16 @@ export function MobileWaitingNew() {
 
       <div
         style={{
+          ...paper(14, 3, false),
           position: "absolute",
           top: 676,
           left: "50%",
-          transform: "translateX(-50%) rotate(-4deg)",
+          transform: "translateX(-50%) rotate(-3deg)",
           width: 110,
           height: 72,
           background: "#fff",
-          border: `4px solid ${INK}`,
-          borderRadius: 14,
           boxSizing: "border-box",
-          boxShadow: `0 0 0 5px ${SUN}`,
+          boxShadow: "var(--paper-shadow)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -150,11 +147,10 @@ export function MobileWaitingNew() {
       >
         <div
           style={{
+            ...paper(6, 4),
             width: 78,
             height: 42,
-            borderRadius: 6,
             background: MINT,
-            border: `3px solid ${INK}`,
             boxSizing: "border-box",
           }}
         />

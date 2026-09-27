@@ -7,7 +7,7 @@ import {
   HostRaceStacks,
 } from "#/components/chop-chop/screens/HostRaceStacks";
 import type { RaceStack } from "#/components/chop-chop/screens/HostRaceStacks";
-import { LOBBY_COLORS } from "#/components/chop-chop/screens/HostLobbyNew";
+import { lobbyColor } from "#/components/chop-chop/screens/HostLobbyNew";
 import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
 import { RoundLeaderboard } from "#/components/chop-chop/screens/RoundLeaderboard";
 import { iconIdFor } from "#/components/client/Store";
@@ -97,7 +97,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
     .map((player, i) => ({
       id: player.id,
       name: player.name,
-      color: LOBBY_COLORS[i % LOBBY_COLORS.length],
+      color: lobbyColor(player.character, i),
     }));
 
   const serverPlayers = new Map(connection.state.players.map((p) => [p.id, p]));

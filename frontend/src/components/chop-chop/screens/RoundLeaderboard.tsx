@@ -10,8 +10,9 @@ import {
   nunito,
 } from "../design";
 import { CONFETTI } from "./HostVictoryNew";
-import { VeggieBackground } from "../VeggieBackground";
+import { KitchenBackground } from "../KitchenBackground";
 
+import { paper } from "#/components/chop-chop/paper";
 export type LeaderboardEntry = {
   id: string;
   name: string;
@@ -83,21 +84,20 @@ export function RoundLeaderboard({
         color: INK,
       }}
     >
-      <VeggieBackground />
+      <KitchenBackground blurred />
       {scale !== null && (
         <>
           {CONFETTI.map((c, i) => (
             <span
               key={i}
               style={{
+                ...paper(c.r, 0),
                 position: "absolute",
                 left: `${(c.x / 1920) * 100}%`,
                 top: `${(c.y / 1080) * 100}%`,
                 width: c.w * s,
                 height: c.h * s,
-                borderRadius: c.r,
                 background: c.color,
-                border: `${3 * s}px solid ${INK}`,
                 transform: `rotate(${c.rot}deg)`,
               }}
             />
@@ -137,12 +137,10 @@ export function RoundLeaderboard({
             >
               <div
                 style={{
+                  ...paper(48 * s, 1),
                   transform: "rotate(-3deg)",
                   background: ROYAL,
-                  border: `${6 * s}px solid ${INK}`,
-                  borderRadius: 48 * s,
                   padding: `${10 * s}px ${70 * s}px ${22 * s}px`,
-                  boxShadow: `0 0 0 ${14 * s}px ${SUN},0 ${22 * s}px 0 ${14 * s}px rgba(43,42,107,.18)`,
                   font: lilita(130 * s, 1),
                   color: "#fff",
                   WebkitTextStroke: `${14 * s}px ${INK}`,
@@ -154,10 +152,9 @@ export function RoundLeaderboard({
               </div>
               <span
                 style={{
+                  ...paper(22 * s, 2),
                   transform: "rotate(2deg)",
                   background: "#fff",
-                  border: `${4 * s}px solid ${INK}`,
-                  borderRadius: 22 * s,
                   padding: `${4 * s}px ${22 * s}px`,
                   font: nunito(900, 26 * s),
                   letterSpacing: ".14em",
@@ -215,6 +212,10 @@ export function RoundLeaderboard({
                     >
                       <div
                         style={{
+                          ...paper(
+                            `${28 * s}px ${28 * s}px ${10 * s}px ${10 * s}px`,
+                            3,
+                          ),
                           position: "absolute",
                           left: 0,
                           right: 0,
@@ -222,9 +223,6 @@ export function RoundLeaderboard({
                           height: grown ? `${pct}%` : "0%",
                           transition: "height 900ms cubic-bezier(.2,.9,.3,1.1)",
                           background: entry.color,
-                          border: `${5 * s}px solid ${INK}`,
-                          borderRadius: `${28 * s}px ${28 * s}px ${10 * s}px ${10 * s}px`,
-                          boxShadow: `0 0 0 ${8 * s}px #fff,0 ${14 * s}px 0 ${8 * s}px rgba(43,42,107,.15)`,
                           boxSizing: "border-box",
                         }}
                       >
@@ -256,12 +254,11 @@ export function RoundLeaderboard({
                         >
                           <span
                             style={{
-                              transform: `rotate(${rank === 1 ? -6 : 4}deg)`,
+                              ...paper(22 * s, 4, false),
+                              transform: `rotate(${rank === 1 ? -3 : 3}deg)`,
                               background: rank === 1 ? SUN : "#fff",
-                              border: `${4 * s}px solid ${INK}`,
-                              borderRadius: 22 * s,
                               padding: `${2 * s}px ${16 * s}px`,
-                              boxShadow: `0 0 0 ${5 * s}px #fff`,
+                              boxShadow: "var(--paper-shadow)",
                               font: lilita(28 * s),
                             }}
                           >
@@ -285,26 +282,24 @@ export function RoundLeaderboard({
 
                     <div
                       style={{
+                        ...paper(28 * s, 5, false),
                         display: "flex",
                         alignItems: "center",
                         gap: 10 * s,
                         maxWidth: "100%",
                         background: "#fff",
-                        border: `${4 * s}px solid ${INK}`,
-                        borderRadius: 28 * s,
                         padding: `${6 * s}px ${20 * s}px ${6 * s}px ${8 * s}px`,
-                        boxShadow: `0 0 0 ${6 * s}px ${entry.color}`,
+                        boxShadow: "var(--paper-shadow)",
                         boxSizing: "border-box",
                       }}
                     >
                       <span
                         style={{
+                          ...paper("50%", 6),
                           width: 26 * s,
                           height: 26 * s,
                           flexShrink: 0,
-                          borderRadius: "50%",
                           background: entry.color,
-                          border: `${3 * s}px solid ${INK}`,
                           boxSizing: "border-box",
                         }}
                       />
@@ -336,11 +331,10 @@ export function RoundLeaderboard({
                 onClick={onLobby}
                 role={onLobby ? "button" : undefined}
                 style={{
+                  ...paper(52 * s, 7),
                   height: 104 * s,
                   padding: `0 ${44 * s}px`,
-                  borderRadius: 52 * s,
                   background: "#fff",
-                  border: `${5 * s}px solid ${INK}`,
                   boxSizing: "border-box",
                   display: "flex",
                   alignItems: "center",
@@ -355,14 +349,12 @@ export function RoundLeaderboard({
                   onClick={onNextRound}
                   role={onNextRound ? "button" : undefined}
                   style={{
+                    ...paper(62 * s, 8),
                     position: "relative",
                     height: 124 * s,
                     padding: `0 ${64 * s}px`,
-                    borderRadius: 62 * s,
                     background: LEAF,
-                    border: `${5 * s}px solid ${INK}`,
                     boxSizing: "border-box",
-                    boxShadow: `inset 0 -${10 * s}px 0 rgba(43,42,107,.18),0 0 0 ${10 * s}px #fff,0 ${14 * s}px 0 ${10 * s}px rgba(43,42,107,.15)`,
                     display: "flex",
                     alignItems: "center",
                     font: lilita(70 * s),
@@ -394,8 +386,8 @@ export function RoundLeaderboard({
 
 const PREVIEW_ENTRIES: LeaderboardEntry[] = [
   { id: "mina", name: "Mina", color: ROYAL, points: 500 },
-  { id: "jun", name: "Jun", color: "#F2553D", points: 300 },
-  { id: "ari", name: "Ari", color: "#159A6B", points: 300 },
+  { id: "jun", name: "Jun", color: "#EF4128", points: 300 },
+  { id: "ari", name: "Ari", color: "#0F7F3F", points: 300 },
   { id: "leo", name: "Leo", color: PINK, points: 100 },
 ];
 

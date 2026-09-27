@@ -1,19 +1,25 @@
 import React from "react";
 
-export const INK = "#2B2A6B";
-export const PAGE_BG = "#EEF3FB";
-export const CARD_BG = "#F7F9FE";
-export const DOT = "#D5E0F2";
-export const SUN = "#FFC928";
-export const LEAF = "#3CB54A";
-export const ROYAL = "#1F4FD8";
-export const SKY = "#4FB3F0";
-export const PINK = "#F48FB7";
-export const TOMATO = "#F2553D";
-export const MINT = "#BFEBD9";
+import { paper } from "./paper";
+// Construction-paper palette (see paper.tsx). The old names are kept so every
+// screen picks up the new colours; ROYAL/SKY/PINK now map to paper colours.
+export const INK = "#3D2817";
+export const PAGE_BG = "#FCEBC7";
+export const CARD_BG = "#FFF6E3";
+export const DOT = "#F2D7A0";
+export const SUN = "#FFC20E";
+export const LEAF = "#2FA84F";
+export const ROYAL = "#127C78";
+export const SKY = "#F07F22";
+export const PINK = "#F7876B";
+export const TOMATO = "#EF4128";
+export const MINT = "#CDE8B5";
+export const DEEP_GREEN = "#0F7F3F";
+export const WOOD = "#B27440";
 
+/** Display font (formerly Sniglet); paper.css thickens it with a stroke. */
 export const lilita = (size: number, lineHeight?: number) =>
-  `400 ${size}px${lineHeight ? `/${lineHeight}` : ""} 'Lilita One'`;
+  `400 ${size}px${lineHeight ? `/${lineHeight}` : ""} Sniglet`;
 export const nunito = (weight: number, size: number) =>
   `${weight} ${size}px Nunito`;
 
@@ -54,9 +60,6 @@ export function Sparkle({
           <path
             d="M12 1 Q13.4 10.6 23 12 Q13.4 13.4 12 23 Q10.6 13.4 1 12 Q10.6 10.6 12 1Z"
             fill={color}
-            stroke={INK}
-            strokeWidth="1.6"
-            strokeLinejoin="round"
           />
         )}
         {kind === "plus" && (
@@ -115,7 +118,7 @@ export function Food({
   const f = fy ?? 50;
   const d = Math.max(2, Math.round(size / 26));
   const filter = sticker
-    ? `drop-shadow(${d}px 0 0 #fff) drop-shadow(-${d}px 0 0 #fff) drop-shadow(0 ${d}px 0 #fff) drop-shadow(0 -${d}px 0 #fff) drop-shadow(0 ${d + 2}px 0 rgba(43,42,107,.16))`
+    ? `drop-shadow(${d}px 0 0 #fff) drop-shadow(-${d}px 0 0 #fff) drop-shadow(0 ${d}px 0 #fff) drop-shadow(0 -${d}px 0 #fff) drop-shadow(0 ${d + 2}px 0 rgba(122,78,30,.16))`
     : "none";
 
   return (
@@ -143,10 +146,10 @@ export function Food({
       >
         {kind === "tomato" && (
           <g>
-            <circle cx="50" cy="57" r="36" fill="#F2553D" />
+            <circle cx="50" cy="57" r="36" fill="#EF4128" />
             <path
               d="M32 26 Q42 31 50 22 Q58 31 68 26 Q63 36 50 36 Q37 36 32 26Z"
-              fill="#3CB54A"
+              fill="#2FA84F"
             />
             <path d="M50 22 L52 11" />
             <ellipse
@@ -187,7 +190,7 @@ export function Food({
               d="M18 50 Q14 20 46 18 Q80 12 86 42 Q94 72 64 84 Q30 92 18 70 Q10 60 18 50Z"
               fill="#fff"
             />
-            <circle cx="52" cy="50" r="19" fill="#FFC928" />
+            <circle cx="52" cy="50" r="19" fill="#FFC20E" />
             <ellipse
               cx="45"
               cy="42"
@@ -211,7 +214,7 @@ export function Food({
         {kind === "mushroom" && (
           <g>
             <path d="M36 56 L34 84 Q50 92 66 84 L64 56 Z" fill="#FFF1D2" />
-            <path d="M10 58 Q12 16 50 16 Q88 16 90 58 Z" fill="#F2553D" />
+            <path d="M10 58 Q12 16 50 16 Q88 16 90 58 Z" fill="#EF4128" />
             <circle cx="33" cy="36" r="6" fill="#fff" stroke="none" />
             <circle cx="57" cy="28" r="5" fill="#fff" stroke="none" />
             <circle cx="72" cy="45" r="5" fill="#fff" stroke="none" />
@@ -221,7 +224,7 @@ export function Food({
           <g>
             <path
               d="M50 92 Q14 72 22 30 Q38 10 50 32 Q62 10 78 30 Q86 72 50 92Z"
-              fill="#3CB54A"
+              fill="#2FA84F"
             />
             <path d="M50 38 L50 86" />
             <ellipse
@@ -243,7 +246,7 @@ export function Food({
               rx="6"
               ry="12"
               transform="rotate(-25 42 18)"
-              fill="#3CB54A"
+              fill="#2FA84F"
             />
             <ellipse
               cx="58"
@@ -251,7 +254,7 @@ export function Food({
               rx="6"
               ry="12"
               transform="rotate(25 58 18)"
-              fill="#3CB54A"
+              fill="#2FA84F"
             />
             <path
               d="M50 92 Q28 62 28 44 Q28 28 50 28 Q72 28 72 44 Q72 62 50 92Z"
@@ -264,7 +267,7 @@ export function Food({
           <g>
             <path
               d="M50 10 Q78 46 76 64 Q74 88 50 88 Q26 88 24 64 Q22 46 50 10Z"
-              fill="#F2553D"
+              fill="#EF4128"
             />
             <ellipse
               cx="36"
@@ -285,12 +288,12 @@ export function Food({
               cy="40"
               rx="9"
               ry="6"
-              fill="#3CB54A"
+              fill="#2FA84F"
               strokeWidth="3.5"
             />
-            <circle cx="70" cy="40" r="8" fill="#F2553D" strokeWidth="3.5" />
-            <circle cx="50" cy="33" r="9" fill="#FFC928" strokeWidth="3.5" />
-            <path d="M8 50 H92 Q90 88 50 90 Q10 88 8 50Z" fill="#1F4FD8" />
+            <circle cx="70" cy="40" r="8" fill="#EF4128" strokeWidth="3.5" />
+            <circle cx="50" cy="33" r="9" fill="#FFC20E" strokeWidth="3.5" />
+            <path d="M8 50 H92 Q90 88 50 90 Q10 88 8 50Z" fill="#127C78" />
             <circle cx="30" cy="66" r="3" fill="#fff" stroke="none" />
             <circle cx="50" cy="72" r="3" fill="#fff" stroke="none" />
             <circle cx="70" cy="66" r="3" fill="#fff" stroke="none" />
@@ -299,7 +302,7 @@ export function Food({
               cy="60"
               rx="3"
               ry="6"
-              fill="#4FB3F0"
+              fill="#F07F22"
               stroke="none"
             />
           </g>
@@ -363,11 +366,10 @@ export function ChefPlaceholder({
     >
       <div
         style={{
+          ...paper("50%", 0),
           width: diameter,
           height: diameter,
-          borderRadius: "50%",
           background: color,
-          border: `${bust ? 3 : 5}px solid ${INK}`,
           boxSizing: "border-box",
         }}
       />
@@ -394,7 +396,7 @@ export function PhoneFrame({
         borderRadius: 62,
         padding: 10,
         boxSizing: "border-box",
-        boxShadow: "0 24px 50px rgba(43,42,107,.25)",
+        boxShadow: "0 24px 50px rgba(122,78,30,.25)",
       }}
     >
       <div
@@ -425,14 +427,7 @@ export function PhoneFrame({
           }}
         >
           <span>9:41</span>
-          <span
-            style={{
-              width: 26,
-              height: 13,
-              border: `2px solid ${chrome}`,
-              borderRadius: 4,
-            }}
-          />
+          <span style={{ ...paper(4, 1), width: 26, height: 13 }} />
         </div>
         <div
           style={{
@@ -479,26 +474,24 @@ export function NamePill({
   return (
     <div
       style={{
+        ...paper(28, 2, false),
         display: "flex",
         alignItems: "center",
         gap: 10,
         background: "#fff",
-        border: `4px solid ${INK}`,
-        borderRadius: 28,
         padding: "6px 20px 6px 8px",
-        boxShadow: `0 0 0 6px ${color}`,
+        boxShadow: "var(--paper-shadow)",
         maxWidth,
         boxSizing: maxWidth ? "border-box" : undefined,
       }}
     >
       <span
         style={{
+          ...paper("50%", 3),
           width: 26,
           height: 26,
           flexShrink: 0,
-          borderRadius: "50%",
           background: color,
-          border: `3px solid ${INK}`,
         }}
       />
       <span
@@ -516,5 +509,30 @@ export function NamePill({
         {name}
       </span>
     </div>
+  );
+}
+
+/** The Chop Chop cleaver logo (public/assets/logo-chop-chop.png, 1200×612). */
+export function ChopChopLogo({
+  width,
+  style,
+}: {
+  width: number | string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <img
+      src="/assets/logo-chop-chop.png"
+      alt="Chop Chop"
+      draggable={false}
+      style={{
+        display: "block",
+        width,
+        height: "auto",
+        aspectRatio: "1200 / 612",
+        filter: "drop-shadow(0 8px 0 rgba(122,78,30,.14))",
+        ...style,
+      }}
+    />
   );
 }

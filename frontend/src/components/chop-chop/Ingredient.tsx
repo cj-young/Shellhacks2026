@@ -73,23 +73,23 @@ export const INGREDIENT_LOOKALIKE_PAIRS: [IngredientKind, IngredientKind][] = [
 ];
 
 const PALETTE = {
-  red: "#F2553D",
-  green: "#3CB54A",
+  red: "#EF4128",
+  green: "#2FA84F",
   dkgreen: "#1E8A4A",
-  ltgreen: "#BFEBD9",
+  ltgreen: "#CDE8B5",
   white: "#FFFFFF",
   cream: "#FFF1D2",
   lemon: "#FFD83A",
   lime: "#8FD14F",
   butter: "#FFE58A",
   butterTop: "#FFF3C2",
-  cheese: "#FFC928",
+  cheese: "#FFC20E",
   cheeseTop: "#FFDD6B",
   cheeseDk: "#E8A51C",
-  blue: "#1F4FD8",
-  sky: "#4FB3F0",
-  skyLt: "#CFE6FB",
-  pink: "#F48FB7",
+  blue: "#127C78",
+  sky: "#F07F22",
+  skyLt: "#F6DDB0",
+  pink: "#F7876B",
   bacon: "#FF8A7A",
   tan: "#E9A866",
   gold: "#F2BE63",
@@ -676,20 +676,20 @@ export function Ingredient({
     if (silhouette) c[key] = INK;
   if (silhouette) c.hi = "none";
   if (!silhouette && !outline) {
-    c.white = "#E3EAF6";
+    c.white = "#F8E6C4";
     c.cream = "#FBE3B8";
-    c.skyLt = "#B9D9F7";
+    c.skyLt = "#F1CF94";
     c.butterTop = "#FFEFA6";
   }
   const ink = silhouette || outline ? INK : "none";
-  const line = silhouette || outline ? INK : "rgba(43,42,107,.5)";
+  const line = silhouette || outline ? INK : "rgba(122,78,30,.5)";
 
   const worried = mood === "worried" && !silhouette;
   const fy = FACE_Y[kind] ?? 58;
   const fx = FACE_X[kind] ?? 50;
   const d = Math.max(2, Math.round(size / 26));
   const filter = sticker
-    ? `drop-shadow(${d}px 0 0 #fff) drop-shadow(-${d}px 0 0 #fff) drop-shadow(0 ${d}px 0 #fff) drop-shadow(0 -${d}px 0 #fff) drop-shadow(0 ${d + 2}px 0 rgba(43,42,107,.16))`
+    ? `drop-shadow(${d}px 0 0 #fff) drop-shadow(-${d}px 0 0 #fff) drop-shadow(0 ${d}px 0 #fff) drop-shadow(0 -${d}px 0 #fff) drop-shadow(0 ${d + 2}px 0 rgba(122,78,30,.16))`
     : "none";
 
   return (
@@ -732,7 +732,7 @@ export function Ingredient({
             />
             <path
               d={`M${fx + 26} ${fy - 22} Q${fx + 32} ${fy - 13} ${fx + 29} ${fy - 9} Q${fx + 26} ${fy - 6} ${fx + 23} ${fy - 9} Q${fx + 20} ${fy - 13} ${fx + 26} ${fy - 22}Z`}
-              fill="#4FB3F0"
+              fill="#F07F22"
               strokeWidth="3"
               stroke={line}
             />

@@ -174,6 +174,28 @@ export function createSocketIoGateway(
       void handleFinishStage();
     });
 
+    socket.on("select_character", (character) => {
+      void handleSelectCharacter(character);
+    });
+
+    async function handleSelectCharacter(character: unknown): Promise<void> {
+      const selection = await session.selectCharacter({
+        code: gameCode,
+        playerId: player.id,
+        character,
+      });
+
+      if (!selection.ok) {
+        socket.emit("game_error", {
+          code: selection.code,
+          message: selection.message,
+        });
+        return;
+      }
+
+      io.to(room).emit("player_updated", selection.player);
+    }
+
     async function handlePurchase(items: PurchaseItem[]): Promise<void> {
       if (!isPurchaseItems(items)) {
         socket.emit("game_error", {
