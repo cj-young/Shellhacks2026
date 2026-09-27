@@ -23,7 +23,7 @@
       {
         "type": "spin",
         "backgroundImage": "/SlicedBreadTest.jpg",
-        "image": "/FlourTest.webp",
+        "image": "/assets/ingredient-ground-beef.svg",
         "finishedImage": "/SlicedBreadTest2.jpg",
         "spins": [
           {
@@ -41,7 +41,7 @@
       {
         "type": "spin",
         "backgroundImage": "/SlicedBreadTest.jpg",
-        "image": "/FlourTest.webp",
+        "image": "/assets/ingredient-ground-beef.svg",
         "finishedImage": "/SlicedBreadTest2.jpg",
         "spins": [
           {
@@ -51,16 +51,13 @@
             "direction": "clockwise",
             "rotations": 1
           }
-        ],
-        "ingredientsConsumed": {
-          "8": 1
-        }
+        ]
       },
       {
         "type": "spin",
         "backgroundImage": "/SlicedBreadTest.jpg",
-        "image": "/FlourTest.webp",
-        "finishedImage": "/SlicedBreadTest2.jpg",
+        "image": "/assets/ingredient-ground-beef.svg",
+        "finishedImage": "/assets/steps/spaghetti/raw-meatballs.png",
         "spins": [
           {
             "center": { "x": 150, "y": 100 },
@@ -69,20 +66,33 @@
             "direction": "clockwise",
             "rotations": 1
           }
-        ],
-        "ingredientsConsumed": {
-          "8": 1
-        }
+        ]
+      },
+      ,
+      {
+        "type": "spin",
+        "backgroundImage": "/assets/steps/pan.svg",
+        "image": "/assets/steps/spaghetti/raw-meatballs.png",
+        "finishedImage": "/assets/steps/spaghetti/cooked-meatballs.png",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 30,
+            "direction": "counterclockwise",
+            "rotations": 2
+          }
+        ]
       },
       {
         "type": "lines",
         "backgroundImage": "/SlicedBreadTest.jpg",
-        "image": "/FlourTest.webp",
+        "image": "/assets/ingredient-garlic.svg",
         "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
-            "end": { "x": 170, "y": 30 },
+            "start": { "x": 30, "y": 50 },
+            "end": { "x": 170, "y": 50 },
             "radius": 20
           }
         ],
@@ -93,7 +103,7 @@
       {
         "type": "lines",
         "backgroundImage": "/SlicedBreadTest.jpg",
-        "image": "/FlourTest.webp",
+        "image": "/assets/ingredient-garlic.svg",
         "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {
