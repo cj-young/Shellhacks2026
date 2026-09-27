@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import ingredients from "../../data/ingredients.json" with { type: "json" };
 import type { Game } from "../domain/game.ts";
-import type { Player } from "../domain/player.ts";
+import { CHARACTERS, type Player } from "../domain/player.ts";
 import type { Recipe } from "../domain/recipe.ts";
 import { InMemoryGameStore } from "../infrastructure/in-memory-game-store.ts";
 import type { GameStore } from "../ports/game-store.ts";
@@ -719,6 +719,68 @@ test("selectCharacter rejects unknown chefs, the host, and picks after start", a
     await service.selectCharacter(game.code, ada.player.id, "cow"),
     { ok: false, code: "GAME_STARTED" },
   );
+});
+
+test("startGame assigns remaining chefs to players who did not pick", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const host = await service.joinPlayer(game.code, {
+    hostToken: game.hostToken,
+  });
+  const ada = await service.joinPlayer(game.code, { name: "Ada" });
+  const bo = await service.joinPlayer(game.code, { name: "Bo" });
+  if (!host.ok || !ada.ok || !bo.ok) {
+    assert.fail("expected all joins to succeed");
+  }
+
+  await service.selectCharacter(game.code, ada.player.id, "bear");
+
+  const result = await service.startGame(game.code, { durationMs: 60_000 });
+  if (!result.ok) {
+    assert.fail("expected start to succeed");
+  }
+
+  const byId = new Map(result.game.state.players.map((p) => [p.id, p]));
+  assert.equal(byId.get(host.player.id)?.character, null);
+  assert.equal(byId.get(ada.player.id)?.character, "bear");
+  const boCharacter = byId.get(bo.player.id)?.character;
+  assert.ok(boCharacter !== null && boCharacter !== "bear");
+});
+
+test("startGame reuses chefs when there are more players than characters", async () => {
+  const players: Player[] = Array.from({ length: 5 }, (_, index) => ({
+    id: `player-${index}`,
+    name: `Player ${index}`,
+    isHost: false,
+    reconnectToken: `token-${index}`,
+    joinedAt: 0,
+    connected: true,
+    character: null,
+    interfaceState: "store",
+    recipeIndex: 0,
+    recipeStageIndex: 0,
+    cart: {},
+    inventory: {},
+    score: 0,
+    stageDeadlineAt: null,
+    sabotages: [],
+  }));
+  const base = makeGame();
+  const game: Game = {
+    ...base,
+    status: "lobby",
+    state: { ...base.state, players },
+  };
+  const service = new GameService(mutableStore(game));
+
+  const result = await service.startGame(game.code, { durationMs: 60_000 });
+  if (!result.ok) {
+    assert.fail("expected start to succeed");
+  }
+
+  const assigned = result.game.state.players.map((p) => p.character);
+  assert.ok(assigned.every((character) => character !== null));
+  assert.equal(new Set(assigned).size, CHARACTERS.length);
 });
 
 test("startGame arms each player's stage deadline", async () => {

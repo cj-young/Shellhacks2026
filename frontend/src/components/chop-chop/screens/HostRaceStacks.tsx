@@ -669,7 +669,15 @@ function PrepPanel({
               />
             </div>
           )}
-          {stack.gesture === "plate" ? (
+          {GESTURE_ART[stack.gesture] ? (
+            <img
+              src={GESTURE_ART[stack.gesture]}
+              alt=""
+              width={250}
+              height={250}
+              style={{ position: "relative" }}
+            />
+          ) : stack.gesture === "plate" ? (
             stack.dish && (
               <img
                 src={dishAsset(stack.dish)}
@@ -681,7 +689,7 @@ function PrepPanel({
             )
           ) : (
             <GameIcon
-              kind={stack.gesture}
+              kind={stack.gesture === "chop" ? "chop" : "stir"}
               size={200}
               style={{ position: "relative" }}
             />
@@ -1135,7 +1143,17 @@ const GESTURE_NAMES: Record<Gesture, string> = {
   chop: "CHOP!",
   stir: "STIR!",
   flip: "FLIP!",
+  pour: "POUR!",
+  scoop: "SCOOP!",
   plate: "PLATE!",
+};
+
+/** Illustrated gesture icons (public/assets/gestures); others use GameIcon. */
+const GESTURE_ART: Partial<Record<Gesture, string>> = {
+  flip: "/assets/gestures/flip.png",
+  pour: "/assets/gestures/pour.png",
+  scoop: "/assets/gestures/scoop.png",
+  stir: "/assets/gestures/stir.png",
 };
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
 

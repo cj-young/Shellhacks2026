@@ -110,9 +110,8 @@ export function HostInterface({ connection }: HostInterfaceProps) {
   }, [results]);
 
   const serverPlayers = new Map(connection.state.players.map((p) => [p.id, p]));
-  // Live score: the server's player score or the per-recipe tally, whichever is ahead.
-  const livePoints = (id: string) =>
-    Math.max(serverPlayers.get(id)?.score ?? 0, connection.scores[id] ?? 0);
+  // Live score: the authoritative player score from the server's state.
+  const livePoints = (id: string) => serverPlayers.get(id)?.score ?? 0;
 
   const players = connection.players
     .filter((player) => !player.isHost)
@@ -129,7 +128,6 @@ export function HostInterface({ connection }: HostInterfaceProps) {
       Math.max(
         results.find((r) => r.playerId === id)?.score ?? 0,
         serverPlayers.get(id)?.score ?? 0,
-        connection.scores[id] ?? 0,
       );
     return (
       <div style={{ width: "100vw", height: "100dvh" }}>

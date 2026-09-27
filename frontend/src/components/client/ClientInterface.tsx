@@ -192,7 +192,6 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     if (completedRecipes.current.has(recipeState)) return;
     completedRecipes.current.add(recipeState);
 
-    connection.socketRef.current?.emit("recipe_completed");
     // Target by our own count so a server that's still catching up isn't under-shot.
     setAdvanceTo(recipeState + 1);
 
@@ -256,9 +255,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const total = recipeOrder.length;
   const recipesDone = recipeState + (finished ? 1 : 0);
   const progress = total ? Math.round((recipesDone / total) * 100) : 0;
-  const myPoints = connection.playerId
-    ? (connection.scores[connection.playerId] ?? 0)
-    : 0;
+  const myPoints = me?.score ?? 0;
 
   if (connection.results) {
     return (

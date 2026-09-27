@@ -22,8 +22,6 @@ export type GameConnection = {
   message: string;
   started: boolean;
   state: GameState;
-  /** Running points per player id, from the server's `player_scored` events. */
-  scores: Record<string, number>;
   /** When the round ends, in this device's clock (from `timer_sync`); null before it starts. */
   roundEndsAt: number | null;
   /** Final results once the server ends the game (`game_ended`); null while playing. */
@@ -62,7 +60,6 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
   const [message, setMessage] = useState("");
   const [started, setStarted] = useState(false);
   const [state, setState] = useState<GameState>(MakeEmptyState());
-  const [scores, setScores] = useState<Record<string, number>>({});
   const [roundEndsAt, setRoundEndsAt] = useState<number | null>(null);
   const [results, setResults] = useState<PlayerResult[] | null>(null);
 
@@ -85,7 +82,6 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     setMessage("");
     setStarted(false);
     setState(MakeEmptyState());
-    setScores({});
     setRoundEndsAt(null);
     setResults(null);
 
@@ -146,12 +142,6 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
       console.log(gameState);
     });
     socket.on(
-      "player_scored",
-      ({ playerId: scorerId, total }: { playerId: string; total: number }) => {
-        setScores((current) => ({ ...current, [scorerId]: total }));
-      },
-    );
-    socket.on(
       "timer_sync",
       ({
         roundEndsAt: endsAt,
@@ -185,7 +175,6 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     message,
     started,
     state,
-    scores,
     roundEndsAt,
     results,
   };
