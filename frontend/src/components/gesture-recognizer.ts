@@ -137,6 +137,19 @@ export function pathLength(points: Point[]): number {
   return total;
 }
 
+/**
+ * Whether a finished stroke was a real attempt worth punishing, as opposed to a
+ * tap or a tiny scribble. Uses the recognizer's own minimums so a wrong-gesture
+ * penalty only fires for strokes the recognizer would have scored.
+ */
+export function isDeliberateStroke(points: Point[]): boolean {
+  const clean = cleanPoints(points);
+  return (
+    clean.length >= RECOGNIZER_TUNING.minPoints &&
+    pathLength(clean) >= RECOGNIZER_TUNING.minPathLength
+  );
+}
+
 /** Shortest distance from `point` to the finite segment `a`–`b`. */
 export function distanceToSegment(point: Point, a: Point, b: Point): number {
   const dx = b.x - a.x;

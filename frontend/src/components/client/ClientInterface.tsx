@@ -35,6 +35,9 @@ import {
 /** Visible square of the recipe box; stage gestures sit within its 0–200px. */
 const GESTURE_AREA = 210;
 
+/** How long a wrong gesture locks the player out of drawing, in ms. */
+const WRONG_LOCKOUT_MS = 2500;
+
 interface ClientInterfaceProps {
   connection: GameConnection;
 }
@@ -63,6 +66,9 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
   const [canPrepareRecipe, setCanPrepareRecipe] = useState(false);
   const [finished, setFinished] = useState(false);
   const [currentPoints, setCurrentPoints] = useState<CursorPoint[]>([]);
+  /** True while a wrong gesture is being punished: drawing is locked out. */
+  const [lockedOut, setLockedOut] = useState(false);
+  const lockoutTimer = useRef<number | undefined>(undefined);
   /** True while the "new order" card for the next recipe is on screen. */
   const [showNewRecipe, setShowNewRecipe] = useState(false);
   /** Server recipe index we're finishing stages toward (see effect below). */
@@ -78,6 +84,20 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
     if (frozen) return;
     connection.socketRef.current?.emit("update_interface_state", next);
   }
+
+  /** A deliberate stroke missed its target: shake the food and lock out input. */
+  function handleWrongGesture() {
+    if (frozen || connection.results) return;
+    setCurrentPoints([]);
+    setLockedOut(true);
+    window.clearTimeout(lockoutTimer.current);
+    lockoutTimer.current = window.setTimeout(
+      () => setLockedOut(false),
+      WRONG_LOCKOUT_MS,
+    );
+  }
+
+  useEffect(() => () => window.clearTimeout(lockoutTimer.current), []);
 
   /** 3-2-1 over everything when the game starts (the host shows the same). */
   const [showCountdown, setShowCountdown] = useState(true);
@@ -580,9 +600,10 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
                 onCompleteChange={(complete) => {
                   if (complete) completeRecipe();
                 }}
+                onWrong={handleWrongGesture}
               />
               <CursorPathTracker
-                disabled={frozen}
+                disabled={frozen || lockedOut}
                 onPointsChange={setCurrentPoints}
               />
               {activeStep?.tool && activeStage && (
@@ -591,6 +612,59 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
                   tool={activeStep.tool}
                   rest={toolRest(activeStage)}
                 />
+              )}
+              {lockedOut && (
+                <>
+                  <style>{`
+                    @keyframes wrongDrain {
+                      from { transform: scaleX(1); }
+                      to { transform: scaleX(0); }
+                    }
+                    @media (prefers-reduced-motion: reduce) {
+                      .wrong-drain-bar { animation: none !important; }
+                    }
+                  `}</style>
+                  <span
+                    style={{
+                      ...paper(22, 0),
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      zIndex: 30,
+                      transform: "translate(-50%, -50%) rotate(-3deg)",
+                      background: "#FFE1DA",
+                      padding: "4px 18px",
+                      font: lilita(28),
+                      color: INK,
+                      pointerEvents: "none",
+                    }}
+                  >
+                    Oops!
+                  </span>
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: 8,
+                      zIndex: 31,
+                      background: "rgba(61,40,23,.25)",
+                      borderRadius: "0 0 22px 22px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      className="wrong-drain-bar"
+                      style={{
+                        height: "100%",
+                        background: "#E5452F",
+                        transformOrigin: "left center",
+                        animation: `wrongDrain ${WRONG_LOCKOUT_MS}ms linear forwards`,
+                      }}
+                    />
+                  </div>
+                </>
               )}
             </div>
           ) : (

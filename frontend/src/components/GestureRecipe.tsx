@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CursorPoint } from "./CursorPathTracker";
 import { LineTarget } from "./LineTarget";
 import { SpinGesture } from "./SpinGesture";
-import { matchStage } from "./gesture-recognizer";
+import { isDeliberateStroke, matchStage } from "./gesture-recognizer";
 import type { LineType, RecipeStage, SpinType } from "../lib/types";
 
 import { paper } from "#/components/chop-chop/paper";
@@ -22,8 +22,12 @@ export type GestureRecipeProps = {
   points: CursorPoint[];
   /** Holds the finished appearance while the parent waits to advance. */
   completed?: boolean;
+  /** Freezes recognition without losing progress (e.g. a sabotage). */
+  paused?: boolean;
   /** True only while the stage's gesture has been recognized. */
   onMatchChange?: (matches: boolean) => void;
+  /** Called when a deliberate stroke ends without matching the stage. */
+  onWrong?: () => void;
 };
 
 /**
@@ -35,10 +39,13 @@ export function GestureRecipe({
   stage,
   points,
   completed = false,
+  paused = false,
   onMatchChange,
+  onWrong,
 }: GestureRecipeProps) {
   const stageKey = useMemo(() => JSON.stringify(stage), [stage]);
   const [matchedKey, setMatchedKey] = useState<string | null>(null);
+  const [shakeId, setShakeId] = useState(0);
 
   const result = useMemo(() => matchStage(points, stage), [points, stage]);
   const matches =
@@ -56,12 +63,64 @@ export function GestureRecipe({
     onMatchChange?.(matches);
   }, [matches, onMatchChange]);
 
+  // Punish a real stroke that ends without matching: shake the food and tell the
+  // parent. A stroke only counts if it started on this stage (a match can advance
+  // the stage mid-stroke), was not matched, and was a genuine attempt.
+  const lastPointsRef = useRef<CursorPoint[]>(points);
+  const prevLengthRef = useRef(points.length);
+  const startedOnStageRef = useRef(false);
+  const strokeMatchedRef = useRef(false);
+
+  useEffect(() => {
+    const prevLength = prevLengthRef.current;
+    prevLengthRef.current = points.length;
+
+    if (points.length > 0) {
+      lastPointsRef.current = points;
+      if (prevLength === 0) {
+        startedOnStageRef.current = true;
+        strokeMatchedRef.current = false;
+      }
+      if (matches) strokeMatchedRef.current = true;
+      return;
+    }
+
+    const wrong =
+      prevLength > 0 &&
+      startedOnStageRef.current &&
+      !strokeMatchedRef.current &&
+      !paused &&
+      !completed &&
+      isDeliberateStroke(lastPointsRef.current);
+    startedOnStageRef.current = false;
+    strokeMatchedRef.current = false;
+
+    if (wrong) {
+      setShakeId((id) => id + 1);
+      onWrong?.();
+    }
+  }, [points, matches, paused, completed, onWrong]);
+
   const foregroundImage = completed
     ? stage.finishedImage || stage.image
     : stage.image;
 
   return (
     <div className="relative h-full w-full overflow-hidden pointer-events-none">
+      <style>{`
+        @keyframes foodShake {
+          0%, 100% { transform: translateX(0) rotate(0deg); }
+          12% { transform: translateX(-3px) rotate(-4deg); }
+          28% { transform: translateX(3px) rotate(4deg); }
+          44% { transform: translateX(-3px) rotate(-3deg); }
+          62% { transform: translateX(2px) rotate(3deg); }
+          80% { transform: translateX(-1px) rotate(-1deg); }
+        }
+        .food-shake { animation: foodShake 420ms ease-in-out; }
+        @media (prefers-reduced-motion: reduce) {
+          .food-shake { animation: none !important; }
+        }
+      `}</style>
       {stage.backgroundImage && (
         <img
           alt=""
@@ -73,8 +132,11 @@ export function GestureRecipe({
         // Over the stage's gesture space (targets use 0–200px), so the art sits
         // under the lines and circles rather than centred on the whole box.
         <img
+          key={shakeId}
           alt=""
-          className="absolute left-0 top-0 h-50 w-50 object-contain"
+          className={`absolute left-0 top-0 h-50 w-50 object-contain${
+            shakeId > 0 ? " food-shake" : ""
+          }`}
           src={foregroundImage}
         />
       )}

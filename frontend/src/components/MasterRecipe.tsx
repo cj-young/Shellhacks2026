@@ -16,6 +16,8 @@ export type MasterRecipeProps = {
   onCompleteChange?: (complete: boolean) => void;
   /** Called whenever the active stage changes; -1 means the recipe is done. */
   onStageChange?: (stageIndex: number) => void;
+  /** Called when a deliberate stroke ends without matching the active stage. */
+  onWrong?: () => void;
 };
 
 /** Renders a recipe's stages one at a time and advances after each match. */
@@ -27,6 +29,7 @@ export function MasterRecipe({
   stageDelayMs = 1500,
   onCompleteChange,
   onStageChange,
+  onWrong,
 }: MasterRecipeProps) {
   const recipeKey = useMemo(() => JSON.stringify(recipe), [recipe]);
   const [progress, setProgress] = useState({
@@ -98,9 +101,11 @@ export function MasterRecipe({
       key={`${recipeKey}:${currentProgress.stageIndex}`}
       points={paused ? [] : points}
       stage={activeStage}
+      paused={paused}
       completed={
         currentProgress.completedStageIndex === currentProgress.stageIndex
       }
+      onWrong={onWrong}
       onMatchChange={(matches) => {
         if (paused || !matches) return;
 
