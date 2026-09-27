@@ -53,6 +53,7 @@ function makeGame(overrides: Partial<Player> = {}): Game {
     status: "active",
     createdAt: 0,
     state: {
+      activeSabotages: [],
       recipeOrder: [recipe],
       players: [player],
       roundStartedAt: 0,

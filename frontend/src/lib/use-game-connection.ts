@@ -6,6 +6,8 @@ import { SOCKET_PATH, SOCKET_URL } from "./api";
 import { MakeEmptyState } from "./types";
 import type { GameState, PlayerSummary } from "./types";
 
+import { useSabotages } from "./use-sabotages";
+
 export type Player = PlayerSummary;
 export type GameAuth = { code: string; token?: string; name?: string };
 
@@ -17,6 +19,7 @@ type JoinedPayload = {
 
 export type GameConnection = {
   socketRef: RefObject<Socket | null>;
+  sabotages: ReturnType<typeof useSabotages>;
   players: PlayerSummary[];
   playerId: string | null;
   status: string;
@@ -55,6 +58,7 @@ function storeToken(code: string, reconnectToken: string): void {
 
 export function useGameConnection(auth: GameAuth | null): GameConnection {
   const socketRef = useRef<Socket | null>(null);
+  const [activeSocket, setActiveSocket] = useState<Socket | null>(null);
   const [players, setPlayers] = useState<PlayerSummary[]>([]);
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [status, setStatus] = useState("Not connected");
@@ -92,6 +96,7 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
       auth: { code, token, name, reconnectToken },
     });
     socketRef.current = socket;
+    setActiveSocket(socket);
 
     socket.on("connect", () => setStatus("Connected"));
     socket.on("connect_error", () => setStatus("Connection failed"));
@@ -165,10 +170,22 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     return () => {
       socket.disconnect();
       socketRef.current = null;
+      setActiveSocket(null);
     };
   }, [code, name, token]);
 
+  const sabotages = useSabotages({
+    socket: activeSocket,
+    room: code,
+    playerId,
+    players: state.players,
+    activeSabotages: state.activeSabotages,
+    serverNow: state.serverNow,
+    ended: results !== null,
+  });
+
   return {
+    sabotages,
     socketRef,
     players,
     playerId,

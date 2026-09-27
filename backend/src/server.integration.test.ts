@@ -1,3 +1,7 @@
+import type {
+  ClientGameState,
+  SabotageAppliedPayload,
+} from "./realtime/domain/protocol.ts";
 import { strict as assert } from "node:assert";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
@@ -686,3 +690,200 @@ test("host receives each player's current stage before the recipe is complete", 
     host.close();
   }
 });
+
+// These tests exercise the public websocket flow rather than granting test credits directly.
+async function sabotageRoom() {
+  const game = await gameModule.service.createGame();
+  const host = connectClient(base, { code: game.code, token: game.hostToken });
+  const source = connectClient(base, { code: game.code, name: "Ada" });
+  const target = connectClient(base, { code: game.code, name: "Jun" });
+  const joined = [];
+  for (const socket of [host, source, target]) {
+    const response = waitFor<JoinedPayload>(socket, "joined");
+    socket.connect();
+    joined.push(await response);
+  }
+  const ready = waitFor<ClientGameState>(source, "update_state");
+  host.emit("start_game");
+  const state = await ready;
+  return {
+    game,
+    host,
+    source,
+    target,
+    sourceId: joined[1].playerId,
+    targetId: joined[2].playerId,
+    sourceToken: joined[1].reconnectToken,
+    targetToken: joined[2].reconnectToken,
+    state,
+  };
+}
+async function earnSocketCredit(
+  room: Awaited<ReturnType<typeof sabotageRoom>>,
+) {
+  const player = room.state.players.find((p) => p.id === room.sourceId)!;
+  const stages = room.state.recipeOrder[player.recipeIndex].stages.length;
+  for (let stage = player.recipeStageIndex; stage < stages; stage++) {
+    const update = waitFor<ClientGameState>(room.source, "update_state");
+    room.source.emit("finish_stage");
+    room.state = await update;
+  }
+  assert.ok(
+    room.state.players.find((p) => p.id === room.sourceId)!.sabotageCredits > 0,
+  );
+}
+
+test("sabotage websocket broadcasts exact inventory changes to host, sender, and victim", async (t) => {
+  const room = await sabotageRoom();
+  t.after(() => {
+    room.host.close();
+    room.source.close();
+    room.target.close();
+  });
+  await earnSocketCredit(room);
+  const stock = waitFor<ClientGameState>(room.source, "update_state");
+  room.target.emit("purchase_items", [{ id: ITEM_ID, count: 2 }]);
+  await stock;
+  const applied = [room.host, room.source, room.target].map((socket) =>
+    waitFor<SabotageAppliedPayload>(socket, "sabotage_applied"),
+  );
+  const updates = [room.host, room.source, room.target].map((socket) =>
+    waitForState(
+      socket,
+      (state) =>
+        state.players.find((p) => p.id === room.sourceId)?.sabotageCredits ===
+          0 &&
+        state.players.find((p) => p.id === room.sourceId)?.inventory[
+          ITEM_ID
+        ] === 1,
+    ),
+  );
+  // A forged source field must not change the authenticated sender.
+  room.source.emit("use_sabotage", {
+    definitionId: "steal",
+    targetPlayerId: room.targetId,
+    sourcePlayerId: room.targetId,
+  });
+  const events = await Promise.all(applied);
+  const states = await Promise.all(updates);
+  assert.deepEqual(events[0], events[1]);
+  assert.deepEqual(events[1], events[2]);
+  assert.equal(events[0].sourcePlayerId, room.sourceId);
+  assert.equal(events[0].targetPlayerId, room.targetId);
+  assert.equal(events[0].ingredientId, ITEM_ID);
+  assert.equal(events[0].expiresAt, null);
+  assert.equal(typeof events[0].serverNow, "number");
+  for (const state of states) {
+    assert.equal(
+      state.players.find((p) => p.id === room.sourceId)?.sabotageCredits,
+      0,
+    );
+    assert.deepEqual(
+      state.players.find((p) => p.id === room.sourceId)?.inventory,
+      { [ITEM_ID]: 1 },
+    );
+    assert.deepEqual(
+      state.players.find((p) => p.id === room.targetId)?.inventory,
+      { [ITEM_ID]: 1 },
+    );
+    assert.equal(JSON.stringify(state).includes(room.sourceToken), false);
+    assert.equal(JSON.stringify(state).includes(room.game.hostToken), false);
+  }
+});
+
+test("rapid sabotage requests spend a single credit once and malformed input preserves it", async (t) => {
+  const room = await sabotageRoom();
+  t.after(() => {
+    room.host.close();
+    room.source.close();
+    room.target.close();
+  });
+  await earnSocketCredit(room);
+  const malformed = waitFor<GameErrorPayload>(room.source, "game_error");
+  room.source.emit("use_sabotage", null);
+  assert.equal((await malformed).code, "SABOTAGE_NOT_FOUND");
+  const applied = waitFor<SabotageAppliedPayload>(
+    room.source,
+    "sabotage_applied",
+  );
+  const denied = waitFor<GameErrorPayload>(room.source, "game_error");
+  const updated = waitFor<ClientGameState>(room.source, "update_state");
+  room.source.emit("use_sabotage", { definitionId: "blackout" });
+  room.source.emit("use_sabotage", { definitionId: "blackout" });
+  assert.equal((await applied).definition.id, "blackout");
+  assert.equal((await denied).code, "SABOTAGE_ALREADY_USED");
+  assert.equal(
+    (await updated).players.find((p) => p.id === room.sourceId)
+      ?.sabotageCredits,
+    0,
+  );
+  const game = await gameModule.service.getGame(room.game.code);
+  assert.equal(game?.state.activeSabotages.length, 1);
+});
+
+test("freeze enforces server-side blocking and reconnect restores active effects and balance", async (t) => {
+  const room = await sabotageRoom();
+  t.after(() => {
+    room.host.close();
+    room.source.close();
+    room.target.close();
+  });
+  await earnSocketCredit(room);
+  const applied = waitFor<SabotageAppliedPayload>(
+    room.target,
+    "sabotage_applied",
+  );
+  const updated = waitFor<ClientGameState>(room.target, "update_state");
+  room.source.emit("use_sabotage", {
+    definitionId: "freeze",
+    targetPlayerId: room.targetId,
+  });
+  const effect = await applied;
+  await updated;
+  const error = waitFor<GameErrorPayload>(room.target, "game_error");
+  room.target.emit("finish_stage");
+  assert.equal((await error).code, "PLAYER_FROZEN");
+  const left = waitFor<PlayerDisconnectedPayload>(
+    room.host,
+    "player_disconnected",
+  );
+  room.target.close();
+  await left;
+  const resumed = connectClient(base, {
+    code: room.game.code,
+    reconnectToken: room.targetToken,
+  });
+  t.after(() => resumed.close());
+  const snapshot = waitFor<ClientGameState>(resumed, "update_state");
+  resumed.connect();
+  const state = await snapshot;
+  assert.equal(state.activeSabotages[0].id, effect.id);
+  assert.equal(
+    state.players.find((p) => p.id === room.sourceId)?.sabotageCredits,
+    0,
+  );
+  assert.equal(state.activeSabotages[0].expiresAt, effect.expiresAt);
+  assert.ok(state.serverNow >= effect.serverNow);
+  const rejected = waitFor<GameErrorPayload>(resumed, "game_error");
+  resumed.emit("purchase_items", [{ id: ITEM_ID, count: 1 }]);
+  assert.equal((await rejected).code, "PLAYER_FROZEN");
+});
+
+function waitForState(
+  socket: Socket,
+  matches: (state: ClientGameState) => boolean,
+): Promise<ClientGameState> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      socket.off("update_state", onState);
+      reject(new Error("timeout waiting for matching state"));
+    }, 3000);
+    function onState(state: ClientGameState) {
+      if (!matches(state)) return;
+      clearTimeout(timer);
+      socket.off("update_state", onState);
+      resolve(state);
+    }
+    socket.on("update_state", onState);
+  });
+}

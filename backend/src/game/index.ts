@@ -31,6 +31,7 @@ export type {
   EndRoundResult,
   ExpireStagesResult,
   FinishStageResult,
+  UseSabotageResult,
   JoinPlayerInput,
   JoinPlayerResult,
   StartGameOptions,
@@ -42,6 +43,8 @@ export type { Inventory, PurchaseItem } from "./domain/inventory.ts";
 export type { Player } from "./domain/player.ts";
 export type {
   Sabotage,
+  SabotageApplication,
+  UseSabotagePayload,
   SabotageDefinition,
   SabotageId,
   SabotageTargetScope,

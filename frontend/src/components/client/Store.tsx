@@ -48,6 +48,8 @@ const AISLES: { name: string; items: Ingredient[] }[] = (() => {
 })();
 
 export function Store({
+  blackout = false,
+  disabled = false,
   uploadInventory,
   onCartChange,
   score,
@@ -55,6 +57,8 @@ export function Store({
   notice,
   hint,
 }: {
+  blackout?: boolean;
+  disabled?: boolean;
   uploadInventory: (inv: Ingredient[]) => void;
   onCartChange: (cart: Ingredient[]) => void;
   score: number;
@@ -67,11 +71,13 @@ export function Store({
   const [aisle, setAisle] = useState(0);
 
   function checkout() {
+    if (disabled) return;
     uploadInventory(inventory);
     setInventory([]);
   }
 
   function addToCart(ingredient: Ingredient) {
+    if (disabled) return;
     const nextCart = [...inventory, ingredient];
     setInventory(nextCart);
     onCartChange(nextCart);
@@ -83,6 +89,8 @@ export function Store({
 
   return (
     <StoreScreen
+      blackout={blackout}
+      disabled={disabled}
       framed={false}
       score={score}
       progress={progress}

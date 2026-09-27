@@ -17,19 +17,19 @@ export function HostLobby() {
         <div className="flex flex-col gap-4 items-start">
           <div className="relative">
             <Logo size="lg" rotation={-4} />
-            <Pill
+            {/* <Pill
               color="royal"
               textColor="text-white"
               className="absolute -top-4 -right-2 rotate-12 text-sm"
             >
               KITCHEN RELAY
-            </Pill>
+            </Pill> */}
           </div>
-          <div className="text-2xl font-display font-bold text-[var(--ink)]">
+          {/* <div className="text-2xl font-display font-bold text-[var(--ink)]">
             Cook together.
             <br />
             Pass it on.
-          </div>
+          </div> */}
 
           {/* Players pills */}
           <div className="flex flex-wrap gap-2 mt-4">

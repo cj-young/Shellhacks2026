@@ -4,6 +4,8 @@ import { GestureRecipe } from "./GestureRecipe";
 import type { GestureRecipeDefinition } from "./GestureRecipe";
 
 export type MasterRecipeProps = {
+  /** Freeze gesture recognition and stage advancement without losing progress. */
+  paused?: boolean;
   recipe: GestureRecipeDefinition;
   points: CursorPoint[];
   /** Stage to resume on mount; later recipe changes still start at stage zero. */
@@ -19,6 +21,7 @@ export type MasterRecipeProps = {
 /** Renders a recipe's stages one at a time and advances after each match. */
 export function MasterRecipe({
   recipe,
+  paused = false,
   points,
   initialStageIndex = 0,
   stageDelayMs = 1500,
@@ -54,18 +57,19 @@ export function MasterRecipe({
     : recipe.stages[currentProgress.stageIndex];
 
   useEffect(() => {
-    if (!isComplete || completedRecipeKey.current === recipeKey) return;
+    if (paused || !isComplete || completedRecipeKey.current === recipeKey)
+      return;
 
     completedRecipeKey.current = recipeKey;
     onCompleteChange?.(true);
-  }, [isComplete, onCompleteChange, recipeKey]);
+  }, [paused, isComplete, onCompleteChange, recipeKey]);
 
   useEffect(() => {
     onStageChange?.(isComplete ? -1 : currentProgress.stageIndex);
   }, [currentProgress.stageIndex, isComplete, onStageChange]);
 
   useEffect(() => {
-    if (currentProgress.completedStageIndex === null) return;
+    if (paused || currentProgress.completedStageIndex === null) return;
 
     const timer = window.setTimeout(() => {
       setProgress((current) => {
@@ -85,20 +89,20 @@ export function MasterRecipe({
     }, stageDelayMs);
 
     return () => window.clearTimeout(timer);
-  }, [currentProgress.completedStageIndex, recipeKey, stageDelayMs]);
+  }, [paused, currentProgress.completedStageIndex, recipeKey, stageDelayMs]);
 
   if (!activeStage) return null;
 
   return (
     <GestureRecipe
       key={`${recipeKey}:${currentProgress.stageIndex}`}
-      points={points}
+      points={paused ? [] : points}
       stage={activeStage}
       completed={
         currentProgress.completedStageIndex === currentProgress.stageIndex
       }
       onMatchChange={(matches) => {
-        if (!matches) return;
+        if (paused || !matches) return;
 
         setProgress((current) =>
           current.recipeKey === recipeKey &&

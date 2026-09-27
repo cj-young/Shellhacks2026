@@ -1,5 +1,7 @@
+import { paper } from "#/components/chop-chop/paper";
 import type { GameConnection } from "#/lib/use-game-connection";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { SabotageControls, SabotageEffects } from "../sabotage/SabotageUI";
 import { Store, iconIdFor } from "./Store";
 import type { Ingredient, PlayerInterfaceState } from "#/lib/types";
 import ingredients from "../../data/ingredients.json";
@@ -33,15 +35,28 @@ import {
 /** Visible square of the recipe box; stage gestures sit within its 0–200px. */
 const GESTURE_AREA = 210;
 
-import { paper } from "#/components/chop-chop/paper";
 interface ClientInterfaceProps {
   connection: GameConnection;
 }
 
 /** Shows a "finish recipe" button so points can be tested without tracing. Turn off for real play. */
-const SHOW_TEST_CONTROLS = true;
+const SHOW_TEST_CONTROLS = import.meta.env.DEV;
 
 export function ClientInterface({ connection }: ClientInterfaceProps) {
+  const frozen = connection.sabotages.frozenMs > 0;
+  return (
+    <>
+      <div inert={frozen}>
+        <ClientGameplay connection={connection} />
+      </div>
+      <SabotageControls connection={connection} />
+      <SabotageEffects connection={connection} />
+    </>
+  );
+}
+
+function ClientGameplay({ connection }: ClientInterfaceProps) {
+  const frozen = connection.sabotages.frozenMs > 0;
   const { recipeOrder } = connection.state;
   const [recipeState, setRecipeState] = useState<number>(0);
   const [activeStageIndex, setActiveStageIndex] = useState(-1);
@@ -60,6 +75,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   );
   const interfaceState = me?.interfaceState ?? "store";
   function setInterfaceState(next: PlayerInterfaceState) {
+    if (frozen) return;
     connection.socketRef.current?.emit("update_interface_state", next);
   }
 
@@ -111,7 +127,13 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const serverRecipe = me?.recipeIndex;
   const serverStage = me?.recipeStageIndex;
   useEffect(() => {
-    if (serverRecipe === undefined || serverStage === undefined) return;
+    if (
+      frozen ||
+      connection.results ||
+      serverRecipe === undefined ||
+      serverStage === undefined
+    )
+      return;
     if (advanceTo !== null && serverRecipe >= advanceTo) {
       setAdvanceTo(null);
       sentFinishFor.current = null;
@@ -127,6 +149,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     sentFinishFor.current = key;
     connection.socketRef.current?.emit("finish_stage");
   }, [
+    frozen,
+    connection.results,
     activeStageIndex,
     advanceTo,
     recipeState,
@@ -136,6 +160,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   ]);
 
   function checkoutFromStore(inv: Ingredient[]) {
+    if (frozen || connection.results) return;
     const purchaseMap = new Map<number, { id: number; count: number }>();
 
     inv.forEach((v) => {
@@ -160,6 +185,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   }
 
   function syncCart(cart: Ingredient[]) {
+    if (frozen || connection.results) return;
     const itemCounts = new Map<number, number>();
     for (const ingredient of cart) {
       itemCounts.set(ingredient.id, (itemCounts.get(ingredient.id) ?? 0) + 1);
@@ -188,6 +214,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   }
 
   function completeRecipe() {
+    if (frozen || connection.results) return;
     // Tracing and the test button can both land here; count each recipe once.
     if (completedRecipes.current.has(recipeState)) return;
     completedRecipes.current.add(recipeState);
@@ -211,6 +238,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     // Consume only after the server has advanced to this stage, so the previous
     // stage's completion cannot re-arm a deadline after consumption clears it.
     if (
+      frozen ||
+      connection.results ||
       activeStageIndex < 0 ||
       serverRecipe !== recipeState ||
       serverStage !== activeStageIndex
@@ -220,8 +249,9 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     const stageKey = `${recipeState}:${activeStageIndex}`;
     if (consumedStages.current.has(stageKey)) return;
 
-    const ingredientsConsumed =
-      recipeOrder[recipeState]?.stages[activeStageIndex]?.ingredientsConsumed;
+    const ingredientsConsumed = recipeOrder
+      .at(recipeState)
+      ?.stages.at(activeStageIndex)?.ingredientsConsumed;
     if (!ingredientsConsumed) return;
 
     const items = Object.entries(ingredientsConsumed)
@@ -243,6 +273,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     consumedStages.current.add(stageKey);
     connection.socketRef.current?.emit("consume_ingredients", items);
   }, [
+    frozen,
+    connection.results,
     activeStageIndex,
     connection.socketRef,
     inventory,
@@ -296,7 +328,16 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   }
 
   const recipe = recipeOrder.at(recipeState);
-  const ready = canPrepareRecipe && !finished && recipe;
+  // An unused ingredient can disappear through steal/trash while cooking.
+  // Already-consumed stages remain valid; future stages must still have their ingredients.
+  const ready =
+    canPrepareRecipe &&
+    !finished &&
+    recipe &&
+    (consumedStages.current.has(
+      `${recipeState}:${Math.max(0, activeStageIndex)}`,
+    ) ||
+      hasIngredientsForStage(recipeState, Math.max(0, activeStageIndex)));
   const activeStage =
     stepRecipe && activeStageIndex >= 0
       ? stepRecipe.stages.at(activeStageIndex)
@@ -365,17 +406,17 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
       onClick={completeRecipe}
       style={{
         position: "fixed",
-        // Store: top centre (its top bar sits lower). Recipe view: bottom right,
+        // Store: top left, beside the sabotage button. Recipe view: bottom right,
         // clear of the top bar, which moves up on short screens.
         ...(interfaceState === "store"
-          ? { top: 8, left: "50%", transform: "translateX(-50%)" }
+          ? { top: 8, left: 8 }
           : { bottom: 12, right: 12 }),
         zIndex: 70,
         background: "rgba(255,255,255,.9)",
         border: `3px dashed ${INK}`,
         borderRadius: 20,
         padding: "5px 16px",
-        font: nunito(900, 14),
+        font: nunito(900, 12),
         color: INK,
         cursor: "pointer",
       }}
@@ -388,6 +429,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     return (
       <>
         <Store
+          blackout={connection.sabotages.blackoutMs > 0}
+          disabled={frozen}
           uploadInventory={checkoutFromStore}
           onCartChange={syncCart}
           score={myPoints}
@@ -529,6 +572,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
               }}
             >
               <MasterRecipe
+                paused={frozen}
                 recipe={stepRecipe}
                 initialStageIndex={Math.max(0, activeStageIndex)}
                 points={currentPoints}
@@ -537,7 +581,10 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
                   if (complete) completeRecipe();
                 }}
               />
-              <CursorPathTracker onPointsChange={setCurrentPoints} />
+              <CursorPathTracker
+                disabled={frozen}
+                onPointsChange={setCurrentPoints}
+              />
               {activeStep?.tool && activeStage && (
                 <ToolCursor
                   key={activeStep.tool.src}

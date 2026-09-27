@@ -1,3 +1,4 @@
+import type { SabotageApplication } from "./sabotage.ts";
 import type { Player } from "./player.ts";
 import type { Recipe } from "./recipe.ts";
 
@@ -16,6 +17,7 @@ export type Game = {
 
 export function MakeEmptyState() {
   return {
+    activeSabotages: [],
     recipeOrder: [],
     players: [],
     roundStartedAt: null,
@@ -24,6 +26,7 @@ export function MakeEmptyState() {
 }
 
 export type GameState = {
+  activeSabotages: SabotageApplication[];
   recipeOrder: Recipe[];
   players: Player[];
   roundStartedAt: number | null;

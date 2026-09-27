@@ -18,6 +18,7 @@ export interface PlayerSummary {
   readonly recipeIndex: number;
   readonly recipeStageIndex: number;
   readonly score: number;
+  readonly sabotageCredits: number;
   readonly stageDeadlineAt: number | null;
 }
 
@@ -35,6 +36,8 @@ export function toPlayerSummary(player: Player): PlayerSummary {
     recipeIndex: player.recipeIndex,
     recipeStageIndex: player.recipeStageIndex,
     score: player.score,
+    sabotageCredits: player.sabotages.filter((entry) => entry.usedAt === null)
+      .length,
     stageDeadlineAt: player.stageDeadlineAt,
   };
 }

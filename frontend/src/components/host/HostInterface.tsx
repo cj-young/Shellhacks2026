@@ -1,3 +1,4 @@
+import { SabotageEffects } from "../sabotage/SabotageUI";
 import type { GameConnection } from "#/lib/use-game-connection";
 import type { Ingredient, Recipe } from "#/lib/types";
 import { useEffect, useState } from "react";
@@ -44,9 +45,6 @@ function playerStack(
   const owned = (id: number) =>
     (server?.inventory[id] ?? 0) + (server?.cart[id] ?? 0);
   const stageIndex = server?.recipeStageIndex ?? 0;
-  const hasEverything = recipe.ingredients.every(
-    (needed) => (server?.inventory[needed.id] ?? 0) >= needed.count,
-  );
   const base = {
     ...player,
     recipe: recipeIndex + 1,
@@ -173,6 +171,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
             : undefined
         }
       />
+      <SabotageEffects connection={connection} host />
       {results && <TimesUp />}
     </div>
   );

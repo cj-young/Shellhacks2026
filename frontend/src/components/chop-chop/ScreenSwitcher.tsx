@@ -21,6 +21,7 @@ import {
 } from "./screens/RacePhoneScreens";
 import { AssetSheet, ASSET_SHEET_SIZE } from "./screens/AssetSheet";
 import { StyleTest } from "./screens/StyleTest";
+import { SabotagePreview } from "#/components/dev/SabotagePreview";
 import { RecipeWalkthrough } from "#/components/dev/RecipeWalkthrough";
 import {
   HostMenuPrepping,
@@ -42,6 +43,7 @@ import {
 } from "./screens/VeggieBackgroundSizes";
 
 import { paper } from "./paper";
+
 type Screen = { id: string; label: string; component: React.ComponentType };
 type Device = "host" | "player" | "sheet" | "sizes" | "recipe";
 
@@ -65,6 +67,17 @@ const RecipeGuacamole = () => <RecipeWalkthrough embedded only="Guacamole" />;
 const RecipeSteak = () => <RecipeWalkthrough embedded only="Steak" />;
 
 const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
+  {
+    title: "Sabotages",
+    device: "recipe",
+    screens: [
+      {
+        id: "sabotage-preview",
+        label: "Sabotage playground",
+        component: SabotagePreview,
+      },
+    ],
+  },
   {
     title: "Host · big screen",
     device: "host",

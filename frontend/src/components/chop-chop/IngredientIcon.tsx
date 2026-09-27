@@ -54,7 +54,12 @@ export function IngredientIcon({
         width: size,
         height: size,
         objectFit: "contain",
-        filter: sticker ? stickerFilter(size) : undefined,
+        filter:
+          silhouette && isImageUrl
+            ? "brightness(0)"
+            : sticker
+              ? stickerFilter(size)
+              : undefined,
         transform: rotate ? `rotate(${rotate}deg)` : undefined,
         pointerEvents: "none",
         ...style,
