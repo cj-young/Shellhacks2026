@@ -21,7 +21,7 @@ export function MasterRecipe({
   recipe,
   points,
   initialStageIndex = 0,
-  stageDelayMs = 500,
+  stageDelayMs = 1500,
   onCompleteChange,
   onStageChange,
 }: MasterRecipeProps) {

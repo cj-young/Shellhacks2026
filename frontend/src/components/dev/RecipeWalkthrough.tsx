@@ -52,6 +52,21 @@ const once = <T,>(socket: Socket, event: string, ms = 8000) =>
  * The phone only receives recipes when a game starts, so host a throwaway game,
  * join it, start it and take the recipe order the server sends (all recipes).
  */
+/**
+ * A game only gets a random few recipes, so keep starting throwaway games
+ * until a few in a row turn up nothing new; that collects every recipe.
+ */
+async function loadAllRecipes(): Promise<Recipe[]> {
+  const byName = new Map<string, Recipe>();
+  let quiet = 0;
+  for (let game = 0; game < 12 && quiet < 3; game++) {
+    const before = byName.size;
+    for (const r of await loadRecipesFromServer()) byName.set(r.name, r);
+    quiet = byName.size > before ? 0 : quiet + 1;
+  }
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 async function loadRecipesFromServer(): Promise<Recipe[]> {
   const res = await fetch("/api/games", { method: "POST" });
   if (!res.ok) throw new Error(`Creating a game failed (${res.status})`);
@@ -267,7 +282,7 @@ let cachedRecipes: Promise<Recipe[]> | null = null;
 /** One throwaway game per page load, shared by every walkthrough on the page. */
 function recipesOnce(reload = false): Promise<Recipe[]> {
   if (reload || !cachedRecipes) {
-    cachedRecipes = loadRecipesFromServer();
+    cachedRecipes = loadAllRecipes();
     cachedRecipes.catch(() => (cachedRecipes = null));
   }
   return cachedRecipes;

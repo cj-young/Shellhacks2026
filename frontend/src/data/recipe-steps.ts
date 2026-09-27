@@ -134,7 +134,8 @@ function consumedArt(stage: RecipeStage): string[] {
  *   else a placeholder station scene when there's no step picture.
  */
 export function withStepArt(recipe: Recipe): Recipe {
-  const real = (src?: string) => (isPlaceholder(src) ? undefined : src);
+  const real = (src?: string) =>
+    isPlaceholder(src) || src === "none" ? undefined : src;
   const pictures = recipe.stages.map(
     (stage, i) => real(stage.image) ?? stepInfo(recipe.name, i, stage).art,
   );
@@ -152,14 +153,20 @@ export function withStepArt(recipe: Recipe): Recipe {
         info.doneArt ?? (i + 1 < pictures.length ? pictures[i + 1] : dish);
       return {
         ...stage,
+        // "none" in recipes.json means "leave this picture out" (no success
+        // picture also skips the success pause).
         backgroundImage:
-          real(stage.backgroundImage) ??
-          info.background ??
-          (picture ? undefined : scene),
+          stage.backgroundImage === "none"
+            ? undefined
+            : (real(stage.backgroundImage) ??
+              info.background ??
+              (picture ? undefined : scene)),
         image: picture,
         finishedImage:
-          real(stage.finishedImage) ??
-          (picture && after ? after : "/assets/steps/done.svg"),
+          stage.finishedImage === "none"
+            ? undefined
+            : (real(stage.finishedImage) ??
+              (picture && after ? after : "/assets/steps/done.svg")),
       };
     }),
   };

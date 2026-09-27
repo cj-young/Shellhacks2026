@@ -15,9 +15,9 @@ const steps = readJson(join(root, "src/data/recipe-steps.json"));
 const assets = join(root, "public/assets");
 const outDir = join(assets, "steps");
 
-// GestureRecipe draws the background across a 300px box, but stage gestures
-// use 0–200px coordinates, so everything is centred on (100, 100).
-const BOX = 300;
+// GestureRecipe fills its container (the 210px gesture area on the phone) and
+// draws the background across it; gestures use 0–200px, centred on (100, 100).
+const BOX = 210;
 const CX = 100;
 const CY = 100;
 

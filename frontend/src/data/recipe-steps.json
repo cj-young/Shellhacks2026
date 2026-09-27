@@ -218,5 +218,70 @@
       "station": "plate",
       "art": "/assets/steps/pancakes/step-8.png"
     }
+  ],
+  "guacamole": [
+    {
+      "label": "Slice it open",
+      "gesture": "slice",
+      "word": "SLICE!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-1.png"
+    },
+    {
+      "label": "Scoop out the pit",
+      "gesture": "slice",
+      "word": "SCOOP!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-2.png"
+    },
+    {
+      "label": "Slice the stem",
+      "gesture": "slice",
+      "word": "SLICE!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-3.png"
+    },
+    {
+      "label": "Slice the bottom",
+      "gesture": "slice",
+      "word": "SLICE!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-4.png"
+    },
+    {
+      "label": "Dice the tomato",
+      "gesture": "slice",
+      "word": "DICE!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-5.png"
+    },
+    {
+      "label": "Slice the stem",
+      "gesture": "slice",
+      "word": "SLICE!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-3.png"
+    },
+    {
+      "label": "Slice the bottom",
+      "gesture": "slice",
+      "word": "SLICE!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-4.png"
+    },
+    {
+      "label": "Dice the onion",
+      "gesture": "slice",
+      "word": "DICE!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-5.png"
+    },
+    {
+      "label": "Stir the guacamole",
+      "gesture": "stir",
+      "word": "STIR!",
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-5.png"
+    }
   ]
 }
