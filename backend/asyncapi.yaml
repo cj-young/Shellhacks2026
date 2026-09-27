@@ -201,6 +201,35 @@ channels:
     messages:
       gameEnded:
         $ref: '#/components/messages/GameEnded'
+  useSabotage:
+    address: use_sabotage
+    title: Use sabotage
+    description: |
+      Sent by a player to spend one of their unused sabotages during an active game.
+      `definitionId` names the sabotage; for `single`-target sabotages `targetPlayerId` is
+      required. The server consumes one unused instance, applies the effect, then broadcasts
+      `sabotage_applied` to the room (including the sender) and `update_state` whenever shared
+      state changed (e.g. inventories for steal/trash). On failure the sender receives
+      `game_error` with `GAME_NOT_ACTIVE`, `PLAYER_NOT_FOUND`, `SABOTAGE_NOT_FOUND`,
+      `SABOTAGE_ALREADY_USED`, or `INVALID_TARGET`.
+    x-socketio:
+      event: use_sabotage
+    messages:
+      useSabotage:
+        $ref: '#/components/messages/UseSabotage'
+  sabotageApplied:
+    address: sabotage_applied
+    title: Sabotage applied
+    description: |
+      Broadcast to every member when a sabotage is used. Carries everything the frontend
+      needs to react: the definition, who used it, who it targets (null for `all`), timing
+      (`appliedAt`, `expiresAt`, `serverNow`), and the affected ingredient for instant
+      inventory effects. Timed effects have no end event; clients clear them locally.
+    x-socketio:
+      event: sabotage_applied
+    messages:
+      sabotageApplied:
+        $ref: '#/components/messages/SabotageApplied'
 
 operations:
   sendJoined:
@@ -268,6 +297,16 @@ operations:
     summary: Announce the end of the round with final rankings.
     channel:
       $ref: '#/channels/gameEnded'
+  receiveUseSabotage:
+    action: receive
+    summary: Receive a request from a player to use a sabotage.
+    channel:
+      $ref: '#/channels/useSabotage'
+  sendSabotageApplied:
+    action: send
+    summary: Broadcast that a sabotage was used, and what it affects.
+    channel:
+      $ref: '#/channels/sabotageApplied'
 
 components:
   messages:
@@ -333,6 +372,16 @@ components:
       title: Game ended
       payload:
         $ref: '#/components/schemas/GameEndedPayload'
+    UseSabotage:
+      name: use_sabotage
+      title: Use sabotage
+      payload:
+        $ref: '#/components/schemas/UseSabotagePayload'
+    SabotageApplied:
+      name: sabotage_applied
+      title: Sabotage applied
+      payload:
+        $ref: '#/components/schemas/SabotageAppliedPayload'
   schemas:
     PlayerInterfaceState:
       type: string
@@ -529,6 +578,113 @@ components:
           description: Players ranked by score (highest first).
           items:
             $ref: '#/components/schemas/PlayerResult'
+    SabotageTargetScope:
+      type: string
+      enum: [self, single, all]
+      description: |
+        How a sabotage selects its target(s): `self` (the user), `single` (one other player,
+        supplied as `targetPlayerId`), or `all` (everyone).
+    SabotageDefinition:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - targetScope
+        - durationMs
+      properties:
+        id:
+          type: string
+          description: Stable sabotage definition id.
+          examples:
+            - steal
+            - freeze
+            - blackout
+        name:
+          type: string
+          examples:
+            - Steal
+        description:
+          type: string
+          examples:
+            - Take an unused ingredient from another player's inventory.
+        targetScope:
+          $ref: '#/components/schemas/SabotageTargetScope'
+        durationMs:
+          type:
+            - integer
+            - "null"
+          description: Default duration in ms for timed effects; null for instantaneous effects.
+          examples:
+            - 10000
+    UseSabotagePayload:
+      type: object
+      additionalProperties: false
+      required:
+        - definitionId
+      properties:
+        definitionId:
+          type: string
+          description: |
+            Which sabotage to use. The server consumes one of the sender's unused instances of
+            this definition. Must match a known definition the sender holds.
+          examples:
+            - steal
+        targetPlayerId:
+          type: string
+          description: |
+            Target player id. Required when the definition's `targetScope` is `single`; omitted
+            for `self`, ignored for `all`.
+          examples:
+            - 2bee17e1-01a8-4a5e-b47e-3e74a1661657
+    SabotageAppliedPayload:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - definition
+        - sourcePlayerId
+        - targetPlayerId
+        - appliedAt
+        - expiresAt
+        - serverNow
+        - ingredientId
+      properties:
+        id:
+          type: string
+          description: Unique id for this application (clients key animations off it).
+        definition:
+          $ref: '#/components/schemas/SabotageDefinition'
+        sourcePlayerId:
+          type: string
+          description: Player that used the sabotage.
+        targetPlayerId:
+          type:
+            - string
+            - "null"
+          description: Player the effect targets, or null when the effect targets everyone.
+        appliedAt:
+          type: integer
+          description: Server time (ms) when the sabotage was applied.
+        expiresAt:
+          type:
+            - integer
+            - "null"
+          description: |
+            Server time (ms) when a timed effect ends, or null for instantaneous effects. There
+            is no expiry event: clients compute the end from `expiresAt` and `serverNow` and
+            clear locally.
+        serverNow:
+          type: integer
+          description: Server clock at send time (ms); clients use it to compute a clock offset.
+        ingredientId:
+          type:
+            - integer
+            - "null"
+          description: |
+            For instant inventory effects (steal/trash), the affected ingredient id; null
+            otherwise. Authoritative inventories arrive in the accompanying `update_state`.
     GameErrorPayload:
       type: object
       additionalProperties: false
@@ -551,6 +707,9 @@ components:
             - ALREADY_FINISHED
             - NOT_HOST
             - ALREADY_STARTED
+            - SABOTAGE_NOT_FOUND
+            - SABOTAGE_ALREADY_USED
+            - INVALID_TARGET
             - INTERNAL_ERROR
         message:
           type: string
