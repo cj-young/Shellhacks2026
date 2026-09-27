@@ -30,10 +30,26 @@ export type Recipe = {
 };
 
 export type RecipeStage = {
-  type: string;
+  /** Decorative image rendered behind the foreground image. */
+  backgroundImage?: string;
   image?: string;
-  lines: LineType[];
+  /** Optional foreground shown briefly after completing this stage. */
+  finishedImage?: string;
   ingredientsConsumed: Record<number, number>;
+} & (
+  { type: "lines"; lines: LineType[] } | { type: "spin"; spins: SpinType[] }
+);
+
+export type SpinDirection = "clockwise" | "counterclockwise";
+
+export type SpinType = {
+  center: Point;
+  /** Distance from the center to the circular target, in pixels. */
+  radius: number;
+  /** Accepted distance on either side of the target ring, less than radius. */
+  tolerance: number;
+  direction: SpinDirection;
+  rotations: number;
 };
 
 export type LineType = {

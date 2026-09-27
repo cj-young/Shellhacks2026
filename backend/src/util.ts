@@ -13,9 +13,7 @@ export function generateRecipeOrder(length: number): Recipe[] {
     name: recipe.name,
     ingredients: recipe.ingredients,
     stages: recipe.stages.map((stage) => ({
-      type: stage.type,
-      image: stage.image,
-      lines: stage.lines,
+      ...stage,
       ingredientsConsumed: { ...stage.ingredientsConsumed },
     })),
   })) as Recipe[];

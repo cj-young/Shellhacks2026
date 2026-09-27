@@ -6,7 +6,7 @@ import type { GestureRecipeDefinition } from "./GestureRecipe";
 export type MasterRecipeProps = {
   recipe: GestureRecipeDefinition;
   points: CursorPoint[];
-  /** Time to show a completed stage before proceeding, in milliseconds. */
+  /** Time to show finishedImage before proceeding; unused when it is absent. */
   stageDelayMs?: number;
   /** Called once when every stage in the recipe has been completed. */
   onCompleteChange?: (complete: boolean) => void;
@@ -91,13 +91,23 @@ export function MasterRecipe({
       key={`${recipeKey}:${currentProgress.stageIndex}`}
       points={points}
       stage={activeStage}
+      completed={
+        currentProgress.completedStageIndex === currentProgress.stageIndex
+      }
       onMatchChange={(matches) => {
         if (!matches) return;
 
         setProgress((current) =>
           current.recipeKey === recipeKey &&
+          current.stageIndex === currentProgress.stageIndex &&
           current.completedStageIndex !== currentProgress.stageIndex
-            ? { ...current, completedStageIndex: currentProgress.stageIndex }
+            ? activeStage.finishedImage
+              ? { ...current, completedStageIndex: currentProgress.stageIndex }
+              : {
+                  ...current,
+                  stageIndex: current.stageIndex + 1,
+                  completedStageIndex: null,
+                }
             : current,
         );
       }}
