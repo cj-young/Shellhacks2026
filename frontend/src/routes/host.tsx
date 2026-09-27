@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { useGameConnection } from "#/lib/use-game-connection";
 import { HostInterface } from "#/components/host/HostInterface";
 
@@ -39,6 +40,7 @@ function HostScreen() {
   const [game, setGame] = useState<HostGame | null>(null);
   const [nameInput, setNameInput] = useState("");
   const [createError, setCreateError] = useState("");
+  const [joinUrl, setJoinUrl] = useState("");
   const connection = useGameConnection(
     game ? { code: game.code, token: game.hostToken, name: game.name } : null,
   );
@@ -50,6 +52,17 @@ function HostScreen() {
       setNameInput(stored.name);
     }
   }, []);
+
+  useEffect(() => {
+    if (!game) {
+      setJoinUrl("");
+      return;
+    }
+
+    setJoinUrl(
+      new URL(`/join?code=${game.code}`, window.location.origin).toString(),
+    );
+  }, [game]);
 
   const canCreate = nameInput.trim().length > 0;
 
@@ -127,6 +140,17 @@ function HostScreen() {
               >
                 Copy code
               </button>
+
+              {joinUrl && (
+                <div className="mt-3 w-fit rounded bg-white p-2">
+                  <QRCodeSVG
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                    size={160}
+                    value={joinUrl}
+                  />
+                </div>
+              )}
             </div>
 
             <button
