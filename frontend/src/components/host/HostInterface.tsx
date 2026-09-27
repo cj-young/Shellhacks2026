@@ -23,8 +23,8 @@ const ingredientById = (id: number): Ingredient | undefined =>
 type ServerPlayer = GameConnection["state"]["players"][number];
 
 /**
- * A player's card from their server state: shopping (ticked from cart + inventory) until they
- * have everything for their current recipe or have started it, then the prep step they're on.
+ * A player's card follows their networked store/recipe mode. Shopping checkmarks
+ * still reflect their cart and inventory.
  */
 function playerStack(
   player: {
@@ -54,7 +54,7 @@ function playerStack(
     allDone: (server?.recipeIndex ?? 0) >= order.length,
   };
 
-  if (stageIndex > 0 || hasEverything) {
+  if (server?.interfaceState === "recipe") {
     // Step name and icon for the stage they're on (see data/recipe-steps).
     const current = Math.min(stageIndex, recipe.stages.length - 1);
     const info = stepInfo(recipe.name, current, recipe.stages.at(current));

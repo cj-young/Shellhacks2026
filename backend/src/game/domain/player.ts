@@ -11,6 +11,8 @@ export function isCharacterId(value: unknown): value is CharacterId {
   return (CHARACTERS as readonly unknown[]).includes(value);
 }
 
+export type PlayerInterfaceState = "store" | "recipe";
+
 export interface Player {
   readonly id: string;
   readonly name: string;
@@ -20,6 +22,7 @@ export interface Player {
   readonly connected: boolean;
   character: CharacterId | null;
 
+  interfaceState: PlayerInterfaceState;
   recipeIndex: number;
   recipeStageIndex: number;
   cart: Inventory;

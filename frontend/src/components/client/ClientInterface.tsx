@@ -1,7 +1,7 @@
 import type { GameConnection } from "#/lib/use-game-connection";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Store, iconIdFor } from "./Store";
-import type { Ingredient } from "#/lib/types";
+import type { Ingredient, PlayerInterfaceState } from "#/lib/types";
 import ingredients from "../../data/ingredients.json";
 import { MasterRecipe } from "../MasterRecipe";
 import { CursorPathTracker } from "../CursorPathTracker";
@@ -35,12 +35,8 @@ interface ClientInterfaceProps {
 /** Shows a "finish recipe" button so points can be tested without tracing. Turn off for real play. */
 const SHOW_TEST_CONTROLS = true;
 
-type ClientInterfaceState = "store" | "recipe";
-
 export function ClientInterface({ connection }: ClientInterfaceProps) {
   const { recipeOrder } = connection.state;
-  const [interfaceState, setInterfaceState] =
-    useState<ClientInterfaceState>("store");
   const [recipeState, setRecipeState] = useState<number>(0);
   const [activeStageIndex, setActiveStageIndex] = useState(-1);
   const [canPrepareRecipe, setCanPrepareRecipe] = useState(false);
@@ -56,6 +52,11 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const me = connection.state.players.find(
     (entry) => entry.id === connection.playerId,
   );
+  const interfaceState = me?.interfaceState ?? "store";
+  function setInterfaceState(next: PlayerInterfaceState) {
+    connection.socketRef.current?.emit("update_interface_state", next);
+  }
+
   /** 3-2-1 over everything when the game starts (the host shows the same). */
   const [showCountdown, setShowCountdown] = useState(true);
   // The recipe view uses real pixels (gestures are measured in them), so it
@@ -86,24 +87,35 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     });
   }, [me]);
 
-  // Finish the server-side stages of a completed recipe one at a time: each
-  // finish_stage waits for the state update from the previous one, since the
-  // server handles them concurrently. The last stage scores the recipe, moves
-  // the player to the next one and clears their inventory.
+  // Keep shared progress in sync as each gesture stage finishes. Wait for the
+  // server to acknowledge each finish before sending another; recipe completion
+  // (including the test button) also drains any remaining stages this way.
   const serverRecipe = me?.recipeIndex;
   const serverStage = me?.recipeStageIndex;
   useEffect(() => {
-    if (advanceTo === null || serverRecipe === undefined) return;
-    if (serverRecipe >= advanceTo) {
+    if (serverRecipe === undefined || serverStage === undefined) return;
+    if (advanceTo !== null && serverRecipe >= advanceTo) {
       setAdvanceTo(null);
       sentFinishFor.current = null;
       return;
     }
+    const finishingRecipe = advanceTo !== null && serverRecipe < advanceTo;
+    const finishingStage =
+      serverRecipe === recipeState && serverStage < activeStageIndex;
+    if (!finishingRecipe && !finishingStage) return;
+
     const key = `${serverRecipe}:${serverStage}`;
     if (sentFinishFor.current === key) return;
     sentFinishFor.current = key;
     connection.socketRef.current?.emit("finish_stage");
-  }, [advanceTo, serverRecipe, serverStage, connection.socketRef]);
+  }, [
+    activeStageIndex,
+    advanceTo,
+    recipeState,
+    serverRecipe,
+    serverStage,
+    connection.socketRef,
+  ]);
 
   function checkoutFromStore(inv: Ingredient[]) {
     const purchaseMap = new Map<number, { id: number; count: number }>();
@@ -121,7 +133,11 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
       );
     }
 
-    setCanPrepareRecipe(hasIngredientsForStage(recipeState, 0, inv));
+    const stageIndex = Math.max(0, activeStageIndex);
+    setCanPrepareRecipe(
+      consumedStages.current.has(`${recipeState}:${stageIndex}`) ||
+        hasIngredientsForStage(recipeState, stageIndex, inv),
+    );
     setInterfaceState("recipe");
   }
 
@@ -175,7 +191,14 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   }
 
   useEffect(() => {
-    if (activeStageIndex < 0) return;
+    // Consume only after the server has advanced to this stage, so the previous
+    // stage's completion cannot re-arm a deadline after consumption clears it.
+    if (
+      activeStageIndex < 0 ||
+      serverRecipe !== recipeState ||
+      serverStage !== activeStageIndex
+    )
+      return;
 
     const stageKey = `${recipeState}:${activeStageIndex}`;
     if (consumedStages.current.has(stageKey)) return;
@@ -208,6 +231,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     inventory,
     recipeOrder,
     recipeState,
+    serverRecipe,
+    serverStage,
   ]);
 
   const total = recipeOrder.length;
@@ -485,6 +510,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
             >
               <MasterRecipe
                 recipe={stepRecipe}
+                initialStageIndex={Math.max(0, activeStageIndex)}
                 points={currentPoints}
                 onStageChange={setActiveStageIndex}
                 onCompleteChange={(complete) => {
