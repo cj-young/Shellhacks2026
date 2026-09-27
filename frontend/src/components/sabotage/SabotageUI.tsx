@@ -53,11 +53,18 @@ export function SabotageLaunchButton({
   );
 }
 
+/** A timed sabotage's length in seconds, from sabotages.json. */
+const seconds = (id: string) =>
+  (definitions.find((d) => d.id === id)?.durationMs ?? 0) / 1000;
+
 /** The sabotages players can be awarded, in menu order, with their artwork. */
 export const SABOTAGE_CARDS = [
   { id: "trash", blurb: "Toss one of a chef's ingredients" },
-  { id: "freeze", blurb: "Freeze a chef for 10 seconds" },
-  { id: "blackout", blurb: "Lights out in every store for 15s" },
+  { id: "freeze", blurb: `Freeze a chef for ${seconds("freeze")} seconds` },
+  {
+    id: "blackout",
+    blurb: `Lights out in every store for ${seconds("blackout")}s`,
+  },
 ] as const;
 export const sabotageArt = (id: string) => `/assets/sabotages/${id}.png`;
 export const sabotageAwardArt = (id: string) =>
