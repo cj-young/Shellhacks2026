@@ -326,6 +326,29 @@ Per-package npm scripts: backend `test`, `test:watch`, `start`, `lint`, `format`
 
 The public app lives at **http://localhost:8080**.
 
+## Deployment
+
+The frontend is hosted on **Vercel** and the backend on **Railway** (a Node service). They are
+separate origins, so the backend uses the `ALLOWED_ORIGINS` allowlist for CORS and Socket.IO
+(see `backend/src/origins.ts`). Env examples live in `backend/.env.example` and
+`frontend/.env.example`.
+
+- **Backend (Railway)**: deploy from `backend/`. Railway runs `npm install` + `npm start`
+  (`node src/server.ts`); `engines.node >= 24` selects Node 24, and Railway supplies `PORT`.
+  Set `ALLOWED_ORIGINS=https://<vercel-app>` (wildcards like `https://*.vercel.app` allowed) and
+  optionally `NODE_ENV=production` / `ROUND_DURATION_MS`. Health check path: `/health`. The game
+  store is in-memory, so a redeploy/restart drops active games.
+- **Frontend (Vercel)**: project root `frontend/`, built with the Nitro Vercel preset
+  (`vite build` emits `.vercel/output`). Set at build time:
+  `VITE_API_URL=https://<railway-app>`, `VITE_SOCKET_URL=https://<railway-app>`,
+  `VITE_SOCKET_PATH=/socket.io/`. Vite inlines these, so changing them needs a redeploy.
+  With the env vars unset the app falls back to the Caddy `/api` paths used in development.
+- **Optional single origin**: to hide the CORS allowlist, add a Vercel rewrite
+  `{"rewrites":[{"source":"/api/:path*","destination":"https://<railway-app>/:path*"}]}` and leave
+  `VITE_API_URL` at the default `/api`. Vercel rewrites do not proxy the WebSocket upgrade, so
+  Socket.IO then falls back to long-polling; the two-origin setup above is recommended for
+  realtime play.
+
 ## Conventions
 
 ### Backend

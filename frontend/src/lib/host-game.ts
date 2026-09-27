@@ -1,3 +1,5 @@
+import { apiUrl } from "./api";
+
 export type HostGame = { code: string; hostToken: string; name: string };
 
 const STORAGE_KEY = "shellhacks.hostGame";
@@ -29,7 +31,7 @@ export function loadStoredHostGame(): HostGame | null {
 }
 
 export async function createHostGame(): Promise<HostGame> {
-  const response = await fetch("/api/games", { method: "POST" });
+  const response = await fetch(apiUrl("/games"), { method: "POST" });
   if (!response.ok) throw new Error(`Request failed (${response.status})`);
 
   const created = (await response.json()) as {

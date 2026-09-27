@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { io } from "socket.io-client";
 import type { Socket } from "socket.io-client";
+import { SOCKET_PATH, SOCKET_URL } from "./api";
 import { MakeEmptyState } from "./types";
 import type { GameState, PlayerSummary } from "./types";
 
@@ -86,8 +87,8 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     setResults(null);
 
     const reconnectToken = readStoredToken(code);
-    const socket = io({
-      path: "/api/socket.io/",
+    const socket = io(SOCKET_URL || undefined, {
+      path: SOCKET_PATH,
       auth: { code, token, name, reconnectToken },
     });
     socketRef.current = socket;
