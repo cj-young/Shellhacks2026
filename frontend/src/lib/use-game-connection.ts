@@ -3,6 +3,7 @@ import type { RefObject } from "react";
 import { io } from "socket.io-client";
 import type { Socket } from "socket.io-client";
 import { SOCKET_PATH, SOCKET_URL } from "./api";
+import { playerTokenKey } from "./session-keys";
 import { MakeEmptyState } from "./types";
 import type { GameState, PlayerSummary } from "./types";
 
@@ -34,13 +35,11 @@ export type GameConnection = {
 
 export type PlayerResult = { playerId: string; name: string; score: number };
 
-const tokenKey = (code: string) => `shellhacks.playerToken:${code}`;
-
 function readStoredToken(code: string): string | undefined {
   if (typeof window === "undefined") return undefined;
 
   try {
-    return window.sessionStorage.getItem(tokenKey(code)) ?? undefined;
+    return window.sessionStorage.getItem(playerTokenKey(code)) ?? undefined;
   } catch {
     return undefined;
   }
@@ -50,7 +49,7 @@ function storeToken(code: string, reconnectToken: string): void {
   if (typeof window === "undefined") return;
 
   try {
-    window.sessionStorage.setItem(tokenKey(code), reconnectToken);
+    window.sessionStorage.setItem(playerTokenKey(code), reconnectToken);
   } catch {
     // Ignore storage failures (private mode, quota, etc.).
   }
@@ -145,6 +144,10 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     );
     socket.on("update_state", (gameState: GameState) => {
       setState(gameState);
+      // `update_state` is only ever sent for an active/finished game, never in
+      // the lobby, so receiving it means the game has started (this restores
+      // the in-game screen after a mid-game reload).
+      setStarted(true);
       console.log(gameState);
     });
     socket.on(

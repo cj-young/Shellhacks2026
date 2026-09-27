@@ -55,6 +55,40 @@ paths:
           description: Malformed JSON request body
         "500":
           description: Unable to allocate a unique game code (unexpected server error)
+  /api/games/{code}:
+    get:
+      tags:
+        - games
+      operationId: getGameStatus
+      summary: Look up a game's status
+      description: |
+        Returns the current status of a game without joining it. The host uses this to decide
+        whether a persisted game code is still a usable room (`lobby` or `active`) or should be
+        replaced (`finished`, or `404` after the in-memory store was reset). Game codes are shared
+        publicly, so this endpoint is unauthenticated.
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Six-character game code (case-insensitive).
+          schema:
+            type: string
+            pattern: "^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$"
+            examples:
+              - ABC234
+      responses:
+        "200":
+          description: Game found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameStatusResponse"
+        "404":
+          description: No game exists for that code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameNotFoundResponse"
 
 components:
   schemas:
@@ -76,3 +110,35 @@ components:
           description: Secret host credential. Returned only at creation time.
           examples:
             - 5v_qSvibmq-Fp9hREs476vZgm3aLhJfm
+    GameStatusResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - status
+      properties:
+        code:
+          type: string
+          pattern: "^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$"
+          examples:
+            - ABC234
+        status:
+          type: string
+          enum:
+            - lobby
+            - active
+            - finished
+          description: |
+            `lobby` – waiting to start, players may join; `active` – the round is running;
+            `finished` – the round ended and the code should be replaced.
+    GameNotFoundResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          const: GAME_NOT_FOUND
+          examples:
+            - GAME_NOT_FOUND

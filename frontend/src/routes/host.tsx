@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useGameConnection } from "#/lib/use-game-connection";
-import { createHostGame, loadStoredHostGame } from "#/lib/host-game";
+import {
+  clearHostGame,
+  createHostGame,
+  fetchGameStatus,
+  loadStoredHostGame,
+} from "#/lib/host-game";
 import type { HostGame } from "#/lib/host-game";
 import { HostInterface } from "#/components/host/HostInterface";
 import { PAGE_BG } from "#/components/chop-chop/design";
@@ -27,22 +32,47 @@ function HostScreen() {
   useEffect(() => {
     setJoinText(`${window.location.host}/join`);
 
-    const stored = loadStoredHostGame();
-    if (stored) {
-      setGame(stored);
-      return;
-    }
     // Guards against React StrictMode running this effect twice and creating two rooms.
-    if (creating.current) return;
-    creating.current = true;
-    createHostGame()
-      .then(setGame)
-      .catch((error: unknown) => {
-        setSetupError(
-          error instanceof Error ? error.message : "Unable to create a game",
-        );
-      });
+    const create = () => {
+      if (creating.current) return;
+      creating.current = true;
+      createHostGame()
+        .then(setGame)
+        .catch((error: unknown) => {
+          setSetupError(
+            error instanceof Error ? error.message : "Unable to create a game",
+          );
+        });
+    };
+
+    const start = async () => {
+      const stored = loadStoredHostGame();
+      if (!stored) {
+        create();
+        return;
+      }
+
+      // Reuse a persisted game only while it's still a lobby or in progress. A
+      // finished game, or one the server no longer has, must be replaced.
+      const status = await fetchGameStatus(stored.code);
+      if (status === "lobby" || status === "active" || status === undefined) {
+        setGame(stored);
+        return;
+      }
+
+      clearHostGame(stored.code);
+      create();
+    };
+
+    void start();
   }, []);
+
+  // The round is over, so the next load should start a fresh room.
+  useEffect(() => {
+    if (connection.results && game) {
+      clearHostGame(game.code);
+    }
+  }, [connection.results, game]);
 
   // The QR code opens the join page with this room's code filled in.
   useEffect(() => {

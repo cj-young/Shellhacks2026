@@ -163,6 +163,21 @@ test("POST /games returns a code and a host token", async () => {
   assert.equal(typeof body.hostToken, "string");
 });
 
+test("GET /games/:code reports the game status, or 404 when unknown", async () => {
+  const game = await gameModule.service.createGame();
+
+  const found = await fetch(`${base}/games/${game.code.toLowerCase()}`);
+  assert.equal(found.status, 200);
+  const body = (await found.json()) as { code: string; status: string };
+  assert.equal(body.code, game.code);
+  assert.equal(body.status, "lobby");
+
+  const missing = await fetch(`${base}/games/ZZZZZZ`);
+  assert.equal(missing.status, 404);
+  const error = (await missing.json()) as { error: string };
+  assert.equal(error.error, "GAME_NOT_FOUND");
+});
+
 test("rejects a cross-origin handshake", async () => {
   const game = await gameModule.service.createGame();
   const client = connectClient(
