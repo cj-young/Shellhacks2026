@@ -1,7 +1,14 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type React from "react";
 import { INK, PhoneFrame, ROYAL, SKY, SUN, TOMATO, lilita } from "./design";
 import { IngredientIcon } from "./IngredientIcon";
+import { characterImage } from "#/data/characters";
 
 import { paper } from "./paper";
 
@@ -369,6 +376,15 @@ function AvatarFace({ mood }: { mood: AvatarMood }) {
   );
 }
 
+/**
+ * What sits at the right of the phone top bar. The live game puts the sabotage
+ * button here; without a provider (dev previews) the star score shows.
+ */
+export const TopBarAction = createContext<React.ReactNode>(null);
+
+/** The player's chef, shown in the top bar in place of the smiley face. */
+export const TopBarCharacter = createContext<string | null>(null);
+
 export function PhoneTopBar({
   mood,
   progress,
@@ -383,6 +399,8 @@ export function PhoneTopBar({
   top?: number;
 }) {
   const panicked = mood === "panicked";
+  const action = useContext(TopBarAction);
+  const character = useContext(TopBarCharacter);
   return (
     <div
       style={{
@@ -402,12 +420,30 @@ export function PhoneTopBar({
           width: 62,
           height: 62,
           flexShrink: 0,
-          background: ROYAL,
+          background: character ? "#fff" : ROYAL,
           boxSizing: "border-box",
+          overflow: "hidden",
           transform: panicked ? "rotate(-8deg)" : undefined,
         }}
       >
-        <AvatarFace mood={mood} />
+        {character ? (
+          // Full-body chef art, zoomed in on the face.
+          <img
+            src={characterImage(character)}
+            alt=""
+            draggable={false}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: 3,
+              width: 92,
+              transform: "translateX(-50%)",
+              maxWidth: "none",
+            }}
+          />
+        ) : (
+          <AvatarFace mood={mood} />
+        )}
       </div>
       <div
         style={{
@@ -430,28 +466,30 @@ export function PhoneTopBar({
           }}
         />
       </div>
-      <div
-        style={{
-          ...paper(22, 2),
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          background: SUN,
-          padding: "2px 14px 2px 8px",
-          font: lilita(28, 1.2),
-        }}
-      >
-        <svg width="22" height="22" viewBox="0 0 100 100">
-          <polygon
-            points={STAR_POINTS}
-            fill="#fff"
-            stroke={INK}
-            strokeWidth="9"
-            strokeLinejoin="round"
-          />
-        </svg>
-        {score}
-      </div>
+      {action ?? (
+        <div
+          style={{
+            ...paper(22, 2),
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: SUN,
+            padding: "2px 14px 2px 8px",
+            font: lilita(28, 1.2),
+          }}
+        >
+          <svg width="22" height="22" viewBox="0 0 100 100">
+            <polygon
+              points={STAR_POINTS}
+              fill="#fff"
+              stroke={INK}
+              strokeWidth="9"
+              strokeLinejoin="round"
+            />
+          </svg>
+          {score}
+        </div>
+      )}
     </div>
   );
 }

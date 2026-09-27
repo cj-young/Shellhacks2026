@@ -1,4 +1,10 @@
-import { SabotageEffects } from "../sabotage/SabotageUI";
+import {
+  BLACKOUT_BANNER_MS,
+  SabotageBlackoutBanner,
+  SabotageLightsOut,
+  sabotageMessage,
+} from "../sabotage/SabotageUI";
+import { NOTICE_MS, effectRemaining } from "#/lib/sabotages";
 import type { GameConnection } from "#/lib/use-game-connection";
 import type { Ingredient, Recipe } from "#/lib/types";
 import { useEffect, useState } from "react";
@@ -14,6 +20,7 @@ import { RoundLeaderboard } from "#/components/chop-chop/screens/RoundLeaderboar
 import { iconIdFor } from "#/components/client/Store";
 import { menuRecipeIdFor, stepInfo, stepProgress } from "#/data/recipe-steps";
 import { useAudioUnlock, useMusic, useSfx } from "#/audio/use-audio";
+import { usePreloadStoreArt } from "#/lib/use-preload-store-art";
 
 const TIMES_UP_MS = 3000;
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
@@ -96,6 +103,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
   const sfx = useSfx();
   useAudioUnlock();
   useMusic("music.game", true);
+  usePreloadStoreArt();
 
   // Round stingers: the go, the time-up, and the leaderboard reveal.
   useEffect(() => {
@@ -151,7 +159,9 @@ export function HostInterface({ connection }: HostInterfaceProps) {
           }))}
           hideNextRound
           onLobby={() => {
-            window.location.href = "/";
+            // The finished room was cleared on game end, so /host opens a
+            // fresh lobby for the next game.
+            window.location.assign("/host");
           }}
         />
       </div>
@@ -165,9 +175,53 @@ export function HostInterface({ connection }: HostInterfaceProps) {
 
   const order = connection.state.recipeOrder;
   // Cart, inventory and recipe progress arrive with each state update from the server.
+  // Sabotages land on the affected player's card: a toast, and frost while frozen.
+  const { effects, now: sabNow } = connection.sabotages;
+  const nameOf = (id: string | null) =>
+    players.find((player) => player.id === id)?.name ?? "A chef";
+  const sabotageFor = (
+    id: string,
+  ): Pick<RaceStack, "frozenSeconds" | "sabotage"> => {
+    const frozenMs = effectRemaining(effects, "freeze", id, sabNow);
+    const latest = [...effects]
+      .reverse()
+      .find((e) => e.targetPlayerId === id && e.noticeUntil > sabNow);
+    const item = ingredients.find((i) => i.id === latest?.ingredientId)?.name;
+    return {
+      frozenSeconds: frozenMs > 0 ? Math.ceil(frozenMs / 1000) : 0,
+      sabotage: latest
+        ? {
+            id: latest.id,
+            definitionId: latest.definition.id,
+            message: sabotageMessage(
+              latest.definition.id,
+              nameOf(latest.sourcePlayerId),
+              nameOf(id),
+              item,
+            ),
+          }
+        : null,
+    };
+  };
   const liveStacks: RaceStack[] = players
     .map((player) => playerStack(player, serverPlayers.get(player.id), order))
-    .filter((stack): stack is RaceStack => stack !== null);
+    .filter((stack): stack is RaceStack => stack !== null)
+    .map((stack) => ({ ...stack, ...sabotageFor(stack.id) }));
+  // Everyone-sabotages (blackout) get a big pop-up for a couple of seconds.
+  const blackout = [...effects]
+    .reverse()
+    .find(
+      (e) =>
+        e.definition.targetScope === "all" &&
+        e.noticeUntil - NOTICE_MS + BLACKOUT_BANNER_MS > sabNow,
+    );
+
+  const blackoutLeft = Math.max(
+    0,
+    ...effects
+      .filter((e) => e.definition.targetScope === "all")
+      .map((e) => (e.localExpiresAt ?? 0) - sabNow),
+  );
 
   const demo = liveStacks.length === 0;
 
@@ -177,6 +231,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
         stacks={demo ? DEMO_STACKS : liveStacks}
         totalRecipes={demo ? 5 : Math.max(1, order.length)}
         secondsLeft={secondsLeft}
+        blackoutSeconds={Math.ceil(blackoutLeft / 1000)}
         intro
         banner={
           demo
@@ -186,7 +241,13 @@ export function HostInterface({ connection }: HostInterfaceProps) {
             : undefined
         }
       />
-      <SabotageEffects connection={connection} host />
+      <SabotageLightsOut active={!results && blackoutLeft > 0} />
+      {blackout && !results && (
+        <SabotageBlackoutBanner
+          key={blackout.id}
+          source={nameOf(blackout.sourcePlayerId)}
+        />
+      )}
       {results && <TimesUp />}
     </div>
   );

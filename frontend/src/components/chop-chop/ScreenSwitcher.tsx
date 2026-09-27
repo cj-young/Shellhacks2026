@@ -22,6 +22,8 @@ import {
 import { AssetSheet, ASSET_SHEET_SIZE } from "./screens/AssetSheet";
 import { StyleTest } from "./screens/StyleTest";
 import { SabotagePreview } from "#/components/dev/SabotagePreview";
+import { SabotageDesignSheet } from "#/components/dev/SabotageDesignSheet";
+import { SabotageDemo } from "#/components/dev/SabotageDemo";
 import { RecipeWalkthrough } from "#/components/dev/RecipeWalkthrough";
 import {
   HostMenuPrepping,
@@ -45,7 +47,7 @@ import {
 import { paper } from "./paper";
 
 type Screen = { id: string; label: string; component: React.ComponentType };
-type Device = "host" | "player" | "sheet" | "sizes" | "recipe";
+type Device = "host" | "player" | "sheet" | "sizes" | "recipe" | "designSheet";
 
 const DEVICE_SIZE: Record<Device, { width: number; height: number }> = {
   host: { width: 1920, height: 1080 },
@@ -54,6 +56,8 @@ const DEVICE_SIZE: Record<Device, { width: number; height: number }> = {
   sizes: VEGGIE_SIZES_CANVAS,
   // Small enough to show unscaled on a laptop, since gestures are traced at real size.
   recipe: { width: 1120, height: 760 },
+  // Scrolls inside; wide enough for the menus in a row.
+  designSheet: { width: 1440, height: 900 },
 };
 
 // Playable recipe checks (real recipes from the server, real gestures).
@@ -75,6 +79,22 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
         id: "sabotage-preview",
         label: "Sabotage playground",
         component: SabotagePreview,
+      },
+    ],
+  },
+  {
+    title: "Sabotages · design",
+    device: "designSheet",
+    screens: [
+      {
+        id: "sabotage-design",
+        label: "Design sheet · all states",
+        component: SabotageDesignSheet,
+      },
+      {
+        id: "sabotage-demo",
+        label: "Demo · try the effects",
+        component: SabotageDemo,
       },
     ],
   },

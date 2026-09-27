@@ -123,7 +123,7 @@ export function PlayerPlatePancakes() {
     <PlatingScreen
       score={1450}
       progress={94}
-      basket={["sugar"]}
+      basket={["flour"]}
       dish="pancakes"
     />
   );

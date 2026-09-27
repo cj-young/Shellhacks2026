@@ -816,9 +816,9 @@
       },
       {
         "type": "lines",
-        "backgroundImage": "/assets/steps/pan.svg",
-        "image": "/assets/steps/guacamole/newchoppedgarlic.png",
-        "finishedImage": "/assets/steps/guacamole/newchoppedgarlic.png",
+        "backgroundImage": "none",
+        "image": "/assets/steps/steak/pan-garlic-chopped.png",
+        "finishedImage": "/assets/steps/steak/pan-garlic-chopped.png",
         "lines": [
           {
             "start": { "x": 100, "y": 125 },
@@ -830,9 +830,9 @@
       },
       {
         "type": "spin",
-        "backgroundImage": "/assets/steps/pan.svg",
-        "image": "/assets/ingredient-steak.svg",
-        "finishedImage": "/assets/ingredient-steak.svg",
+        "backgroundImage": "none",
+        "image": "/assets/steps/steak/pan-steak-raw.png",
+        "finishedImage": "/assets/steps/steak/pan-steak-raw.png",
         "spins": [
           {
             "center": { "x": 100, "y": 100 },
@@ -848,9 +848,9 @@
       },
       {
         "type": "lines",
-        "backgroundImage": "/assets/steps/pan.svg",
-        "image": "/assets/ingredient-steak.svg",
-        "finishedImage": "/assets/steps/steak/03-steak-top-seared.png",
+        "backgroundImage": "none",
+        "image": "/assets/steps/steak/pan-steak-raw.png",
+        "finishedImage": "/assets/steps/steak/pan-steak-top-seared.png",
         "lines": [
           {
             "start": { "x": 100, "y": 170 },
@@ -862,9 +862,9 @@
       },
       {
         "type": "spin",
-        "backgroundImage": "/assets/steps/pan.svg",
-        "image": "/assets/steps/steak/03-steak-top-seared.png",
-        "finishedImage": "/assets/steps/steak/03-steak-top-seared.png",
+        "backgroundImage": "none",
+        "image": "/assets/steps/steak/pan-steak-top-seared.png",
+        "finishedImage": "/assets/steps/steak/pan-steak-top-seared.png",
         "spins": [
           {
             "center": { "x": 100, "y": 100 },
@@ -878,9 +878,9 @@
       },
       {
         "type": "lines",
-        "backgroundImage": "/assets/steps/pan.svg",
-        "image": "/assets/steps/steak/03-steak-top-seared.png",
-        "finishedImage": "/assets/steps/steak/04-steak-fully-seared.png",
+        "backgroundImage": "none",
+        "image": "/assets/steps/steak/pan-steak-top-seared.png",
+        "finishedImage": "/assets/steps/steak/pan-steak-seared.png",
         "lines": [
           {
             "start": { "x": 100, "y": 170 },

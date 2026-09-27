@@ -28,6 +28,27 @@ export type SabotageEffect = SabotageAppliedPayload & {
   noticeUntil: number;
 };
 
+/** How long a sabotage announcement stays on screen after it arrives. */
+export const NOTICE_MS = 4500;
+
+/**
+ * The phone's blackout toast is shorter: the dimmed screen already says what
+ * happened, so it only needs to name who did it and get out of the way.
+ */
+export const PHONE_BLACKOUT_NOTICE_MS = 1800;
+
+/** Whether an announcement is still up, given who is looking at it. */
+export function noticeShowing(
+  effect: { noticeUntil: number },
+  definitionId: string,
+  now: number,
+  phone: boolean,
+) {
+  const shown =
+    phone && definitionId === "blackout" ? PHONE_BLACKOUT_NOTICE_MS : NOTICE_MS;
+  return effect.noticeUntil - NOTICE_MS + shown > now;
+}
+
 export function localizeSabotage(
   payload: SabotageAppliedPayload,
   now: number,
@@ -38,7 +59,7 @@ export function localizeSabotage(
       payload.expiresAt === null
         ? null
         : now + payload.expiresAt - payload.serverNow,
-    noticeUntil: now + 4500,
+    noticeUntil: now + NOTICE_MS,
   };
 }
 

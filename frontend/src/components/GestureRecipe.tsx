@@ -35,6 +35,34 @@ export type GestureRecipeProps = {
  * targets as guides. Matching is forgiving (feature-based, rough proximity,
  * capped rotations); once a stroke matches it stays matched until it clears.
  */
+/** Step art fades in; "Success!" pops, then floats up off the picture. */
+const STEP_CSS = `
+@keyframes stepArtIn { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+.step-art-in { animation: stepArtIn 380ms ease-out both; }
+@keyframes stepSuccess {
+  0% { transform: translate(-50%, -50%) scale(.5); opacity: 0; }
+  18% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  30%, 55% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -160%) scale(.85); opacity: 0; }
+}
+@keyframes foodShake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  12% { transform: translateX(-3px) rotate(-4deg); }
+  28% { transform: translateX(3px) rotate(4deg); }
+  44% { transform: translateX(-3px) rotate(-3deg); }
+  62% { transform: translateX(2px) rotate(3deg); }
+  80% { transform: translateX(-1px) rotate(-1deg); }
+}
+/* Two identical names so each wrong gesture restarts the shake without
+   remounting the picture (which would replay its fade-in). */
+@keyframes foodShake2 { from, to { transform: none; } }
+.food-shake-0 { animation: foodShake 420ms ease-in-out; }
+.food-shake-1 { animation: foodShake 420ms ease-in-out, foodShake2 1ms; }
+@media (prefers-reduced-motion: reduce) {
+  .step-art-in, .food-shake-0, .food-shake-1 { animation: none !important; }
+}
+`;
+
 export function GestureRecipe({
   stage,
   points,
@@ -107,20 +135,7 @@ export function GestureRecipe({
 
   return (
     <div className="relative h-full w-full overflow-hidden pointer-events-none">
-      <style>{`
-        @keyframes foodShake {
-          0%, 100% { transform: translateX(0) rotate(0deg); }
-          12% { transform: translateX(-3px) rotate(-4deg); }
-          28% { transform: translateX(3px) rotate(4deg); }
-          44% { transform: translateX(-3px) rotate(-3deg); }
-          62% { transform: translateX(2px) rotate(3deg); }
-          80% { transform: translateX(-1px) rotate(-1deg); }
-        }
-        .food-shake { animation: foodShake 420ms ease-in-out; }
-        @media (prefers-reduced-motion: reduce) {
-          .food-shake { animation: none !important; }
-        }
-      `}</style>
+      <style>{STEP_CSS}</style>
       {stage.backgroundImage && (
         <img
           alt=""
@@ -132,10 +147,11 @@ export function GestureRecipe({
         // Over the stage's gesture space (targets use 0–200px), so the art sits
         // under the lines and circles rather than centred on the whole box.
         <img
-          key={shakeId}
+          // Keyed by picture so each new one fades in rather than popping on.
+          key={foregroundImage}
           alt=""
-          className={`absolute left-0 top-0 h-50 w-50 object-contain${
-            shakeId > 0 ? " food-shake" : ""
+          className={`absolute left-0 top-0 h-50 w-50 object-contain step-art-in${
+            shakeId > 0 ? ` food-shake-${shakeId % 2}` : ""
           }`}
           src={foregroundImage}
         />
@@ -148,8 +164,8 @@ export function GestureRecipe({
             position: "absolute",
             left: "50%",
             top: "50%",
-            transform: "translate(-50%, -50%)",
             background: "#2FA84F",
+            animation: "stepSuccess 650ms ease-out both",
             padding: "4px 16px",
             font: "400 26px 'Sniglet'",
             color: "#3D2817",

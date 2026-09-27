@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { GameConnection } from "#/lib/use-game-connection";
+import { usePreloadStoreArt } from "#/lib/use-preload-store-art";
 import type { PlayerSummary } from "#/lib/types";
 import { CHARACTERS, characterImage } from "#/data/characters";
 import {
@@ -30,6 +31,7 @@ function useDots() {
 export function WaitingRoom({ connection }: { connection: GameConnection }) {
   const [pending, setPending] = useState<string | null>(null);
   const me = connection.players.find((p) => p.id === connection.playerId);
+  usePreloadStoreArt();
 
   // Clear the "picking…" state once the server confirms (or rejects) the choice.
   useEffect(() => {

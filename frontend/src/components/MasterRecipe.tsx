@@ -28,7 +28,7 @@ export function MasterRecipe({
   paused = false,
   points,
   initialStageIndex = 0,
-  stageDelayMs = 1500,
+  stageDelayMs = 1100,
   onCompleteChange,
   onStageChange,
   onStageMatch,

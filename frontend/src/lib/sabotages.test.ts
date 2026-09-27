@@ -16,12 +16,12 @@ const freeze: SabotageAppliedPayload = {
     name: "Freeze",
     description: "",
     targetScope: "single",
-    durationMs: 10000,
+    durationMs: 3000,
   },
   sourcePlayerId: "ada",
   targetPlayerId: "jun",
   appliedAt: 900000,
-  expiresAt: 910000,
+  expiresAt: 903000,
   serverNow: 902000,
   ingredientId: null,
 };
@@ -36,21 +36,21 @@ test("completed recipes grant saved choice credits, never stages or repeated sta
 
 test("server clock skew and elapsed duration are accounted for; expiry clears locally", () => {
   const effect = localizeSabotage(freeze, 1000);
-  assert.equal(effect.localExpiresAt, 9000);
-  assert.equal(effectRemaining([effect], "freeze", "jun", 1000), 8000);
-  assert.equal(effectRemaining([effect], "freeze", "jun", 9000), 0);
-  assert.equal(effectRemaining([effect], "freeze", "jun", 10000), 0);
+  assert.equal(effect.localExpiresAt, 2000);
+  assert.equal(effectRemaining([effect], "freeze", "jun", 1000), 1000);
+  assert.equal(effectRemaining([effect], "freeze", "jun", 2000), 0);
+  assert.equal(effectRemaining([effect], "freeze", "jun", 3000), 0);
   assert.equal(effectRemaining([effect], "freeze", "ada", 1000), 0);
 });
 
 test("overlapping freezes last until the latest expiry even with out-of-order broadcasts", () => {
   const long = localizeSabotage(freeze, 1000);
   const short = localizeSabotage(
-    { ...freeze, id: "freeze-2", expiresAt: 904000 },
+    { ...freeze, id: "freeze-2", expiresAt: 902500 },
     1000,
   );
-  assert.equal(effectRemaining([long, short], "freeze", "jun", 4000), 5000);
-  assert.equal(effectRemaining([short, long], "freeze", "jun", 4000), 5000);
+  assert.equal(effectRemaining([long, short], "freeze", "jun", 1200), 800);
+  assert.equal(effectRemaining([short, long], "freeze", "jun", 1200), 800);
 });
 
 test("blackout affects everyone, including its sender; single and self scopes are isolated", () => {

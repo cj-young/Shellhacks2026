@@ -38,6 +38,10 @@ export type RaceStack = {
   character?: string | null;
   /** Current score, shown on the tab. */
   points?: number;
+  /** Seconds left on a freeze aimed at this player (frost over their card). */
+  frozenSeconds?: number;
+  /** Latest sabotage aimed at this player, shown as a toast above their card. */
+  sabotage?: { id: string; definitionId: string; message: string } | null;
 } & (
   | { phase: "shop"; items: ShopItem[] }
   | {
@@ -129,6 +133,8 @@ interface HostRaceStacksProps {
   stacks?: RaceStack[];
   totalRecipes?: number;
   secondsLeft?: number;
+  /** Seconds of blackout left; shows a small countdown under the timer. */
+  blackoutSeconds?: number;
   /** Small label in the top-left corner, e.g. to mark demo data. */
   banner?: string;
   /** Start with a 3-2-1 countdown, then dim the kitchen and deal the cards in. */
@@ -147,6 +153,10 @@ const RACE_CSS = `
   100% { transform: none; }
 }
 @keyframes rsTabIn { from { transform: translateY(160px); } to { transform: none; } }
+@keyframes rsBlackoutIn {
+  from { opacity: 0; transform: translateY(-10px) scale(.8); }
+  to { opacity: 1; transform: none; }
+}
 @keyframes rsDrop {
   0% { transform: translateY(-220px); }
   70% { transform: translateY(8px); }
@@ -171,6 +181,21 @@ const RACE_CSS = `
   100% { transform: scale(1) rotate(0); }
 }
 @keyframes rsCheckDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes rsSabToast {
+  0% { transform: translateY(30px) scale(.6); opacity: 0; }
+  8% { transform: translateY(-8px) scale(1.06); opacity: 1; }
+  14% { transform: none; }
+  85% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+@keyframes rsStepIn {
+  from { opacity: 0; transform: translateX(46px) scale(.92); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes rsFrostIn {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: none; }
+}
 @keyframes rsToast {
   0% { transform: translateY(40px) scale(.5); opacity: 0; }
   14% { transform: translateY(-10px) scale(1.12); opacity: 1; }
@@ -191,6 +216,7 @@ export function HostRaceStacks({
   stacks = DEMO_STACKS,
   totalRecipes = 5,
   secondsLeft = 60,
+  blackoutSeconds = 0,
   banner,
   intro = false,
 }: HostRaceStacksProps) {
@@ -289,7 +315,8 @@ export function HostRaceStacks({
         >
           <div
             style={{
-              height: 186 * scale,
+              height: (blackoutSeconds > 0 ? 240 : 186) * scale,
+              transition: "height 350ms ease",
               display: "flex",
               justifyContent: "center",
               flexShrink: 0,
@@ -306,6 +333,9 @@ export function HostRaceStacks({
               }}
             >
               <Timer secondsLeft={secondsLeft} />
+              {blackoutSeconds > 0 && (
+                <BlackoutTimer seconds={blackoutSeconds} />
+              )}
             </div>
           </div>
 
@@ -405,6 +435,36 @@ function Timer({ secondsLeft }: { secondsLeft: number }) {
           {secondsLeft}
         </span>
       </div>
+    </div>
+  );
+}
+
+/** Small "lights out" countdown that sits under the round timer. */
+function BlackoutTimer({ seconds }: { seconds: number }) {
+  return (
+    <div
+      role="timer"
+      style={{
+        ...paper(999, 3),
+        margin: "8px auto 0",
+        width: "fit-content",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "4px 18px 4px 8px",
+        background: "#1f2350",
+        color: "#fff",
+        font: nunito(900, 26),
+        animation: "rsBlackoutIn 350ms cubic-bezier(.2,1.2,.4,1) both",
+      }}
+    >
+      <img
+        src="/assets/sabotages/blackout.png"
+        alt=""
+        draggable={false}
+        style={{ width: 42, height: 42, objectFit: "contain" }}
+      />
+      Lights out · {seconds}s
     </div>
   );
 }
@@ -615,6 +675,11 @@ function PrepPanel({
   stack: Extract<RaceStack, { phase: "prep" }>;
 }) {
   const isChop = stack.gesture === "chop";
+  // Each step remounts these so they slide in when the step changes.
+  const stepKey = `${stack.step}:${stack.stageLabel ?? ""}:${stack.gestureName}:${stack.stepLabel}`;
+  const stepIn = (delay: number): React.CSSProperties => ({
+    animation: `rsStepIn 480ms ${delay}ms cubic-bezier(.2,1.1,.35,1) both`,
+  });
   return (
     <>
       <StepTokens
@@ -624,7 +689,10 @@ function PrepPanel({
         color={stack.color}
       />
       <div
+        key={`icon:${stepKey}`}
+        className="rs-anim"
         style={{
+          ...stepIn(0),
           flex: 1,
           display: "flex",
           alignItems: "center",
@@ -721,19 +789,29 @@ function PrepPanel({
         </div>
       </div>
       <div
-        style={{
-          textAlign: "center",
-          font: lilita(84, 0.9),
-          color: stack.color,
-          WebkitTextStroke: `10px ${INK}`,
-          paintOrder: "stroke fill",
-          textShadow: `0 7px 0 ${INK}`,
-          transform: "rotate(-2deg)",
-        }}
+        key={`word:${stepKey}`}
+        className="rs-anim"
+        style={{ ...stepIn(70), display: "flex", justifyContent: "center" }}
       >
-        {stack.gestureName}
+        <span
+          style={{
+            ...paper(24, 6),
+            display: "inline-block",
+            padding: "6px 30px 10px",
+            background: stack.color,
+            color: isDark(stack.color) ? "#FFF6E3" : INK,
+            font: lilita(70, 1),
+            transform: "rotate(-2deg)",
+          }}
+        >
+          {stack.gestureName}
+        </span>
       </div>
-      <div style={{ textAlign: "center", font: nunito(900, 22) }}>
+      <div
+        key={`label:${stepKey}`}
+        className="rs-anim"
+        style={{ ...stepIn(140), textAlign: "center", font: nunito(900, 22) }}
+      >
         {stack.stepLabel}
       </div>
     </>
@@ -888,7 +966,56 @@ function RecipeStack({
             animate={doneFrom !== null}
           />
         )}
+        {(stack.frozenSeconds ?? 0) > 0 && (
+          <FrostOverlay seconds={stack.frozenSeconds!} />
+        )}
       </div>
+
+      {stack.sabotage && (
+        <div
+          key={stack.sabotage.id}
+          className="rs-anim"
+          style={{
+            position: "absolute",
+            top: -30,
+            left: -10,
+            right: -10,
+            zIndex: 6,
+            display: "flex",
+            justifyContent: "center",
+            pointerEvents: "none",
+            animation: "rsSabToast 4500ms ease-out both",
+          }}
+        >
+          <div
+            style={{
+              ...paper(20, 4),
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              maxWidth: "100%",
+              background: "#1654e6",
+              color: "#fff6e3",
+              padding: "8px 16px 8px 8px",
+              font: nunito(900, 20),
+              transform: "rotate(-2deg)",
+            }}
+          >
+            <img
+              src={`/assets/sabotages/${stack.sabotage.definitionId}.png`}
+              alt=""
+              style={{
+                width: 66,
+                height: 44,
+                objectFit: "cover",
+                borderRadius: 10,
+                flexShrink: 0,
+              }}
+            />
+            <span>{stack.sabotage.message}</span>
+          </div>
+        </div>
+      )}
 
       {doneFrom && (
         <div
@@ -919,6 +1046,51 @@ function RecipeStack({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Whether cream text reads better than dark brown on this colour. */
+function isDark(hex: string) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return true;
+  const n = parseInt(m[1], 16);
+  const lum =
+    (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) /
+    255;
+  return lum < 0.62;
+}
+
+/** Frosty cover over a frozen player's card, with the seconds left. */
+function FrostOverlay({ seconds }: { seconds: number }) {
+  return (
+    <div
+      className="rs-anim"
+      style={{
+        ...paper(38, 8, false),
+        position: "absolute",
+        inset: 0,
+        zIndex: 4,
+        background:
+          "linear-gradient(160deg, rgba(214,241,255,.88), rgba(150,205,240,.82))",
+        boxShadow: "inset 0 0 40px 10px #ffffffcc",
+        backdropFilter: "blur(3px)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        color: "#0b3a66",
+        animation: "rsFrostIn 350ms ease-out both",
+      }}
+    >
+      <img
+        src="/assets/sabotages/freeze.png"
+        alt=""
+        style={{ width: 230, borderRadius: 24 }}
+      />
+      <span style={{ font: lilita(64, 1) }}>Frozen!</span>
+      <span style={{ font: nunito(900, 26) }}>{seconds}s</span>
     </div>
   );
 }
@@ -1113,6 +1285,7 @@ function PlayerTab({ stack }: { stack: RaceStack }) {
               top: 4,
               width: 118,
               transform: "translateX(-50%)",
+              maxWidth: "none",
             }}
           />
         )}

@@ -12,11 +12,10 @@ import { useSfx } from "#/audio/use-audio";
 export const iconIdFor = (ing: Ingredient) =>
   menuIngredientIdFor(ing.name) ?? ing.image;
 
-// Our shelves, with the two produce shelves shown as one aisle since the team's
-// catalog only has a few produce items.
+// Our shelves as store aisles; each fits on one page.
 const AISLE_FOR_SHELF: Record<string, string> = {
-  veggies: "Produce",
-  "onions-citrus": "Produce",
+  veggies: "Veggies",
+  "onions-citrus": "Onions & Citrus",
   "meat-dairy": "Meat & Dairy",
   "bakery-pantry": "Bakery & Pantry",
 };

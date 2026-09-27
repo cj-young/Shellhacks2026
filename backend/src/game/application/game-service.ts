@@ -30,6 +30,10 @@ import type { Recipe } from "../domain/recipe.ts";
 import type { GameStore } from "../ports/game-store.ts";
 
 const MAX_CODE_ATTEMPTS = 5;
+/** Recipes dealt to each game; more than most players will finish in time. */
+const RECIPES_PER_GAME = 5;
+/** Sabotages a finished recipe can award (the ones with artwork). */
+export const AWARDED_SABOTAGES = ["trash", "freeze", "blackout"];
 export const MAX_PLAYERS = 5;
 export const MAX_ITEM_COUNT = 99;
 export const POINTS_PER_RECIPE = 100;
@@ -146,11 +150,20 @@ export type UseSabotageResult =
         | "PLAYER_FROZEN"
         | "SABOTAGE_NOT_FOUND"
         | "SABOTAGE_ALREADY_USED"
+        | "SABOTAGE_NOT_HELD"
         | "INVALID_TARGET";
     };
 
 export class GameService {
   readonly #store: GameStore;
+
+  /**
+   * Picks which sabotage a finished recipe awards. Random from the ones with
+   * artwork by default; tests replace it to get a known sabotage. null gives an
+   * untyped credit that can be spent on any sabotage.
+   */
+  pickSabotage: () => string | null = () =>
+    AWARDED_SABOTAGES[getRandomIntInclusive(0, AWARDED_SABOTAGES.length - 1)];
 
   constructor(store: GameStore) {
     this.#store = store;
@@ -270,7 +283,7 @@ export class GameService {
       return { ok: false, code: "ALREADY_STARTED" };
     }
 
-    const order = generateRecipeOrder(3);
+    const order = generateRecipeOrder(RECIPES_PER_GAME);
     const durationMs = options.durationMs ?? ROUND_DURATION_MS;
     const roundStartedAt = Date.now();
     const players = assignMissingCharacters(game.state.players).map(
@@ -546,7 +559,7 @@ export class GameService {
                 ...player.sabotages,
                 {
                   id: randomUUID(),
-                  definitionId: null,
+                  definitionId: this.pickSabotage(),
                   acquiredAt: now,
                   usedAt: null,
                 },
@@ -605,8 +618,13 @@ export class GameService {
         ? getSabotageDefinition(input.definitionId)
         : undefined;
     if (!definition) return { ok: false, code: "SABOTAGE_NOT_FOUND" };
-    const credit = source.sabotages.find((entry) => entry.usedAt === null);
-    if (!credit) return { ok: false, code: "SABOTAGE_ALREADY_USED" };
+    const unused = source.sabotages.filter((entry) => entry.usedAt === null);
+    if (!unused.length) return { ok: false, code: "SABOTAGE_ALREADY_USED" };
+    // Each award is one specific sabotage (older untyped credits allow any).
+    const credit =
+      unused.find((entry) => entry.definitionId === definition.id) ??
+      unused.find((entry) => entry.definitionId === null);
+    if (!credit) return { ok: false, code: "SABOTAGE_NOT_HELD" };
     const target =
       definition.targetScope === "single"
         ? game.state.players.find(

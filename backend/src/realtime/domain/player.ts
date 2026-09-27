@@ -19,6 +19,8 @@ export interface PlayerSummary {
   readonly recipeStageIndex: number;
   readonly score: number;
   readonly sabotageCredits: number;
+  /** Unused awarded sabotages by id, oldest first (e.g. ["freeze"]). */
+  readonly heldSabotages: string[];
   readonly stageDeadlineAt: number | null;
 }
 
@@ -38,6 +40,9 @@ export function toPlayerSummary(player: Player): PlayerSummary {
     score: player.score,
     sabotageCredits: player.sabotages.filter((entry) => entry.usedAt === null)
       .length,
+    heldSabotages: player.sabotages
+      .filter((entry) => entry.usedAt === null && entry.definitionId !== null)
+      .map((entry) => entry.definitionId as string),
     stageDeadlineAt: player.stageDeadlineAt,
   };
 }

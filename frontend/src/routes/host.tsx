@@ -10,6 +10,7 @@ import {
 import type { HostGame } from "#/lib/host-game";
 import { HostInterface } from "#/components/host/HostInterface";
 import { audio } from "#/audio/engine";
+import { usePreloadStoreArt } from "#/lib/use-preload-store-art";
 import { PAGE_BG } from "#/components/chop-chop/design";
 import {
   HostLobbyNew,
@@ -38,6 +39,7 @@ function HostScreen() {
   const connection = useGameConnection(
     game ? { code: game.code, token: game.hostToken, name: game.name } : null,
   );
+  usePreloadStoreArt();
 
   useEffect(() => {
     setJoinText(`${window.location.host}/join`);

@@ -1,7 +1,12 @@
 import { paper } from "#/components/chop-chop/paper";
+import type React from "react";
 import type { GameConnection } from "#/lib/use-game-connection";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { SabotageControls, SabotageEffects } from "../sabotage/SabotageUI";
+import {
+  SabotageControls,
+  SabotageEffects,
+  SabotageLaunchButton,
+} from "../sabotage/SabotageUI";
 import { Store, iconIdFor } from "./Store";
 import type { Ingredient, PlayerInterfaceState } from "#/lib/types";
 import ingredients from "../../data/ingredients.json";
@@ -19,6 +24,8 @@ import {
   Basket,
   COUNTER_BG,
   PhoneTopBar,
+  TopBarAction,
+  TopBarCharacter,
   StoreButton,
 } from "#/components/chop-chop/race";
 import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
@@ -32,6 +39,7 @@ import {
   withStepArt,
 } from "#/data/recipe-steps";
 import { useAmbient, useAudioUnlock, useSfx } from "#/audio/use-audio";
+import { usePreloadStoreArt } from "#/lib/use-preload-store-art";
 import type { KnifeGesture } from "#/audio/resolve";
 import { CutDetector } from "../knife-cuts";
 
@@ -50,12 +58,37 @@ const SHOW_TEST_CONTROLS = import.meta.env.DEV;
 
 export function ClientInterface({ connection }: ClientInterfaceProps) {
   const frozen = connection.sabotages.frozenMs > 0;
+  usePreloadStoreArt();
+  const [sabotageOpen, setSabotageOpen] = useState(false);
+  const myCharacter =
+    connection.state.players.find((p) => p.id === connection.playerId)
+      ?.character ??
+    connection.players.find((p) => p.id === connection.playerId)?.character ??
+    null;
+  // The sabotage button takes the score's spot in the phone top bar.
+  const sabotageButton = connection.results ? null : (
+    <SabotageLaunchButton
+      inline
+      credits={connection.sabotages.held.length}
+      frozen={frozen}
+      onClick={() => setSabotageOpen(true)}
+    />
+  );
   return (
     <>
       <div inert={frozen}>
-        <ClientGameplay connection={connection} />
+        <TopBarAction.Provider value={sabotageButton}>
+          <TopBarCharacter.Provider value={myCharacter}>
+            <ClientGameplay connection={connection} />
+          </TopBarCharacter.Provider>
+        </TopBarAction.Provider>
       </div>
-      <SabotageControls connection={connection} />
+      <SabotageControls
+        connection={connection}
+        open={sabotageOpen}
+        onOpenChange={setSabotageOpen}
+        showLaunch={false}
+      />
       <SabotageEffects connection={connection} />
     </>
   );
@@ -444,7 +477,8 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
         position: "fixed",
         inset: 0,
         zIndex: 90,
-        background: "rgba(61,40,23,.6)",
+        // Solid: nothing of the store shows until the countdown is over.
+        background: "#3D2817",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -499,19 +533,30 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
     </button>
   );
 
+  // The store stays hidden during the countdown, then slides up into view.
+  const revealStyle: React.CSSProperties = showCountdown
+    ? { visibility: "hidden" }
+    : { animation: "storeReveal 600ms cubic-bezier(.2,1,.35,1) both" };
+  const revealKeyframes = (
+    <style>{`@keyframes storeReveal { from { opacity: 0; transform: translateY(40px) scale(.96); } to { opacity: 1; transform: none; } } @media (prefers-reduced-motion: reduce) { @keyframes storeReveal { from { opacity: 0; } to { opacity: 1; } } }`}</style>
+  );
+
   if (interfaceState == "store") {
     return (
       <>
-        <Store
-          blackout={connection.sabotages.blackoutMs > 0}
-          disabled={frozen}
-          uploadInventory={checkoutFromStore}
-          onCartChange={syncCart}
-          score={myPoints}
-          progress={progress}
-          notice={total === 0 ? "Waiting for the recipes…" : undefined}
-          hint="Look up to see your shopping list"
-        />
+        {revealKeyframes}
+        <div style={revealStyle}>
+          <Store
+            blackout={connection.sabotages.blackoutMs > 0}
+            disabled={frozen}
+            uploadInventory={checkoutFromStore}
+            onCartChange={syncCart}
+            score={myPoints}
+            progress={progress}
+            notice={total === 0 ? "Waiting for the recipes…" : undefined}
+            hint="Look up to see your shopping list"
+          />
+        </div>
         {testFinishButton}
         {countdownOverlay}
       </>
@@ -616,6 +661,18 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
                 STEP {stageProgress.label} OF {stageProgress.total}
               </div>
               <div style={{ font: lilita(26, 1.1) }}>{activeStep?.label}</div>
+              <div
+                style={{
+                  ...paper(16, 3, false),
+                  display: "inline-block",
+                  marginTop: 6,
+                  padding: "3px 12px",
+                  background: "#FFE7A0",
+                  font: nunito(800, 15),
+                }}
+              >
+                {gestureHint(activeStage)}
+              </div>
             </div>
           )}
           {finished ? (
@@ -745,11 +802,6 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
                 grab them.
               </div>
             )
-          )}
-          {ready && activeStage && (
-            <div style={{ font: nunito(800, 16) }}>
-              {gestureHint(activeStage)}
-            </div>
           )}
         </div>
       </div>

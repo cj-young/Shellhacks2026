@@ -82,5 +82,83 @@
     "name": "Steak",
     "image": "/assets/ingredient-steak.svg",
     "category": "Meat"
+  },
+  {
+    "id": 14,
+    "name": "Carrot",
+    "image": "/assets/ingredient-carrot.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 15,
+    "name": "Broccoli",
+    "image": "/assets/ingredient-broccoli.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 16,
+    "name": "Red bell pepper",
+    "image": "/assets/ingredient-red-bell-pepper.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 17,
+    "name": "Celery",
+    "image": "/assets/ingredient-celery.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 18,
+    "name": "Green onion",
+    "image": "/assets/ingredient-green-onion.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 19,
+    "name": "Lime",
+    "image": "/assets/ingredient-lime.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 20,
+    "name": "Lemon",
+    "image": "/assets/ingredient-lemon.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 21,
+    "name": "Leek",
+    "image": "/assets/ingredient-leek.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 22,
+    "name": "Chicken",
+    "image": "/assets/ingredient-chicken.svg",
+    "category": "Meat"
+  },
+  {
+    "id": 23,
+    "name": "Butter",
+    "image": "/assets/ingredient-butter.svg",
+    "category": "Dairy"
+  },
+  {
+    "id": 24,
+    "name": "Tortilla",
+    "image": "/assets/ingredient-tortilla.svg",
+    "category": "Dry Goods"
+  },
+  {
+    "id": 25,
+    "name": "Rice",
+    "image": "/assets/ingredient-rice.svg",
+    "category": "Dry Goods"
+  },
+  {
+    "id": 26,
+    "name": "Soy sauce",
+    "image": "/assets/ingredient-soy-sauce.svg",
+    "category": "Dry Goods"
   }
 ]

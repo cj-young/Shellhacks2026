@@ -210,15 +210,6 @@
       "shelf": "bakery-pantry",
       "color": "#4A4F8C",
       "label": "SOY"
-    },
-    {
-      "id": "sugar",
-      "name": "Sugar",
-      "shelf": "bakery-pantry",
-      "color": "#F48FB7",
-      "label": "SUGAR",
-      "decoy": true,
-      "lookalike": "flour"
     }
   ],
   "recipes": [
