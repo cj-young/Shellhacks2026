@@ -11,7 +11,7 @@ import { lobbyColor } from "#/components/chop-chop/screens/HostLobbyNew";
 import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
 import { RoundLeaderboard } from "#/components/chop-chop/screens/RoundLeaderboard";
 import { iconIdFor } from "#/components/client/Store";
-import { menuRecipeIdFor, stepInfo } from "#/data/recipe-steps";
+import { menuRecipeIdFor, stepInfo, stepProgress } from "#/data/recipe-steps";
 
 const TIMES_UP_MS = 3000;
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
@@ -58,6 +58,7 @@ function playerStack(
     // Step name and icon for the stage they're on (see data/recipe-steps).
     const current = Math.min(stageIndex, recipe.stages.length - 1);
     const info = stepInfo(recipe.name, current, recipe.stages.at(current));
+    const progress = stepProgress(recipe, current);
     return {
       ...base,
       phase: "prep",
@@ -65,8 +66,9 @@ function playerStack(
       dish: menuRecipeIdFor(recipe.name),
       gestureName: info.word,
       stepLabel: info.label,
-      step: current + 1,
-      steps: Math.max(1, recipe.stages.length),
+      step: progress.number,
+      stageLabel: progress.label,
+      steps: Math.max(1, progress.total),
     };
   }
 

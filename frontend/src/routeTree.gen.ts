@@ -14,6 +14,7 @@ import { Route as ChopChopDevRouteImport } from './routes/chop-chop-dev'
 import { Route as HostRouteImport } from './routes/host'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as PracticeRouteImport } from './routes/practice'
+import { Route as RecipeWalkthroughRouteImport } from './routes/recipe-walkthrough'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const PracticeRoute = PracticeRouteImport.update({
   path: '/practice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecipeWalkthroughRoute = RecipeWalkthroughRouteImport.update({
+  id: '/recipe-walkthrough',
+  path: '/recipe-walkthrough',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
   '/practice': typeof PracticeRoute
+  '/recipe-walkthrough': typeof RecipeWalkthroughRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
   '/practice': typeof PracticeRoute
+  '/recipe-walkthrough': typeof RecipeWalkthroughRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/host': typeof HostRoute
   '/join': typeof JoinRoute
   '/practice': typeof PracticeRoute
+  '/recipe-walkthrough': typeof RecipeWalkthroughRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chop-chop-dev' | '/host' | '/join' | '/practice'
+  fullPaths:
+    | '/'
+    | '/chop-chop-dev'
+    | '/host'
+    | '/join'
+    | '/practice'
+    | '/recipe-walkthrough'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chop-chop-dev' | '/host' | '/join' | '/practice'
-  id: '__root__' | '/' | '/chop-chop-dev' | '/host' | '/join' | '/practice'
+  to:
+    | '/'
+    | '/chop-chop-dev'
+    | '/host'
+    | '/join'
+    | '/practice'
+    | '/recipe-walkthrough'
+  id:
+    | '__root__'
+    | '/'
+    | '/chop-chop-dev'
+    | '/host'
+    | '/join'
+    | '/practice'
+    | '/recipe-walkthrough'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +105,7 @@ export interface RootRouteChildren {
   HostRoute: typeof HostRoute
   JoinRoute: typeof JoinRoute
   PracticeRoute: typeof PracticeRoute
+  RecipeWalkthroughRoute: typeof RecipeWalkthroughRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PracticeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recipe-walkthrough': {
+      id: '/recipe-walkthrough'
+      path: '/recipe-walkthrough'
+      fullPath: '/recipe-walkthrough'
+      preLoaderRoute: typeof RecipeWalkthroughRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   HostRoute: HostRoute,
   JoinRoute: JoinRoute,
   PracticeRoute: PracticeRoute,
+  RecipeWalkthroughRoute: RecipeWalkthroughRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -8,7 +8,8 @@ import stepTable from "./recipe-steps.json";
  * Presentation for the team's recipes (backend/src/data/recipes.json). The
  * stages there only carry a gesture (lines/spin), geometry and what they
  * consume, so the names, host icons and placeholder art live in
- * recipe-steps.json, matched by recipe name and stage index. Gesture detection
+ * recipe-steps.json, grouped into master steps and matched by recipe name and
+ * flattened stage index. Gesture detection
  * is untouched. scripts/generate-step-art.mjs builds the art from the same file.
  */
 
@@ -28,6 +29,20 @@ export type StepInfo = {
    * draws it under the gesture, lined up with the 0–200px gesture space.
    */
   art?: string;
+  /** Picture shown on "Success!" for this step; defaults to the next step's art. */
+  doneArt?: string;
+  /** Surface drawn behind the step's picture (e.g. the cutting board). */
+  background?: string;
+  /** Utensil that follows the finger instead of a plain pointer (e.g. a whisk). */
+  tool?: StepTool;
+};
+
+export type StepTool = {
+  src: string;
+  /** Point on the image that sits under the finger, as fractions of its width and height. */
+  hotspot: [number, number];
+  /** Drawn height in px. */
+  height: number;
 };
 
 const step = (
@@ -37,12 +52,52 @@ const step = (
   station: Station,
 ): StepInfo => ({ label, gesture, word, station });
 
-// One entry per stage, in the same order as recipes.json.
-const STEPS = Object.fromEntries(
+export type MasterStep = {
+  label: string;
+  stages: StepInfo[];
+};
+
+// Flatten only the presentation: gameplay still advances its original stage index.
+const MASTER_STEPS = Object.fromEntries(
   Object.entries(stepTable).filter(([key]) => !key.startsWith("_")),
-) as unknown as Record<string, StepInfo[]>;
+) as unknown as Record<string, MasterStep[]>;
+const STEPS: Partial<Record<string, StepInfo[]>> = Object.fromEntries(
+  Object.entries(MASTER_STEPS).map(([key, steps]) => [
+    key,
+    steps.flatMap((entry) => entry.stages),
+  ]),
+);
 
 const normalize = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
+
+/** Letter within a master step; continues A…Z, AA…AZ for long steps. */
+function stageLetter(index: number): string {
+  let letter = "";
+  for (let n = index + 1; n > 0; n = Math.floor((n - 1) / 26)) {
+    letter = String.fromCharCode(65 + ((n - 1) % 26)) + letter;
+  }
+  return letter;
+}
+
+/** Translate the unchanged gameplay stage index into the visible step counter. */
+export function stepProgress(recipe: Recipe, stageIndex: number) {
+  const groups = MASTER_STEPS[normalize(recipe.name)] ?? [];
+  const positions = groups.flatMap((group, stepIndex) =>
+    group.stages.map((_, index) => ({
+      number: stepIndex + 1,
+      label: `${stepIndex + 1}${stageLetter(index)}`,
+    })),
+  );
+  // A missing or out-of-date presentation table must not misnumber live stages.
+  if (positions.length !== recipe.stages.length) {
+    return {
+      number: stageIndex + 1,
+      label: `${stageIndex + 1}A`,
+      total: recipe.stages.length,
+    };
+  }
+  return { ...positions[stageIndex], total: groups.length };
+}
 
 /** Fallback when a recipe or stage isn't in the table: read it off the gesture. */
 function derivedStep(stage: RecipeStage | undefined): StepInfo {
@@ -109,31 +164,56 @@ function consumedArt(stage: RecipeStage): string[] {
 }
 
 /**
- * Swaps the recipe's test pictures for placeholder station art (with the
- * ingredient being used). Real art in recipes.json is left alone. The finished
- * picture stays set so the stage still pauses on "Success!" like the data asks.
+ * Fills in each stage's pictures for GestureRecipe, which draws them over the
+ * 0–200px gesture space:
+ * - image (while doing the step): the stage's own art from recipes.json, else
+ *   our step art from recipe-steps.json, else nothing (the station shows).
+ * - finishedImage (the "Success!" pause): the stage's own, else our doneArt,
+ *   else the next step's picture (the dish so far), else the finished dish on
+ *   the last step, else a sparkle. Keeping it set means the stage still pauses on success.
+ * - backgroundImage: the stage's own, else our background (e.g. the board),
+ *   else a placeholder station scene when there's no step picture.
  */
 export function withStepArt(recipe: Recipe): Recipe {
+  const real = (src?: string) =>
+    isPlaceholder(src) || src === "none" ? undefined : src;
+  const pictures = recipe.stages.map(
+    (stage, i) => real(stage.image) ?? stepInfo(recipe.name, i, stage).art,
+  );
+  const dishId = menuRecipeIdFor(recipe.name);
+  const dish = dishId ? `/assets/dish-${dishId}.svg` : undefined;
+
   return {
     ...recipe,
     stages: recipe.stages.map((stage, i) => {
       const info = stepInfo(recipe.name, i, stage);
       const art = consumedArt(stage);
       const scene = `/assets/steps/${[info.station, ...art].join("-")}.svg`;
+      const picture = pictures[i];
+      const after =
+        info.doneArt ?? (i + 1 < pictures.length ? pictures[i + 1] : dish);
       return {
         ...stage,
-        // With final step art (drawn by the phone under the gesture) there's
-        // no placeholder scene behind it.
-        backgroundImage: isPlaceholder(stage.backgroundImage)
-          ? info.art
+        // "none" in recipes.json means "leave this picture out" (no success
+        // picture also skips the success pause).
+        backgroundImage:
+          stage.backgroundImage === "none"
             ? undefined
-            : scene
-          : stage.backgroundImage,
-        image: isPlaceholder(stage.image) ? undefined : stage.image,
-        finishedImage: isPlaceholder(stage.finishedImage)
-          ? "/assets/steps/done.svg"
-          : stage.finishedImage,
+            : (real(stage.backgroundImage) ??
+              info.background ??
+              (picture ? undefined : scene)),
+        image: picture,
+        finishedImage:
+          stage.finishedImage === "none"
+            ? undefined
+            : (real(stage.finishedImage) ??
+              (picture && after ? after : "/assets/steps/done.svg")),
       };
     }),
   };
+}
+
+/** Entries in recipe-steps.json for a recipe, or undefined if it has none. */
+export function stepTableLength(recipeName: string): number | undefined {
+  return STEPS[normalize(recipeName)]?.length;
 }

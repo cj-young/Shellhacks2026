@@ -58,5 +58,29 @@
     "name": "Burger Buns",
     "image": "/FlourTest.webp",
     "category": "Dry Goods"
+  },
+  {
+    "id": 10,
+    "name": "Avocado",
+    "image": "/assets/steps/guacamole/01-avocado-unsliced.png",
+    "category": "Produce"
+  },
+  {
+    "id": 11,
+    "name": "Onion",
+    "image": "/assets/ingredient-onion.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 12,
+    "name": "Potato",
+    "image": "/assets/ingredient-potato.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 13,
+    "name": "Steak",
+    "image": "/assets/ingredient-steak.svg",
+    "category": "Meat"
   }
 ]

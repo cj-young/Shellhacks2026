@@ -48,6 +48,8 @@ export type RaceStack = {
       stepLabel: string;
       /** 1-based current step. */
       step: number;
+      /** Current stage within the step, e.g. 1A or 1B. */
+      stageLabel?: string;
       steps: number;
     }
 );
@@ -479,10 +481,12 @@ function Hourglass() {
 
 function StepTokens({
   current,
+  stageLabel,
   total,
   color,
 }: {
   current: number;
+  stageLabel?: string;
   total: number;
   color: string;
 }) {
@@ -521,13 +525,13 @@ function StepTokens({
             ) : (
               <span
                 style={{
-                  font: lilita(now ? 38 : 28, 1),
+                  font: lilita(now && !stageLabel ? 38 : 28, 1),
                   color: now ? fg : INK,
                   WebkitTextStroke: `${now && fg === "#fff" ? 6 : 0}px ${INK}`,
                   paintOrder: "stroke fill",
                 }}
               >
-                {n}
+                {now ? (stageLabel ?? n) : n}
               </span>
             )}
           </div>
@@ -614,6 +618,7 @@ function PrepPanel({
     <>
       <StepTokens
         current={stack.step}
+        stageLabel={stack.stageLabel}
         total={stack.steps}
         color={stack.color}
       />
@@ -664,7 +669,15 @@ function PrepPanel({
               />
             </div>
           )}
-          {stack.gesture === "plate" ? (
+          {GESTURE_ART[stack.gesture] ? (
+            <img
+              src={GESTURE_ART[stack.gesture]}
+              alt=""
+              width={250}
+              height={250}
+              style={{ position: "relative" }}
+            />
+          ) : stack.gesture === "plate" ? (
             stack.dish && (
               <img
                 src={dishAsset(stack.dish)}
@@ -676,7 +689,7 @@ function PrepPanel({
             )
           ) : (
             <GameIcon
-              kind={stack.gesture}
+              kind={stack.gesture === "chop" ? "chop" : "stir"}
               size={200}
               style={{ position: "relative" }}
             />
@@ -1130,7 +1143,17 @@ const GESTURE_NAMES: Record<Gesture, string> = {
   chop: "CHOP!",
   stir: "STIR!",
   flip: "FLIP!",
+  pour: "POUR!",
+  scoop: "SCOOP!",
   plate: "PLATE!",
+};
+
+/** Illustrated gesture icons (public/assets/gestures); others use GameIcon. */
+const GESTURE_ART: Partial<Record<Gesture, string>> = {
+  flip: "/assets/gestures/flip.png",
+  pour: "/assets/gestures/pour.png",
+  scoop: "/assets/gestures/scoop.png",
+  stir: "/assets/gestures/stir.png",
 };
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
 

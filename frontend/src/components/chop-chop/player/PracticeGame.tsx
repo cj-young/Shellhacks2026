@@ -442,7 +442,9 @@ function StepIcon({ step, recipeId }: { step: RecipeStep; recipeId: string }) {
   if (step.gesture === "plate") {
     return <img src={dishAsset(recipeId)} alt="" width={36} height={36} />;
   }
-  return <GameIcon kind={step.gesture} size={32} sticker={false} />;
+  const kind =
+    step.gesture === "chop" || step.gesture === "flip" ? step.gesture : "stir";
+  return <GameIcon kind={kind} size={32} sticker={false} />;
 }
 
 /** In a real game this card lives on the host screen; practice shows it on the phone. */
