@@ -9,6 +9,7 @@ import {
 } from "#/lib/host-game";
 import type { HostGame } from "#/lib/host-game";
 import { HostInterface } from "#/components/host/HostInterface";
+import { audio } from "#/audio/engine";
 import { PAGE_BG } from "#/components/chop-chop/design";
 import {
   HostLobbyNew,
@@ -93,6 +94,8 @@ function HostScreen() {
   }, [game]);
 
   const startGame = useCallback(() => {
+    // Unlock audio from this click so host music can start immediately.
+    audio.unlock();
     connection.socketRef.current?.emit("start_game");
   }, [connection.socketRef]);
 

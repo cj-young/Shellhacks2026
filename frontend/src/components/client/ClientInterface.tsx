@@ -31,6 +31,7 @@ import {
   stepProgress,
   withStepArt,
 } from "#/data/recipe-steps";
+import { useAmbient, useAudioUnlock, useSfx } from "#/audio/use-audio";
 
 /** Visible square of the recipe box; stage gestures sit within its 0–200px. */
 const GESTURE_AREA = 210;
@@ -61,6 +62,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
 function ClientGameplay({ connection }: ClientInterfaceProps) {
   const frozen = connection.sabotages.frozenMs > 0;
   const { recipeOrder } = connection.state;
+  const sfx = useSfx();
+  useAudioUnlock();
   const [recipeState, setRecipeState] = useState<number>(0);
   const [activeStageIndex, setActiveStageIndex] = useState(-1);
   const [canPrepareRecipe, setCanPrepareRecipe] = useState(false);
@@ -88,6 +91,7 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
   /** A deliberate stroke missed its target: shake the food and lock out input. */
   function handleWrongGesture() {
     if (frozen || connection.results) return;
+    sfx.play("gesture.fail");
     setCurrentPoints([]);
     setLockedOut(true);
     window.clearTimeout(lockoutTimer.current);
@@ -132,6 +136,23 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
       }
     }
   }, [stepRecipe]);
+  // Presentation for the active stage: its gesture drives success SFX and its
+  // station drives the looping ambience (sizzle, boil, …).
+  const audioStage =
+    stepRecipe && activeStageIndex >= 0
+      ? stepRecipe.stages.at(activeStageIndex)
+      : undefined;
+  const audioInfo =
+    stepRecipe && audioStage
+      ? stepInfo(stepRecipe.name, activeStageIndex, audioStage)
+      : undefined;
+  useAmbient(
+    audioInfo?.station,
+    interfaceState === "recipe" && !connection.results && !frozen,
+    stepRecipe && activeStageIndex >= 0
+      ? { recipeName: stepRecipe.name, stageIndex: activeStageIndex }
+      : undefined,
+  );
   const inventory = useMemo(() => {
     if (!me) return [];
 
@@ -241,6 +262,7 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
 
     // Target by our own count so a server that's still catching up isn't under-shot.
     setAdvanceTo(recipeState + 1);
+    sfx.play("recipe.complete");
 
     if (recipeState + 1 < recipeOrder.length) {
       // Next recipe starts from scratch: new card, then back to the store.
@@ -249,6 +271,7 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
       setCanPrepareRecipe(false);
       setCurrentPoints([]);
       setShowNewRecipe(true);
+      sfx.play("recipe.new");
     } else {
       setFinished(true);
     }
@@ -597,6 +620,14 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
                 initialStageIndex={Math.max(0, activeStageIndex)}
                 points={currentPoints}
                 onStageChange={setActiveStageIndex}
+                onStageMatch={() => {
+                  if (audioInfo) {
+                    sfx.playGesture(audioInfo.gesture, {
+                      recipeName: stepRecipe.name,
+                      stageIndex: activeStageIndex,
+                    });
+                  }
+                }}
                 onCompleteChange={(complete) => {
                   if (complete) completeRecipe();
                 }}

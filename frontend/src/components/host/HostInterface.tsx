@@ -13,6 +13,7 @@ import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
 import { RoundLeaderboard } from "#/components/chop-chop/screens/RoundLeaderboard";
 import { iconIdFor } from "#/components/client/Store";
 import { menuRecipeIdFor, stepInfo, stepProgress } from "#/data/recipe-steps";
+import { useAudioUnlock, useMusic, useSfx } from "#/audio/use-audio";
 
 const TIMES_UP_MS = 3000;
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
@@ -92,6 +93,20 @@ export function HostInterface({ connection }: HostInterfaceProps) {
   const [now, setNow] = useState(() => Date.now());
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const { roundEndsAt, results } = connection;
+  const sfx = useSfx();
+  useAudioUnlock();
+  useMusic("music.game", true);
+
+  // Round stingers: the go, the time-up, and the leaderboard reveal.
+  useEffect(() => {
+    sfx.play("round.go");
+  }, [sfx]);
+  useEffect(() => {
+    if (results) sfx.play("round.timesup");
+  }, [results, sfx]);
+  useEffect(() => {
+    if (showLeaderboard) sfx.play("round.leaderboard");
+  }, [showLeaderboard, sfx]);
 
   // The server owns the round clock (`timer_sync`); tick locally to redraw the countdown.
   useEffect(() => {
