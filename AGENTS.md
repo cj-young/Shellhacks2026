@@ -256,11 +256,19 @@ gallery. They do not share components today.
 
 **Gesture engine** (the actual game interaction)
 
-- `CursorPathTracker.tsx` — captures a pointer trail.
-- `LineTarget.tsx` — `doesPathConnectLine()` geometry; a target matches when the path stays within the
-  radius and touches both endpoints.
-- `GestureRecipe.tsx` — a stage composed of line targets; reports when all lines match.
+- `CursorPathTracker.tsx` — captures a pointer trail (points in the stage's gesture space).
+- `gesture-recognizer.ts` — the recognizer. Magic-Cat-Academy-style feature classification: it
+  resamples the stroke, derives shape features (straightness, corners, signed turning), then matches
+  the stage by shape + rough proximity. Line/zig-zag stages also require ~80% path coverage and both
+  endpoints; stirs require most of the stage's configured rotations (80%, floor 1). `LineTarget`/
+  `SpinGesture` only draw the stage's guides now; the connector/corridor and exact-rotation geometry
+  are gone.
+- `LineTarget.tsx` / `SpinGesture.tsx` — presentational guides for line and stir targets.
+- `GestureRecipe.tsx` — recognizes the stroke against a stage and reports when it matches.
 - `MasterRecipe.tsx` — runs a recipe's stages in order, advancing after each match.
+- Tests: `gesture-recognizer.test.ts` (`node --test`) covers lines, zig-zags, loops, direction,
+  proximity, path coverage and rotation requirements.
+
 
 **Design system + dev gallery (`components/chop-chop/`) — dev/prototype, not wired to sockets**
 

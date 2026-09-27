@@ -1,50 +1,23 @@
-import { useEffect, useMemo } from "react";
-import type { CursorPoint } from "./CursorPathTracker";
 import type { SpinType } from "../lib/types";
-import { doesPathCompleteSpin } from "./spin-path";
-
-export { doesPathCompleteSpin } from "./spin-path";
 
 export type SpinGestureProps = SpinType & {
-  points: CursorPoint[];
-  /** Ignore the approach to the ring, then require the drag to stay inside it. */
-  allowStartOutsideTarget?: boolean;
-  /** Reports success until the path clears or the target changes. */
-  onMatchChange?: (matches: boolean) => void;
+  /** Whether the stage's stroke has been recognized (colors the guide green). */
+  matched: boolean;
 };
 
+/**
+ * A visual guide for a circular stir. Recognition happens in
+ * `gesture-recognizer.ts`; this only draws the target ring and its
+ * direction/rotation label.
+ */
 export function SpinGesture({
   center,
   radius,
   tolerance,
   direction,
   rotations,
-  points,
-  allowStartOutsideTarget = false,
-  onMatchChange,
+  matched,
 }: SpinGestureProps) {
-  const matches = useMemo(
-    () =>
-      doesPathCompleteSpin(
-        points,
-        { center, radius, tolerance, direction, rotations },
-        allowStartOutsideTarget,
-      ),
-    [
-      points,
-      center,
-      radius,
-      tolerance,
-      direction,
-      rotations,
-      allowStartOutsideTarget,
-    ],
-  );
-
-  useEffect(() => {
-    onMatchChange?.(matches);
-  }, [matches, onMatchChange]);
-
   return (
     <svg
       aria-hidden="true"
@@ -55,7 +28,7 @@ export function SpinGesture({
         cy={center.y}
         r={radius}
         fill="none"
-        stroke={matches ? "#2FA84F" : "rgba(122,78,30,.28)"}
+        stroke={matched ? "#2FA84F" : "rgba(122,78,30,.28)"}
         strokeWidth={Math.max(1, tolerance * 2)}
       />
       <text
