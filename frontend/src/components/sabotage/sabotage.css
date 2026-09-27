@@ -295,6 +295,7 @@
   box-shadow: 0 0 0 3px #3d281726;
 }
 .sabotage-avatar img {
+  max-width: none;
   position: absolute;
   left: 50%;
   top: 4px;
@@ -555,7 +556,6 @@
   z-index: 130;
   display: grid;
   place-items: center;
-  background: #0b1030b3;
   pointer-events: none;
   animation: sabotage-banner 2.6s ease-out both;
 }
@@ -563,9 +563,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 22px 48px 28px;
-  border-radius: 34px 40px 30px 44px / 40px 32px 42px 30px;
+  gap: 2px;
+  padding: 14px 30px 18px;
+  border-radius: 26px 32px 24px 34px / 30px 24px 32px 26px;
   background: #1654e6;
   color: #fff6e3;
   box-shadow: var(--paper-shadow);
@@ -573,18 +573,56 @@
   animation: sabotage-award-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 .sabotage-blackout-card img {
-  width: min(420px, 60vw);
+  width: min(240px, 26vw);
 }
 .sabotage-blackout-card strong {
   font:
-    400 clamp(48px, 7vw, 110px) / 1 "Sniglet",
+    400 clamp(32px, 4vw, 64px) / 1 "Sniglet",
     sans-serif;
   -webkit-text-stroke: 0.05em currentColor;
 }
 .sabotage-blackout-card span {
   font:
-    900 clamp(18px, 2vw, 30px) Nunito,
+    900 clamp(14px, 1.3vw, 20px) Nunito,
     sans-serif;
+}
+/* Lights out: a dark wash over the screen for the whole blackout. */
+.sabotage-lights-out {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(8, 10, 28, 0.36),
+    rgba(3, 4, 12, 0.45)
+  );
+  animation: sabotage-lights-off 0.6s steps(3, jump-none) both;
+}
+.sabotage-lights-out.lights-on {
+  animation: sabotage-lights-on 0.9s ease-out both;
+}
+@keyframes sabotage-lights-on {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sabotage-lights-off {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 @keyframes sabotage-banner {
   0% {
@@ -595,6 +633,25 @@
     opacity: 1;
   }
   100% {
+    opacity: 0;
+  }
+}
+/* On the phone the blackout toast pops in and fades out within 1.8s. */
+.sabotage-notices:not(.sabotage-host) .sabotage-notice.sabotage-blackout {
+  animation: sabotage-quick-notice 1.8s ease-out both;
+}
+@keyframes sabotage-quick-notice {
+  0% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  15%,
+  75% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
     opacity: 0;
   }
 }

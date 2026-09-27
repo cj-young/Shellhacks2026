@@ -3,7 +3,7 @@ import type React from "react";
 import {
   SABOTAGE_CARDS,
   SabotageAwardPopup,
-  SabotageBlackoutBar,
+  SabotageLightsOut,
   SabotageFreezeOverlay,
   SabotageLaunchButton,
   SabotageMenu,
@@ -16,6 +16,7 @@ import {
 } from "#/components/sabotage/SabotageUI";
 import type { SabotageTargetOption } from "#/components/sabotage/SabotageUI";
 import { StoreScreen } from "#/components/chop-chop/screens/RacePhoneScreens";
+import { noticeShowing } from "#/lib/sabotages";
 import {
   DEMO_STACKS,
   HostRaceStacks,
@@ -175,6 +176,8 @@ export function SabotageDemo() {
         )
         .map((e) => (e.expiresAt ?? now) - now),
     );
+  // Blackouts hit every store, so the TV shows one countdown for all of them.
+  const tvBlackout = remaining("blackout", "");
 
   function apply(defId: string, source: string, target: string | null) {
     const d = def(defId);
@@ -243,7 +246,7 @@ export function SabotageDemo() {
   /** Notices as a given viewer sees them ("you" for themselves). */
   const noticesFor = (viewer: string | null) =>
     effects
-      .filter((e) => e.noticeUntil > now)
+      .filter((e) => noticeShowing(e, e.defId, now, true))
       .slice(-3)
       .map((e) => {
         const who = (id: string | null) =>
@@ -321,9 +324,7 @@ export function SabotageDemo() {
             />
           ) : null;
         })()}
-        {blackout > 0 && (
-          <SabotageBlackoutBar seconds={Math.ceil(blackout / 1000)} />
-        )}
+        <SabotageLightsOut active={blackout > 0} />
         {frozen > 0 && (
           <SabotageFreezeOverlay seconds={Math.ceil(frozen / 1000)} />
         )}
@@ -511,6 +512,7 @@ export function SabotageDemo() {
           </Frame>
         </div>
         <Frame label="TV" width={1920} height={1080} scale={0.27}>
+          <SabotageLightsOut active={tvBlackout > 0} />
           <HostRaceStacks
             stacks={chefs.map((c, i) => {
               const frozenMs = remaining("freeze", c.id);
@@ -541,6 +543,7 @@ export function SabotageDemo() {
             })}
             totalRecipes={5}
             secondsLeft={90}
+            blackoutSeconds={Math.ceil(tvBlackout / 1000)}
           />
           {(() => {
             const b = [...effects]

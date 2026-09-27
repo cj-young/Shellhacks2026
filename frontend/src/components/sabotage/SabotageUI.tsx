@@ -4,7 +4,12 @@ import type { CSSProperties } from "react";
 import type { GameConnection } from "#/lib/use-game-connection";
 import definitions from "#/data/sabotages.json";
 import ingredients from "#/data/ingredients.json";
-import { NOTICE_MS, canTarget, effectRemaining } from "#/lib/sabotages";
+import {
+  NOTICE_MS,
+  canTarget,
+  effectRemaining,
+  noticeShowing,
+} from "#/lib/sabotages";
 import { paper } from "#/components/chop-chop/paper";
 import { characterImage } from "#/data/characters";
 import { IngredientIcon } from "#/components/chop-chop/IngredientIcon";
@@ -488,7 +493,35 @@ export function SabotagePawGrab({
 /** How long the host's "Blackout!" pop-up stays up. */
 export const BLACKOUT_BANNER_MS = 2600;
 
-/** Big "Blackout!" pop-up over the whole host screen. */
+/** How long the lights take to fade back on once a blackout ends. */
+const LIGHTS_ON_MS = 900;
+
+/**
+ * The lights go out: dims the whole screen while a blackout lasts, then fades
+ * the lights back on. Keep it mounted and toggle `active`.
+ */
+export function SabotageLightsOut({ active }: { active: boolean }) {
+  const [fading, setFading] = useState(false);
+  const [wasActive, setWasActive] = useState(active);
+  if (active !== wasActive) {
+    setWasActive(active);
+    setFading(!active);
+  }
+  useEffect(() => {
+    if (!fading) return;
+    const id = setTimeout(() => setFading(false), LIGHTS_ON_MS);
+    return () => clearTimeout(id);
+  }, [fading]);
+  if (!active && !fading) return null;
+  return (
+    <div
+      className={`sabotage-lights-out${active ? "" : " lights-on"}`}
+      aria-hidden
+    />
+  );
+}
+
+/** "Blackout!" pop-up over the host screen. */
 export function SabotageBlackoutBanner({ source }: { source: string }) {
   return (
     <div className="sabotage-blackout-banner" role="status">
@@ -634,7 +667,7 @@ export function SabotageEffects({
     connection.players.find((player) => player.id === id)?.name ??
     "A chef";
   const notices = effects
-    .filter((effect) => effect.noticeUntil > now)
+    .filter((effect) => noticeShowing(effect, effect.definition.id, now, !host))
     .slice(-3);
   const timed = effects.filter((effect) => (effect.localExpiresAt ?? 0) > now);
   // noticeUntil is 4.5s after the effect arrived; restored effects have none.
@@ -700,9 +733,7 @@ export function SabotageEffects({
             />
           ))}
       </div>
-      {!host && blackoutMs > 0 && (
-        <SabotageBlackoutBar seconds={Math.ceil(blackoutMs / 1000)} />
-      )}
+      {!host && <SabotageLightsOut active={blackoutMs > 0} />}
       {!host && frozenMs > 0 && (
         <SabotageFreezeOverlay seconds={Math.ceil(frozenMs / 1000)} />
       )}

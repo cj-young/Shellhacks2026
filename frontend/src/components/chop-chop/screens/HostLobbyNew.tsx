@@ -218,12 +218,7 @@ function LobbyLayout({
           })}
         >
           <Parallax amount={UI_PAN}>
-            <StartRow
-              count={players.length}
-              onStart={onStart}
-              canStart={canStart}
-              notice={notice}
-            />
+            <StartRow onStart={onStart} canStart={canStart} notice={notice} />
           </Parallax>
         </div>
       </div>
@@ -488,6 +483,27 @@ function PlateStage({ players }: { players: LobbyPlayer[] }) {
           willChange: "transform",
         }}
       >
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            ...paper(24, 3),
+            position: "absolute",
+            top: "100%",
+            left: "50%",
+            transform: "translateX(-50%) rotate(-1.5deg)",
+            marginTop: 14,
+            zIndex: 2,
+            padding: "6px 24px",
+            background: "#fff",
+            font: nunito(900, 28),
+            whiteSpace: "nowrap",
+          }}
+        >
+          {Math.min(players.length, PLATE_SLOTS.length)}/{PLATE_SLOTS.length}{" "}
+          chefs in
+        </div>
+
         <img
           src={PLATE_IMAGE}
           alt=""
@@ -620,12 +636,10 @@ function PlateStage({ players }: { players: LobbyPlayer[] }) {
 }
 
 function StartRow({
-  count,
   onStart,
   canStart,
   notice,
 }: {
-  count: number;
   onStart?: () => void;
   canStart: boolean;
   notice?: string;
@@ -634,11 +648,10 @@ function StartRow({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "flex-end",
+        flexDirection: "column",
         alignItems: "center",
-        gap: 30,
-        padding: "0 16px 16px",
+        gap: 18,
+        padding: "0 16px 70px",
       }}
     >
       {notice && (
@@ -653,9 +666,6 @@ function StartRow({
           {notice}
         </span>
       )}
-      <span style={{ font: nunito(900, 28) }}>
-        {count} {count === 1 ? "chef" : "chefs"} in
-      </span>
       <button
         type="button"
         onClick={onStart}

@@ -361,6 +361,16 @@ export function createSocketIoGateway(
       }
 
       io.to(room).emit("update_state", result.state);
+
+      // Everyone has finished every recipe: end the round now instead of
+      // waiting for the clock. Already inside this game's action queue.
+      const chefs = result.state.players.filter((p) => !p.isHost);
+      if (
+        chefs.length > 0 &&
+        chefs.every((p) => p.recipeIndex >= result.state.recipeOrder.length)
+      ) {
+        await finishRound(gameCode);
+      }
     }
 
     socket.on("disconnect", () => {

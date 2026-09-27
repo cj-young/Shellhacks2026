@@ -297,7 +297,7 @@ test("host starts the game, notifies everyone, and never leaks tokens", async ()
     await Promise.all([hostStarted, guestStarted, hostState, guestState]);
   assert.equal(hostEvent.gameCode, game.code);
   assert.equal(guestEvent.gameCode, game.code);
-  assert.equal(hostGameState.recipeOrder.length, 3);
+  assert.equal(hostGameState.recipeOrder.length, 5);
   assert.deepEqual(guestGameState, hostGameState);
 
   for (const player of hostGameState.players) {

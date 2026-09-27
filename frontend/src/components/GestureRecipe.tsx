@@ -31,6 +31,19 @@ export type GestureRecipeProps = {
  * targets as guides. Matching is forgiving (feature-based, rough proximity,
  * capped rotations); once a stroke matches it stays matched until it clears.
  */
+/** Step art fades in; "Success!" pops, then floats up off the picture. */
+const STEP_CSS = `
+@keyframes stepArtIn { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+.step-art-in { animation: stepArtIn 380ms ease-out both; }
+@keyframes stepSuccess {
+  0% { transform: translate(-50%, -50%) scale(.5); opacity: 0; }
+  18% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  30%, 55% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -160%) scale(.85); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .step-art-in { animation: none; } }
+`;
+
 export function GestureRecipe({
   stage,
   points,
@@ -62,6 +75,7 @@ export function GestureRecipe({
 
   return (
     <div className="relative h-full w-full overflow-hidden pointer-events-none">
+      <style>{STEP_CSS}</style>
       {stage.backgroundImage && (
         <img
           alt=""
@@ -73,8 +87,10 @@ export function GestureRecipe({
         // Over the stage's gesture space (targets use 0–200px), so the art sits
         // under the lines and circles rather than centred on the whole box.
         <img
+          // Keyed by picture so each new one fades in rather than popping on.
+          key={foregroundImage}
           alt=""
-          className="absolute left-0 top-0 h-50 w-50 object-contain"
+          className="absolute left-0 top-0 h-50 w-50 object-contain step-art-in"
           src={foregroundImage}
         />
       )}
@@ -86,8 +102,8 @@ export function GestureRecipe({
             position: "absolute",
             left: "50%",
             top: "50%",
-            transform: "translate(-50%, -50%)",
             background: "#2FA84F",
+            animation: "stepSuccess 650ms ease-out both",
             padding: "4px 16px",
             font: "400 26px 'Sniglet'",
             color: "#3D2817",

@@ -585,6 +585,18 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
                 STEP {stageProgress.label} OF {stageProgress.total}
               </div>
               <div style={{ font: lilita(26, 1.1) }}>{activeStep?.label}</div>
+              <div
+                style={{
+                  ...paper(16, 3, false),
+                  display: "inline-block",
+                  marginTop: 6,
+                  padding: "3px 12px",
+                  background: "#FFE7A0",
+                  font: nunito(800, 15),
+                }}
+              >
+                {gestureHint(activeStage)}
+              </div>
             </div>
           )}
           {finished ? (
@@ -652,11 +664,6 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
                 grab them.
               </div>
             )
-          )}
-          {ready && activeStage && (
-            <div style={{ font: nunito(800, 16) }}>
-              {gestureHint(activeStage)}
-            </div>
           )}
         </div>
       </div>

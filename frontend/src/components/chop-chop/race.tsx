@@ -438,6 +438,7 @@ export function PhoneTopBar({
               top: 3,
               width: 92,
               transform: "translateX(-50%)",
+              maxWidth: "none",
             }}
           />
         ) : (

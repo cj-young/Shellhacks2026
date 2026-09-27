@@ -30,6 +30,8 @@ import type { Recipe } from "../domain/recipe.ts";
 import type { GameStore } from "../ports/game-store.ts";
 
 const MAX_CODE_ATTEMPTS = 5;
+/** Recipes dealt to each game; more than most players will finish in time. */
+const RECIPES_PER_GAME = 5;
 /** Sabotages a finished recipe can award (the ones with artwork). */
 export const AWARDED_SABOTAGES = ["trash", "freeze", "blackout"];
 export const MAX_PLAYERS = 5;
@@ -281,7 +283,7 @@ export class GameService {
       return { ok: false, code: "ALREADY_STARTED" };
     }
 
-    const order = generateRecipeOrder(3);
+    const order = generateRecipeOrder(RECIPES_PER_GAME);
     const durationMs = options.durationMs ?? ROUND_DURATION_MS;
     const roundStartedAt = Date.now();
     const players = assignMissingCharacters(game.state.players).map(

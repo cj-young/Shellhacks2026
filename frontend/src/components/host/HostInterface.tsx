@@ -1,6 +1,7 @@
 import {
   BLACKOUT_BANNER_MS,
   SabotageBlackoutBanner,
+  SabotageLightsOut,
   sabotageMessage,
 } from "../sabotage/SabotageUI";
 import { NOTICE_MS, effectRemaining } from "#/lib/sabotages";
@@ -141,7 +142,9 @@ export function HostInterface({ connection }: HostInterfaceProps) {
           }))}
           hideNextRound
           onLobby={() => {
-            window.location.href = "/";
+            // The finished room was cleared on game end, so /host opens a
+            // fresh lobby for the next game.
+            window.location.assign("/host");
           }}
         />
       </div>
@@ -196,6 +199,13 @@ export function HostInterface({ connection }: HostInterfaceProps) {
         e.noticeUntil - NOTICE_MS + BLACKOUT_BANNER_MS > sabNow,
     );
 
+  const blackoutLeft = Math.max(
+    0,
+    ...effects
+      .filter((e) => e.definition.targetScope === "all")
+      .map((e) => (e.localExpiresAt ?? 0) - sabNow),
+  );
+
   const demo = liveStacks.length === 0;
 
   return (
@@ -204,6 +214,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
         stacks={demo ? DEMO_STACKS : liveStacks}
         totalRecipes={demo ? 5 : Math.max(1, order.length)}
         secondsLeft={secondsLeft}
+        blackoutSeconds={Math.ceil(blackoutLeft / 1000)}
         intro
         banner={
           demo
@@ -213,6 +224,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
             : undefined
         }
       />
+      <SabotageLightsOut active={!results && blackoutLeft > 0} />
       {blackout && !results && (
         <SabotageBlackoutBanner
           key={blackout.id}

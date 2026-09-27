@@ -10,6 +10,7 @@ import {
   nunito,
 } from "../design";
 import { CONFETTI } from "./HostVictoryNew";
+import { characterImage } from "#/data/characters";
 import { KitchenBackground } from "../KitchenBackground";
 
 import { paper } from "#/components/chop-chop/paper";
@@ -19,7 +20,21 @@ export type LeaderboardEntry = {
   name: string;
   color: string;
   points: number;
+  /** Chef picked in the lobby; shown beside the name. */
+  character?: string | null;
 };
+
+/** One burst of confetti: every piece falls once, all gone within ~2.5s. */
+const CONFETTI_CSS = `
+@keyframes lbConfettiFall {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(var(--sway), calc(var(--fall) / 2)) rotate(calc(var(--spin) / 2)); }
+  88% { opacity: 1; }
+  100% { transform: translate(0, var(--fall)) rotate(var(--spin)); opacity: 0; }
+}
+.lb-confetti { animation: lbConfettiFall ease-in 1 both; will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .lb-confetti { animation: none; } }
+`;
 
 /** Ordinal label for a 1-based rank. */
 const ordinal = (n: number) => {
@@ -87,18 +102,25 @@ export function RoundLeaderboard({
       <KitchenBackground blurred />
       {scale !== null && (
         <>
+          <style>{CONFETTI_CSS}</style>
           {CONFETTI.map((c, i) => (
             <span
               key={i}
+              className="lb-confetti"
               style={{
                 ...paper(c.r, 0),
                 position: "absolute",
                 left: `${(c.x / 1920) * 100}%`,
-                top: `${(c.y / 1080) * 100}%`,
+                top: -40 * s,
                 width: c.w * s,
                 height: c.h * s,
                 background: c.color,
-                transform: `rotate(${c.rot}deg)`,
+                ["--spin" as string]: `${c.rot + (i % 2 ? 540 : -540)}deg`,
+                ["--sway" as string]: `${((i % 5) * 18 - 36) * s}px`,
+                // Past the bottom of this screen (not the window, which may be larger).
+                ["--fall" as string]: `${1080 * s + 80 * s}px`,
+                animationDuration: `${1.8 + (i % 5) * 0.2}s`,
+                animationDelay: `${(i * 0.13) % 0.7}s`,
               }}
             />
           ))}
@@ -301,13 +323,31 @@ export function RoundLeaderboard({
                       <span
                         style={{
                           ...paper("50%", 6),
-                          width: 26 * s,
-                          height: 26 * s,
+                          width: 58 * s,
+                          height: 58 * s,
                           flexShrink: 0,
-                          background: entry.color,
+                          overflow: "hidden",
+                          background: entry.character ? "#fff" : entry.color,
+                          boxShadow: `0 0 0 ${4 * s}px ${entry.color}`,
                           boxSizing: "border-box",
                         }}
-                      />
+                      >
+                        {entry.character && (
+                          <img
+                            src={characterImage(entry.character)}
+                            alt=""
+                            draggable={false}
+                            style={{
+                              position: "absolute",
+                              left: "50%",
+                              top: 3 * s,
+                              width: 86 * s,
+                              transform: "translateX(-50%)",
+                              maxWidth: "none",
+                            }}
+                          />
+                        )}
+                      </span>
                       <span
                         style={{
                           font: lilita(32 * s),
@@ -332,10 +372,13 @@ export function RoundLeaderboard({
                 gap: 30 * s,
               }}
             >
-              <div
+              <button
+                type="button"
                 onClick={onLobby}
-                role={onLobby ? "button" : undefined}
+                disabled={!onLobby}
                 style={{
+                  border: "none",
+                  color: INK,
                   ...paper(52 * s, 7),
                   height: 104 * s,
                   padding: `0 ${44 * s}px`,
@@ -347,13 +390,16 @@ export function RoundLeaderboard({
                   cursor: onLobby ? "pointer" : undefined,
                 }}
               >
-                Lobby
-              </div>
+                Back to lobby
+              </button>
               {!hideNextRound && (
-                <div
+                <button
+                  type="button"
                   onClick={onNextRound}
-                  role={onNextRound ? "button" : undefined}
+                  disabled={!onNextRound}
                   style={{
+                    border: "none",
+                    color: INK,
                     ...paper(62 * s, 8),
                     position: "relative",
                     height: 124 * s,
@@ -367,7 +413,7 @@ export function RoundLeaderboard({
                   }}
                 >
                   Next Round!
-                </div>
+                </button>
               )}
             </div>
           </div>
@@ -378,10 +424,10 @@ export function RoundLeaderboard({
 }
 
 const PREVIEW_ENTRIES: LeaderboardEntry[] = [
-  { id: "mina", name: "Mina", color: ROYAL, points: 500 },
-  { id: "jun", name: "Jun", color: "#EF4128", points: 300 },
-  { id: "ari", name: "Ari", color: "#0F7F3F", points: 300 },
-  { id: "leo", name: "Leo", color: PINK, points: 100 },
+  { id: "mina", name: "Mina", color: ROYAL, points: 500, character: "cat" },
+  { id: "jun", name: "Jun", color: "#EF4128", points: 300, character: "bear" },
+  { id: "ari", name: "Ari", color: "#0F7F3F", points: 300, character: "panda" },
+  { id: "leo", name: "Leo", color: PINK, points: 100, character: "cow" },
 ];
 
 /** Dev-switcher previews. */

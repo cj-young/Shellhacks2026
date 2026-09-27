@@ -160,11 +160,5 @@
     "name": "Soy sauce",
     "image": "/assets/ingredient-soy-sauce.svg",
     "category": "Dry Goods"
-  },
-  {
-    "id": 27,
-    "name": "Sugar",
-    "image": "/assets/ingredient-sugar.svg",
-    "category": "Baking"
   }
 ]
