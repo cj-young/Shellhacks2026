@@ -284,8 +284,10 @@ gallery. They do not share components today.
   (`ambient.<station>` → `ambient.default`), and exact keys for everything else.
 - `audio/use-audio.ts` — hooks: `useSfx`, `useAmbient` (phone-only station loops), `useMusic` (host),
   `useAudioUnlock`.
+- `components/knife-cuts.ts` — `CutDetector`: fires a knife cut on the first movement and each sharp
+  turn of a stroke, never while rounding. Drives the `knife.<chop|slice>` → `knife` cues.
 - Wired in: `HostInterface` (music + round sounds), `ClientInterface` (ambience, gesture success/fail,
-  recipe sounds), `Store` (`ui.*`), `SabotageUI` (`sabotage.*`).
+  recipe sounds, knife cuts), `Store` (`ui.*`), `SabotageUI` (`sabotage.*`).
 - Assets live in `frontend/public/assets/audio/`; add a file there and a line in `data/sounds.ts`.
 
 

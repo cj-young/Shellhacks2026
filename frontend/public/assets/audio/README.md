@@ -7,7 +7,8 @@ Drop your sound files here. Each sound is registered by path in
 - **Ambience** (phone, looping with fades): `ambient.<board|bowl|pan|pot|plate>`
   (falls back to `ambient.default`). Example: `ambient.pan` → a sizzle loop.
 - **Effects**: gesture success (`gesture.success.<chop|stir|flip|pour|scoop|plate>`),
-  `gesture.fail`, store/UI (`ui.take`, `ui.remove`, `ui.aisle`, `ui.checkout`, `ui.trash`),
+  `gesture.fail`, knife cuts (`knife.chop` / `knife.slice`, falling back to `knife`),
+  store/UI (`ui.take`, `ui.remove`, `ui.aisle`, `ui.checkout`, `ui.trash`),
   recipes (`recipe.complete`, `recipe.new`), round (`round.go`, `round.timesup`,
   `round.leaderboard`), sabotage (`sabotage.steal`, `sabotage.freeze`, `sabotage.blackout`,
   `sabotage.applied`).

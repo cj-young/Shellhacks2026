@@ -8,6 +8,7 @@ import {
   channelVolume,
   clampVolume,
   gestureKeys,
+  knifeKeys,
   pickCue,
   resolveAmbient,
   resolveGesture,
@@ -57,6 +58,17 @@ test("ambient resolution falls back from station to default", () => {
 test("pickCue skips cues with no src", () => {
   assert.equal(pickCue(["ui.take"], { "ui.take": { src: "" } }), null);
   assert.equal(pickCue([], table), null);
+});
+
+test("knife cues prefer the gesture, then fall back to the shared clip", () => {
+  assert.deepEqual(knifeKeys("slice"), ["knife.slice", "knife"]);
+  const knives: SoundTable = {
+    knife: { src: "/knife.mp3" },
+    "knife.slice": { src: "/slice.mp3" },
+  };
+  assert.equal(pickCue(knifeKeys("slice"), knives)?.src, "/slice.mp3");
+  assert.equal(pickCue(knifeKeys("chop"), knives)?.src, "/knife.mp3");
+  assert.equal(pickCue(knifeKeys("chop"), {}), null);
 });
 
 test("channelFor maps key prefixes to buses", () => {

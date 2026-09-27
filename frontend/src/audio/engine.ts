@@ -7,11 +7,13 @@ import {
   DEFAULT_VOLUMES,
   clampVolume,
   channelVolume,
+  knifeKeys,
+  pickCue,
   resolveAmbient,
   resolveGesture,
   resolveKey,
 } from "./resolve";
-import type { ChannelVolumes, StageRef } from "./resolve";
+import type { ChannelVolumes, KnifeGesture, StageRef } from "./resolve";
 
 /** Per-play overrides; falls back to the cue's own settings. */
 export type PlayOptions = {
@@ -248,6 +250,11 @@ class AudioEngine {
     opts: PlayOptions = {},
   ): void {
     void this.playDef(resolveGesture(gesture, SOUNDS, stage), opts);
+  }
+
+  /** A knife cut for a chop/slice stroke: `knife.<gesture>` → `knife`. */
+  playKnife(gesture: KnifeGesture, opts: PlayOptions = {}): void {
+    void this.playDef(pickCue(knifeKeys(gesture), SOUNDS), opts);
   }
 
   /** Looping ambience for a station. Replaces any current ambience. */

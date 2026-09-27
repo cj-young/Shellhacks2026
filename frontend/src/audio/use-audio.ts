@@ -4,7 +4,7 @@ import type { Station } from "../data/recipe-steps";
 import type { SoundKey } from "../data/sounds";
 import { audio } from "./engine";
 import type { PlayOptions } from "./engine";
-import type { StageRef } from "./resolve";
+import type { KnifeGesture, StageRef } from "./resolve";
 
 /** Unlocks audio on the first pointer/key press. Mount once per route. */
 export function useAudioUnlock(): void {
@@ -26,6 +26,8 @@ export function useSfx() {
       play: (key: SoundKey, opts?: PlayOptions) => audio.play(key, opts),
       playGesture: (gesture: Gesture, stage?: StageRef, opts?: PlayOptions) =>
         audio.playGesture(gesture, stage, opts),
+      playKnife: (gesture: KnifeGesture, opts?: PlayOptions) =>
+        audio.playKnife(gesture, opts),
     }),
     [],
   );

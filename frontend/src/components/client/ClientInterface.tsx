@@ -32,6 +32,8 @@ import {
   withStepArt,
 } from "#/data/recipe-steps";
 import { useAmbient, useAudioUnlock, useSfx } from "#/audio/use-audio";
+import type { KnifeGesture } from "#/audio/resolve";
+import { CutDetector } from "../knife-cuts";
 
 /** Visible square of the recipe box; stage gestures sit within its 0–200px. */
 const GESTURE_AREA = 210;
@@ -153,6 +155,35 @@ function ClientGameplay({ connection }: ClientInterfaceProps) {
       ? { recipeName: stepRecipe.name, stageIndex: activeStageIndex }
       : undefined,
   );
+  // Knife cuts: while slicing/chopping, fire a sound on each new stroke
+  // direction (first movement and every sharp turn), never while rounding.
+  const gestureName = audioInfo ? String(audioInfo.gesture) : null;
+  const knifeGesture: KnifeGesture | null =
+    gestureName === "chop" || gestureName === "slice" ? gestureName : null;
+  const knifeDetector = useRef<CutDetector | null>(null);
+  if (knifeDetector.current === null) knifeDetector.current = new CutDetector();
+  useEffect(() => {
+    const detector = knifeDetector.current;
+    if (!detector) return;
+    if (
+      knifeGesture === null ||
+      interfaceState !== "recipe" ||
+      frozen ||
+      connection.results
+    ) {
+      detector.reset();
+      return;
+    }
+    const cuts = detector.update(currentPoints);
+    for (let i = 0; i < cuts; i++) sfx.playKnife(knifeGesture);
+  }, [
+    currentPoints,
+    knifeGesture,
+    interfaceState,
+    frozen,
+    connection.results,
+    sfx,
+  ]);
   const inventory = useMemo(() => {
     if (!me) return [];
 

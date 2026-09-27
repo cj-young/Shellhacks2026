@@ -25,6 +25,9 @@ export const ALL_CHANNELS: readonly SoundChannel[] = [
 /** Where a sound originates: recipe name + flattened stage index. */
 export type StageRef = { recipeName: string; stageIndex: number };
 
+/** The cutting gestures that make knife sounds. */
+export type KnifeGesture = "chop" | "slice";
+
 export function clampVolume(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Math.max(0, Math.min(1, value));
@@ -75,6 +78,11 @@ export function ambientKeys(station: Station, stage?: StageRef): SoundKey[] {
   if (stage) keys.push(`stage:${stage.recipeName}:${stage.stageIndex}:ambient`);
   keys.push(`ambient.${station}`, "ambient.default");
   return keys;
+}
+
+/** Candidate keys for a knife cut: the gesture-specific clip → the shared one. */
+export function knifeKeys(gesture: KnifeGesture): SoundKey[] {
+  return [`knife.${gesture}`, "knife"];
 }
 
 export function resolveKey(key: SoundKey, table: SoundTable): SoundDef | null {

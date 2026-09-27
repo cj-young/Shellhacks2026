@@ -43,6 +43,9 @@ export type SoundEvent =
   | "gesture.success"
   | `gesture.success.${Gesture}`
   | "gesture.fail"
+  | "knife"
+  | "knife.chop"
+  | "knife.slice"
   | "ambient.default"
   | `ambient.${Station}`
   | "ui.take"
@@ -72,6 +75,9 @@ export type SoundTable = Partial<Record<SoundEvent, SoundDef>> & {
  *   "music.game":          { src: "/assets/audio/main-theme.mp3", volume: 0.5 },
  *   "gesture.success.chop":{ src: "/assets/audio/chop.mp3", volume: 0.9, pitchJitter: 0.06 },
  *   "gesture.fail":        { src: "/assets/audio/aw.mp3", volume: 0.7, minGapMs: 300 },
+ *   "knife.chop":          { src: "/assets/audio/knife.mp3", volume: 0.8, minGapMs: 60 },
+ *   "knife.slice":         { src: "/assets/audio/slice.mp3", volume: 0.8, minGapMs: 60 },
+ *   // `"knife"` is the fallback played when a chop/slice-specific cue is absent.
  *   "ambient.pan":         { src: "/assets/audio/sizzle.mp3", volume: 0.35, fadeMs: 500 },
  *   "ui.aisle":            { src: "/assets/audio/swipe.mp3", volume: 0.6 },
  *   "ui.take":             { src: "/assets/audio/pick.mp3", volume: 0.6, minGapMs: 40 },
