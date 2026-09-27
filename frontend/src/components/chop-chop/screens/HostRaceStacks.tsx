@@ -22,6 +22,7 @@ import { Countdown } from "../Countdown";
 import { characterImage } from "#/data/characters";
 
 import { paper } from "#/components/chop-chop/paper";
+
 export type ShopItem = { kind: string; rot: number; done: boolean };
 
 export type RaceStack = {
@@ -764,6 +765,11 @@ function RecipeStack({
   const [entering, setEntering] = useState(false);
   /** Points shown in the "+N pts" toast for the recipe just finished. */
   const [gained, setGained] = useState(0);
+  // Transient animation timers live in refs (not effect cleanups) so an
+  // unrelated moveKey change — e.g. tapping Continue flips prep→shop — cannot
+  // cancel them and strand the "Order up!" / flip state on screen.
+  const doneTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const moveKey = `${stack.recipe}:${stack.phase}:${stack.allDone ? 1 : 0}`;
 
   // Runs before the effect below updates lastRef, so lastRef is the old card.
@@ -776,11 +782,13 @@ function RecipeStack({
       // Score can land a moment after the recipe moves on; fall back to a recipe's worth.
       const delta = (stack.points ?? 0) - (prev.points ?? 0);
       setGained(delta > 0 ? delta : POINTS_PER_RECIPE);
-      const id = setTimeout(() => {
+      if (doneTimer.current !== null) clearTimeout(doneTimer.current);
+      doneTimer.current = setTimeout(() => {
+        doneTimer.current = null;
         setDoneFrom(null);
         setEntering(!stack.allDone);
       }, DONE_MS);
-      return () => clearTimeout(id);
+      return;
     }
     if (
       prev.recipe === stack.recipe &&
@@ -789,10 +797,12 @@ function RecipeStack({
     ) {
       // Shopping done: flip the card over to its gesture side.
       setFlipFrom(prev);
-      const id = setTimeout(() => setFlipFrom(null), FLIP_MS);
-      return () => clearTimeout(id);
+      if (flipTimer.current !== null) clearTimeout(flipTimer.current);
+      flipTimer.current = setTimeout(() => {
+        flipTimer.current = null;
+        setFlipFrom(null);
+      }, FLIP_MS);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moveKey]);
   useEffect(() => {
     lastRef.current = stack;
@@ -802,6 +812,13 @@ function RecipeStack({
     const id = setTimeout(() => setEntering(false), ENTER_MS);
     return () => clearTimeout(id);
   }, [entering]);
+  useEffect(
+    () => () => {
+      if (doneTimer.current !== null) clearTimeout(doneTimer.current);
+      if (flipTimer.current !== null) clearTimeout(flipTimer.current);
+    },
+    [],
+  );
 
   const front = doneFrom ?? flipFrom ?? stack;
   const finished = doneFrom !== null || Boolean(stack.allDone);
