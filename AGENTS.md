@@ -338,8 +338,9 @@ separate origins, so the backend uses the `ALLOWED_ORIGINS` allowlist for CORS a
   Set `ALLOWED_ORIGINS=https://<vercel-app>` (wildcards like `https://*.vercel.app` allowed) and
   optionally `NODE_ENV=production` / `ROUND_DURATION_MS`. Health check path: `/health`. The game
   store is in-memory, so a redeploy/restart drops active games.
-- **Frontend (Vercel)**: project root `frontend/`, built with the Nitro Vercel preset
-  (`vite build` emits `.vercel/output`). Set at build time:
+- **Frontend (Vercel)**: project root `frontend/`. The Nitro plugin selects the Vercel preset when
+  `VERCEL` is set (i.e. during Vercel's build), so `vite build` emits `.vercel/output`; local builds
+  emit `.output`. Set at build time:
   `VITE_API_URL=https://<railway-app>`, `VITE_SOCKET_URL=https://<railway-app>`,
   `VITE_SOCKET_PATH=/socket.io/`. Vite inlines these, so changing them needs a redeploy.
   With the env vars unset the app falls back to the Caddy `/api` paths used in development.

@@ -14,8 +14,10 @@ const config = defineConfig({
     devtools(),
     tailwindcss(),
     tanstackStart(),
-    // Produces Vercel's Build Output API layout when deployed there.
-    nitro({ preset: "vercel" }),
+    // Vercel sets VERCEL=1 while building; force the Vercel preset there so the
+    // output lands in `.vercel/output`. Forcing it everywhere would run Nitro's
+    // Vercel env-runner locally, which warns about a missing VERCEL_OIDC_TOKEN.
+    nitro(process.env.VERCEL ? { preset: "vercel" } : {}),
     viteReact(),
   ],
 });
