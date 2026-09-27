@@ -11,6 +11,7 @@ import { lobbyColor } from "#/components/chop-chop/screens/HostLobbyNew";
 import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
 import { RoundLeaderboard } from "#/components/chop-chop/screens/RoundLeaderboard";
 import { iconIdFor } from "#/components/client/Store";
+import { menuRecipeIdFor, stepInfo } from "#/data/recipe-steps";
 
 const TIMES_UP_MS = 3000;
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
@@ -43,14 +44,17 @@ function playerStack(
   const base = { ...player, recipe: recipeIndex + 1, recipeName: recipe.name };
 
   if (stageIndex > 0 || hasEverything) {
+    // Step name and icon for the stage they're on (see data/recipe-steps).
+    const current = Math.min(stageIndex, recipe.stages.length - 1);
+    const info = stepInfo(recipe.name, current, recipe.stages.at(current));
     return {
       ...base,
       phase: "prep",
-      // The team's recipe stages are line-tracing ("lines"), which plays as a swipe.
-      gesture: "chop",
-      gestureName: "TRACE!",
-      stepLabel: "Trace the lines on your phone",
-      step: Math.min(stageIndex + 1, recipe.stages.length),
+      gesture: info.gesture,
+      dish: menuRecipeIdFor(recipe.name),
+      gestureName: info.word,
+      stepLabel: info.label,
+      step: current + 1,
       steps: Math.max(1, recipe.stages.length),
     };
   }

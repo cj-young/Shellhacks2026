@@ -1,0 +1,165 @@
+{
+  "_note": "Presentation for backend/src/data/recipes.json, one entry per stage in order, keyed by recipe name (letters only, lowercase). gesture: host card icon (chop|stir|flip|plate). station: placeholder art (board|bowl|pan|pot|plate). After editing, run: node scripts/generate-step-art.mjs",
+  "spaghettimeatballs": [
+    {
+      "label": "Roll a meatball",
+      "gesture": "stir",
+      "word": "ROLL!",
+      "station": "board"
+    },
+    {
+      "label": "Roll another meatball",
+      "gesture": "stir",
+      "word": "ROLL!",
+      "station": "board"
+    },
+    {
+      "label": "Roll the last meatball",
+      "gesture": "stir",
+      "word": "ROLL!",
+      "station": "board"
+    },
+    {
+      "label": "Slice the garlic",
+      "gesture": "chop",
+      "word": "SLICE!",
+      "station": "board"
+    },
+    {
+      "label": "Mince the garlic",
+      "gesture": "chop",
+      "word": "MINCE!",
+      "station": "board"
+    },
+    {
+      "label": "Slice the tomato",
+      "gesture": "chop",
+      "word": "SLICE!",
+      "station": "board"
+    },
+    {
+      "label": "Slice it again",
+      "gesture": "chop",
+      "word": "SLICE!",
+      "station": "board"
+    },
+    {
+      "label": "Crush it into sauce",
+      "gesture": "chop",
+      "word": "CRUSH!",
+      "station": "pot"
+    },
+    {
+      "label": "Stir the sauce",
+      "gesture": "stir",
+      "word": "STIR!",
+      "station": "pot"
+    },
+    {
+      "label": "Toss in the pasta",
+      "gesture": "stir",
+      "word": "TOSS!",
+      "station": "pot"
+    }
+  ],
+  "cheeseburger": [
+    {
+      "label": "Mix the beef",
+      "gesture": "stir",
+      "word": "MIX!",
+      "station": "bowl"
+    },
+    {
+      "label": "Shape the patty",
+      "gesture": "stir",
+      "word": "SHAPE!",
+      "station": "board"
+    },
+    {
+      "label": "Flip the patty",
+      "gesture": "flip",
+      "word": "FLIP!",
+      "station": "pan"
+    },
+    {
+      "label": "Let it sizzle",
+      "gesture": "stir",
+      "word": "SIZZLE!",
+      "station": "pan"
+    },
+    {
+      "label": "Flip it again",
+      "gesture": "flip",
+      "word": "FLIP!",
+      "station": "pan"
+    },
+    {
+      "label": "Slice the lettuce",
+      "gesture": "chop",
+      "word": "SLICE!",
+      "station": "board"
+    },
+    {
+      "label": "Shred the lettuce",
+      "gesture": "chop",
+      "word": "SHRED!",
+      "station": "board"
+    },
+    {
+      "label": "Stack the burger",
+      "gesture": "plate",
+      "word": "STACK!",
+      "station": "plate"
+    }
+  ],
+  "pancakes": [
+    {
+      "label": "Pour in the flour",
+      "gesture": "stir",
+      "word": "POUR!",
+      "station": "bowl"
+    },
+    {
+      "label": "Pour in the milk",
+      "gesture": "stir",
+      "word": "POUR!",
+      "station": "bowl"
+    },
+    {
+      "label": "Crack the egg",
+      "gesture": "chop",
+      "word": "CRACK!",
+      "station": "bowl"
+    },
+    {
+      "label": "Whisk it",
+      "gesture": "stir",
+      "word": "WHISK!",
+      "station": "bowl"
+    },
+    {
+      "label": "Whisk the other way",
+      "gesture": "stir",
+      "word": "WHISK!",
+      "station": "bowl"
+    },
+    {
+      "label": "Pour a pancake",
+      "gesture": "stir",
+      "word": "POUR!",
+      "station": "pan"
+    },
+    {
+      "label": "Flip it!",
+      "gesture": "flip",
+      "word": "FLIP!",
+      "station": "pan"
+    },
+    {
+      "label": "Flip it onto the plate",
+      "gesture": "plate",
+      "word": "PLATE!",
+      "station": "plate"
+    }
+  ]
+}

@@ -21,6 +21,10 @@ import {
 } from "#/components/chop-chop/race";
 import { TimesUp } from "#/components/chop-chop/screens/TimesUp";
 import { NewRecipeCard } from "./NewRecipeCard";
+import { gestureHint, stepInfo, withStepArt } from "#/data/recipe-steps";
+
+/** Visible square of the recipe box; stage gestures sit within its 0–200px. */
+const GESTURE_AREA = 210;
 
 import { paper } from "#/components/chop-chop/paper";
 interface ClientInterfaceProps {
@@ -50,6 +54,12 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
   const consumedStages = useRef(new Set<string>());
   const me = connection.state.players.find(
     (entry) => entry.id === connection.playerId,
+  );
+  // The current recipe with placeholder step art swapped in for test pictures.
+  const currentRecipe = recipeOrder.at(recipeState);
+  const stepRecipe = useMemo(
+    () => (currentRecipe ? withStepArt(currentRecipe) : undefined),
+    [currentRecipe],
   );
   const inventory = useMemo(() => {
     if (!me) return [];
@@ -231,6 +241,14 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
 
   const recipe = recipeOrder.at(recipeState);
   const ready = canPrepareRecipe && !finished && recipe;
+  const activeStage =
+    stepRecipe && activeStageIndex >= 0
+      ? stepRecipe.stages.at(activeStageIndex)
+      : undefined;
+  const activeStep =
+    recipe && activeStage
+      ? stepInfo(recipe.name, activeStageIndex, activeStage)
+      : undefined;
 
   if (showNewRecipe && recipe) {
     return (
@@ -320,7 +338,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
         <Basket
           items={inventory.map(iconIdFor)}
           width={354}
-          height={230}
+          height={ready ? 170 : 230}
           token={48}
         />
 
@@ -341,14 +359,30 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
           style={{
             ...paper(34, 1),
             background: CARD_BG,
-            padding: 12,
-            minWidth: 300,
-            minHeight: 300,
+            padding: "12px 16px 14px",
+            minWidth: 260,
+            minHeight: ready ? undefined : 300,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            gap: 8,
           }}
         >
+          {ready && stepRecipe && activeStage && (
+            <div style={{ textAlign: "center" }}>
+              <div
+                style={{
+                  font: nunito(900, 13),
+                  letterSpacing: ".14em",
+                  opacity: 0.75,
+                }}
+              >
+                STEP {activeStageIndex + 1} OF {stepRecipe.stages.length}
+              </div>
+              <div style={{ font: lilita(26, 1.1) }}>{activeStep?.label}</div>
+            </div>
+          )}
           {finished ? (
             <div
               style={{
@@ -360,15 +394,30 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
             >
               All recipes done!
             </div>
-          ) : ready ? (
-            <MasterRecipe
-              recipe={recipe}
-              points={currentPoints}
-              onStageChange={setActiveStageIndex}
-              onCompleteChange={(complete) => {
-                if (complete) completeRecipe();
+          ) : ready && stepRecipe ? (
+            // Stage gestures use 0–200px coordinates from the top-left of the
+            // recipe box, so show that corner and put the finger tracker on the
+            // same origin (as on main). Real pixels: no scaling here.
+            <div
+              style={{
+                position: "relative",
+                width: GESTURE_AREA,
+                height: GESTURE_AREA,
+                overflow: "hidden",
+                borderRadius: 22,
+                background: "#FFF6E3",
               }}
-            />
+            >
+              <MasterRecipe
+                recipe={stepRecipe}
+                points={currentPoints}
+                onStageChange={setActiveStageIndex}
+                onCompleteChange={(complete) => {
+                  if (complete) completeRecipe();
+                }}
+              />
+              <CursorPathTracker onPointsChange={setCurrentPoints} />
+            </div>
           ) : (
             recipe && (
               <div
@@ -386,20 +435,13 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
               </div>
             )
           )}
+          {ready && activeStage && (
+            <div style={{ font: nunito(800, 16) }}>
+              {gestureHint(activeStage)}
+            </div>
+          )}
         </div>
-
-        {ready && (
-          <div style={{ font: nunito(800, 16) }}>
-            Trace each line with your finger
-          </div>
-        )}
       </div>
-
-      {ready && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 30 }}>
-          <CursorPathTracker onPointsChange={setCurrentPoints} />
-        </div>
-      )}
 
       <div
         style={{

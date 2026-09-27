@@ -5,21 +5,37 @@ import {
   STORE_PAGE_SIZE,
   StoreScreen,
 } from "#/components/chop-chop/screens/RacePhoneScreens";
-import { INGREDIENTS as MENU_INGREDIENTS } from "#/data/menu";
-
-const menuIdByName = new Map(
-  MENU_INGREDIENTS.map((i) => [i.name.toLowerCase(), i.id]),
-);
+import { getIngredient, menuIngredientIdFor } from "#/data/menu";
 
 /** Uses our sticker art when the name matches a menu ingredient, otherwise the item's own image. */
 export const iconIdFor = (ing: Ingredient) =>
-  menuIdByName.get(ing.name.toLowerCase()) ?? ing.image;
+  menuIngredientIdFor(ing.name) ?? ing.image;
 
-/** One aisle per category, split into pages that fit the store screen. */
+// Our shelves, with the two produce shelves shown as one aisle since the team's
+// catalog only has a few produce items.
+const AISLE_FOR_SHELF: Record<string, string> = {
+  veggies: "Produce",
+  "onions-citrus": "Produce",
+  "meat-dairy": "Meat & Dairy",
+  "bakery-pantry": "Bakery & Pantry",
+};
+
+/** Aisle for a team ingredient: our shelf when we know it, else its own category. */
+const aisleFor = (ing: Ingredient) => {
+  const shelf = getIngredient(menuIngredientIdFor(ing.name) ?? "")?.shelf;
+  return (shelf && AISLE_FOR_SHELF[shelf]) || ing.category;
+};
+
+/** One aisle per group, split into pages that fit the store screen. */
 const AISLES: { name: string; items: Ingredient[] }[] = (() => {
-  const categories = [...new Set(ingredients.map((ing) => ing.category))];
-  return categories.flatMap((category) => {
-    const items = ingredients.filter((ing) => ing.category === category);
+  const order = Object.values(AISLE_FOR_SHELF);
+  const rank = (g: string) =>
+    order.includes(g) ? order.indexOf(g) : order.length;
+  const groups = [...new Set(ingredients.map(aisleFor))].sort(
+    (a, b) => rank(a) - rank(b),
+  );
+  return groups.flatMap((category) => {
+    const items = ingredients.filter((ing) => aisleFor(ing) === category);
     const pages = [];
     for (let i = 0; i < items.length; i += STORE_PAGE_SIZE) {
       pages.push({

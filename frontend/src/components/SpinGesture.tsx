@@ -55,7 +55,7 @@ export function SpinGesture({
         cy={center.y}
         r={radius}
         fill="none"
-        stroke={matches ? "rgb(74 222 128)" : "rgb(148 163 184)"}
+        stroke={matches ? "#2FA84F" : "rgba(122,78,30,.28)"}
         strokeWidth={Math.max(1, tolerance * 2)}
       />
       <text
@@ -63,7 +63,11 @@ export function SpinGesture({
         y={center.y - radius}
         textAnchor="middle"
         dominantBaseline="central"
-        fill="white"
+        fill="#3D2817"
+        stroke="#FFF6E3"
+        strokeWidth="4"
+        paintOrder="stroke"
+        fontFamily="Sniglet"
         fontSize="24"
       >
         {direction === "clockwise" ? "↻" : "↺"} {rotations}×

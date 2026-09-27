@@ -46,5 +46,19 @@ export const ingredientAsset = (id: string, silhouette = false) =>
   `/assets/ingredient-${id}${silhouette ? "-silhouette" : ""}.svg`;
 export const dishAsset = (recipeId: string) => `/assets/dish-${recipeId}.svg`;
 
+const nameKey = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z]/g, "")
+    .replace(/(es|s)$/, "");
+const byNameKey = new Map(INGREDIENTS.map((i) => [nameKey(i.name), i.id]));
+
+/**
+ * Our art id for a team ingredient name, ignoring case, spacing and plurals
+ * ("Eggs" → egg, "Burger Buns" → burger-bun).
+ */
+export const menuIngredientIdFor = (name: string): string | undefined =>
+  byNameKey.get(nameKey(name));
+
 export const shelfItems = (shelfId: string) =>
   INGREDIENTS.filter((i) => i.shelf === shelfId).map((i) => i.id);
