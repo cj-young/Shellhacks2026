@@ -177,6 +177,7 @@ export class GameService {
       inventory: {},
       score: 0,
       stageDeadlineAt: null,
+      sabotages: [],
     };
 
     const joinedGame = this.#withPlayers(game, [...game.state.players, player]);

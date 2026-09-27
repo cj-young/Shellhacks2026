@@ -1,0 +1,30 @@
+[
+  {
+    "id": "steal",
+    "name": "Steal",
+    "description": "Take an unused ingredient from another player's inventory.",
+    "targetScope": "single",
+    "durationMs": null
+  },
+  {
+    "id": "trash",
+    "name": "Trash",
+    "description": "Throw away an unused ingredient from another player's inventory.",
+    "targetScope": "single",
+    "durationMs": null
+  },
+  {
+    "id": "freeze",
+    "name": "Freeze",
+    "description": "Stop another player from acting for a short time.",
+    "targetScope": "single",
+    "durationMs": 10000
+  },
+  {
+    "id": "blackout",
+    "name": "Blackout",
+    "description": "Hide store ingredients from everyone for a short time.",
+    "targetScope": "all",
+    "durationMs": 15000
+  }
+]
