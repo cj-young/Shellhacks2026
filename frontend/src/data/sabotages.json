@@ -18,7 +18,7 @@
     "name": "Freeze",
     "description": "Stop another player from acting for a short time.",
     "targetScope": "single",
-    "durationMs": 10000
+    "durationMs": 3000
   },
   {
     "id": "blackout",

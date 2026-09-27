@@ -229,7 +229,7 @@ channels:
       required and must identify another connected non-host in this room. Steal/trash remove
       one randomly selected unused inventory ingredient (never a cart or consumed ingredient);
       an empty inventory is INVALID_TARGET. Steal adds that item to the sender.
-      Freeze lasts 10000 ms, blackout 15000 ms; overlapping effects expire independently.
+      Freeze lasts 3000 ms, blackout 15000 ms; overlapping effects expire independently.
       The server consumes a credit only after successful validation, broadcasts
       `sabotage_applied` to the room (including the sender), then `update_state`.
       Hosts and disconnected senders are rejected with PLAYER_NOT_FOUND. No available credit
@@ -696,7 +696,7 @@ components:
             - "null"
           description: Default duration in ms for timed effects; null for instantaneous effects.
           examples:
-            - 10000
+            - 3000
     UseSabotagePayload:
       type: object
       additionalProperties: false
