@@ -275,9 +275,10 @@ gallery. They do not share components today.
 
 - `data/sounds.ts` — **the registry you edit to plug in audio**: a cue table plus the `SoundEvent`
   union. Every entry is optional, so anything unregistered is simply silent.
-- `audio/engine.ts` — dependency-free Web Audio engine with three buses (music / ambient / sfx),
-  lazy `unlock()` from a user gesture, persisted mute + per-bus volumes, looping ambience with
-  fades, and a silent no-op for missing files. Host music starts on the Start click.
+- `audio/engine.ts` — dependency-free engine: one-shot SFX go through Web Audio (low latency,
+  pitch jitter) while music/ambience **loop through streamed `HTMLAudioElement`s** (long tracks start
+  fast). Lazy `unlock()` from a user gesture, persisted mute + per-bus volumes, fades, and a silent
+  no-op for missing files. Host music starts on the Start click.
 - `audio/resolve.ts` — pure, tested key resolution, most-specific first: gesture
   (`stage:<recipe name>:<index>` → `gesture.success.<gesture>` → `gesture.success`), ambience
   (`ambient.<station>` → `ambient.default`), and exact keys for everything else.

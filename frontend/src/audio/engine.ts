@@ -63,11 +63,121 @@ export function clampRate(rate: number): number {
 }
 
 /**
- * A tiny Web Audio engine. Nothing touches the browser until `unlock()` runs
- * from a user gesture, so it is safe to import during SSR.
+ * A looping voice streamed through an `HTMLAudioElement`. Streaming means a
+ * large track starts playing as soon as a little audio has buffered, instead of
+ * waiting for the entire file to download and decode.
+ */
+class StreamVoice {
+  readonly key: string;
+  readonly cueVolume: number;
+  private readonly src: string;
+  private readonly el: HTMLAudioElement;
+  private readonly fade: number;
+  private readonly onStop: () => void;
+  private timer: number | null = null;
+  private blocked = false;
+  private stopped = false;
+
+  constructor(
+    src: string,
+    key: string,
+    cueVolume: number,
+    fadeMs: number,
+    onStop: () => void,
+  ) {
+    this.src = src;
+    this.key = key;
+    this.cueVolume = clampVolume(cueVolume);
+    this.fade = Math.max(0.02, fadeMs / 1000);
+    this.onStop = onStop;
+    this.el = new Audio(src);
+    this.el.loop = true;
+    this.el.preload = "auto";
+    this.el.volume = 0;
+  }
+
+  /** Begins playback and fades up to `level`. */
+  start(level: number): void {
+    this.el.volume = 0;
+    this.play();
+    this.ramp(level, this.fade);
+  }
+
+  /** Re-attempts play() after a user gesture if autoplay was blocked. */
+  retry(): void {
+    if (this.stopped || !this.blocked) return;
+    this.play();
+  }
+
+  /** Instant level change (volume/mute updates). */
+  setLevel(level: number): void {
+    if (this.stopped) return;
+    this.clearTimer();
+    this.el.volume = clampVolume(level);
+  }
+
+  stop(): void {
+    if (this.stopped) return;
+    this.stopped = true;
+    this.onStop();
+    this.ramp(0, this.fade);
+    window.setTimeout(
+      () => {
+        this.el.pause();
+        this.el.removeAttribute("src");
+        this.el.load();
+      },
+      this.fade * 1000 + 60,
+    );
+  }
+
+  private play(): void {
+    this.el.play().then(
+      () => {
+        this.blocked = false;
+      },
+      () => {
+        this.blocked = true;
+        console.warn(
+          `[audio] playback blocked until a user gesture: ${this.src}`,
+        );
+      },
+    );
+  }
+
+  private ramp(target: number, seconds: number): void {
+    this.clearTimer();
+    const from = this.el.volume;
+    const to = clampVolume(target);
+    if (seconds <= 0 || from === to) {
+      this.el.volume = to;
+      return;
+    }
+    const steps = Math.max(1, Math.round(seconds * 60));
+    let step = 0;
+    this.timer = window.setInterval(() => {
+      step += 1;
+      this.el.volume = clampVolume(from + (to - from) * (step / steps));
+      if (step >= steps) this.clearTimer();
+    }, 1000 / 60);
+  }
+
+  private clearTimer(): void {
+    if (this.timer !== null) {
+      window.clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+}
+
+/**
+ * A tiny audio engine. One-shots go through Web Audio (low latency, pitch
+ * jitter); music and ambience stream through `HTMLAudioElement`, so long tracks
+ * start quickly. Nothing touches the browser until `unlock()` runs from a user
+ * gesture, so it is safe to import during SSR.
  *
- * Three buses (music / ambient / sfx) sit under a master gain; volume and mute
- * are persisted. Missing files are a silent no-op so a partial registry works.
+ * Buses carry persisted mute + per-channel volume; missing files are a silent
+ * no-op so a partial registry works.
  */
 class AudioEngine {
   private ctx: AudioContext | null = null;
@@ -77,8 +187,8 @@ class AudioEngine {
   private missing = new Set<string>();
   private pending = new Map<string, Promise<AudioBuffer | null>>();
   private lastPlayed = new Map<string, number>();
-  private ambient: Voice | null = null;
-  private music: Voice | null = null;
+  private ambient: StreamVoice | null = null;
+  private music: StreamVoice | null = null;
   private state: AudioState = loadState();
 
   get muted(): boolean {
@@ -104,7 +214,7 @@ class AudioEngine {
     this.persist();
   }
 
-  /** Creates/resumes the audio context. Call from a user gesture. */
+  /** Creates/resumes the audio context and retries any blocked streams. */
   unlock(): void {
     if (typeof window === "undefined") return;
     if (!this.ctx) {
@@ -122,6 +232,8 @@ class AudioEngine {
       this.applyVolumes();
     }
     if (this.ctx.state === "suspended") void this.ctx.resume();
+    this.music?.retry();
+    this.ambient?.retry();
   }
 
   /** One-shot sound effect (always on the sfx bus). */
@@ -170,58 +282,40 @@ class AudioEngine {
     this.music = null;
   }
 
-  private handleFor(voice: Voice): SoundHandle {
+  private handleFor(voice: StreamVoice): SoundHandle {
     return { stop: () => voice.stop() };
   }
 
-  /**
-   * Registers a looping voice immediately (so it can be stopped while its buffer
-   * is still loading) and starts playback once decoded.
-   */
+  private loopLevel(channel: SoundChannel, cueVolume: number): number {
+    return (
+      channelVolume(channel, this.state.volumes, this.state.muted) *
+      clampVolume(cueVolume)
+    );
+  }
+
   private beginLoop(
     def: SoundDef,
     channel: SoundChannel,
     key: string,
-  ): Voice | null {
+  ): StreamVoice | null {
+    if (typeof window === "undefined") return null;
     this.unlock();
-    if (!this.ctx || !this.buses || this.state.muted) return null;
 
-    const voice = new Voice(key, () => {
-      if (this.ambient === voice) this.ambient = null;
-      if (this.music === voice) this.music = null;
-    });
+    const voice = new StreamVoice(
+      def.src,
+      key,
+      def.volume ?? 1,
+      def.fadeMs ?? 300,
+      () => {
+        if (this.ambient === voice) this.ambient = null;
+        if (this.music === voice) this.music = null;
+      },
+    );
     if (channel === "ambient") this.ambient = voice;
     else this.music = voice;
 
-    void this.startLoop(voice, def, channel);
+    voice.start(this.loopLevel(channel, voice.cueVolume));
     return voice;
-  }
-
-  private async startLoop(
-    voice: Voice,
-    def: SoundDef,
-    channel: SoundChannel,
-  ): Promise<void> {
-    const ctx = this.ctx;
-    const bus = this.buses?.[channel];
-    if (!ctx || !bus) return;
-    const buffer = await this.buffer(def.src);
-    if (!buffer || voice.canceled) return;
-
-    const gain = ctx.createGain();
-    gain.gain.value = 0;
-    gain.connect(bus);
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-    source.connect(gain);
-
-    const fade = Math.max(0.02, (def.fadeMs ?? 300) / 1000);
-    const target = clampVolume(def.volume ?? 1);
-    voice.attach(source, gain, fade);
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(target, ctx.currentTime + fade);
-    source.start();
   }
 
   private async playDef(
@@ -257,13 +351,20 @@ class AudioEngine {
   }
 
   private applyVolumes(): void {
-    if (!this.buses) return;
-    for (const channel of ALL_CHANNELS) {
-      this.buses[channel].gain.value = channelVolume(
-        channel,
-        this.state.volumes,
-        this.state.muted,
-      );
+    if (this.buses) {
+      for (const channel of ALL_CHANNELS) {
+        this.buses[channel].gain.value = channelVolume(
+          channel,
+          this.state.volumes,
+          this.state.muted,
+        );
+      }
+    }
+    if (this.music) {
+      this.music.setLevel(this.loopLevel("music", this.music.cueVolume));
+    }
+    if (this.ambient) {
+      this.ambient.setLevel(this.loopLevel("ambient", this.ambient.cueVolume));
     }
   }
 
@@ -304,62 +405,6 @@ class AudioEngine {
     })();
     this.pending.set(src, promise);
     return promise;
-  }
-}
-
-/** A looping or one-shot voice that can be stopped before it has loaded. */
-class Voice {
-  readonly key: string;
-  canceled = false;
-  private source: AudioBufferSourceNode | null = null;
-  private gain: GainNode | null = null;
-  private fade = 0.02;
-  private readonly onStop: () => void;
-
-  constructor(key: string, onStop: () => void) {
-    this.key = key;
-    this.onStop = onStop;
-  }
-
-  attach(source: AudioBufferSourceNode, gain: GainNode, fade: number): void {
-    this.source = source;
-    this.gain = gain;
-    this.fade = fade;
-  }
-
-  stop(): void {
-    if (this.canceled) return;
-    this.canceled = true;
-    this.onStop();
-    const ctx = this.gain?.context;
-    const gain = this.gain;
-    const source = this.source;
-    if (ctx && gain) {
-      const now = ctx.currentTime;
-      gain.gain.cancelScheduledValues(now);
-      gain.gain.setValueAtTime(gain.gain.value, now);
-      gain.gain.linearRampToValueAtTime(0, now + this.fade);
-    }
-    if (source && ctx) {
-      try {
-        source.stop(ctx.currentTime + this.fade + 0.02);
-      } catch {
-        /* Already stopped. */
-      }
-    }
-    if (gain && ctx) {
-      const cleanup = gain;
-      window.setTimeout(
-        () => {
-          try {
-            cleanup.disconnect();
-          } catch {
-            /* Already disconnected. */
-          }
-        },
-        (this.fade + 0.1) * 1000,
-      );
-    }
   }
 }
 
