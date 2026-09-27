@@ -82,4 +82,6 @@ export type SoundTable = Partial<Record<SoundEvent, SoundDef>> & {
  * Stage-specific override (wins over the gesture default):
  *   "stage:Spaghetti & Meatballs:2": { src: "/assets/audio/roll.mp3" },
  */
-export const SOUNDS: SoundTable = {};
+export const SOUNDS: SoundTable = {
+  "music.game": { src: "/assets/audio/main-music.mp3", volume: 1 },
+};
