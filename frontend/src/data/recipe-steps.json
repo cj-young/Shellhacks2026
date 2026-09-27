@@ -283,5 +283,61 @@
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-5.png"
     }
+  ],
+  "steakpotatoes": [
+    {
+      "label": "Slice the potato into 4 vertical slices",
+      "gesture": "chop",
+      "word": "SLICE!",
+      "station": "board"
+    },
+    {
+      "label": "Cube the sliced potato",
+      "gesture": "chop",
+      "word": "CUBE!",
+      "station": "board"
+    },
+    {
+      "label": "Slice the garlic",
+      "gesture": "chop",
+      "word": "SLICE!",
+      "station": "board"
+    },
+    {
+      "label": "Dice the garlic",
+      "gesture": "chop",
+      "word": "DICE!",
+      "station": "board"
+    },
+    {
+      "label": "Pour the garlic into the pan",
+      "gesture": "stir",
+      "word": "POUR!",
+      "station": "pan"
+    },
+    {
+      "label": "Fry the steak",
+      "gesture": "stir",
+      "word": "FRY!",
+      "station": "pan"
+    },
+    {
+      "label": "Flip the steak",
+      "gesture": "flip",
+      "word": "FLIP!",
+      "station": "pan"
+    },
+    {
+      "label": "Fry the other side of the steak",
+      "gesture": "stir",
+      "word": "FRY!",
+      "station": "pan"
+    },
+    {
+      "label": "Flip the steak again",
+      "gesture": "flip",
+      "word": "FLIP!",
+      "station": "pan"
+    }
   ]
 }

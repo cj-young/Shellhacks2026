@@ -691,5 +691,205 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Steak & Potatoes",
+    "ingredients": [
+      {
+        "id": 12,
+        "count": 1
+      },
+      {
+        "id": 4,
+        "count": 1
+      },
+      {
+        "id": 13,
+        "count": 1
+      }
+    ],
+    "stages": [
+      {
+        "type": "lines",
+        "backgroundImage": "/assets/steps/board2.svg",
+        "image": "/assets/ingredient-potato.svg",
+        "finishedImage": "/assets/steps/steak/01-potato-four-vertical-slices.png",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 70, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 70, "y": 170 },
+            "end": { "x": 110, "y": 30 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 110, "y": 30 },
+            "end": { "x": 140, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 140, "y": 170 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {
+          "12": 1
+        }
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/assets/steps/board2.svg",
+        "image": "/assets/steps/steak/01-potato-four-vertical-slices.png",
+        "finishedImage": "/assets/steps/steak/02-cubed-potato.png",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 170, "y": 70 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 170, "y": 70 },
+            "end": { "x": 30, "y": 110 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 30, "y": 110 },
+            "end": { "x": 170, "y": 140 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 170, "y": 140 },
+            "end": { "x": 30, "y": 170 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {}
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/assets/steps/board2.svg",
+        "image": "/assets/ingredient-garlic.svg",
+        "finishedImage": "/assets/ingredient-garlic.svg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 50 },
+            "end": { "x": 170, "y": 50 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {
+          "4": 1
+        }
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/assets/steps/board2.svg",
+        "image": "/assets/ingredient-garlic.svg",
+        "finishedImage": "/assets/steps/guacamole/newchoppedgarlic.png",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 70, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 70, "y": 170 },
+            "end": { "x": 110, "y": 30 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 110, "y": 30 },
+            "end": { "x": 140, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 140, "y": 170 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {}
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/assets/steps/pan.svg",
+        "image": "/assets/steps/guacamole/newchoppedgarlic.png",
+        "finishedImage": "/assets/steps/guacamole/newchoppedgarlic.png",
+        "lines": [
+          {
+            "start": { "x": 100, "y": 125 },
+            "end": { "x": 100, "y": 75 },
+            "radius": 30
+          }
+        ],
+        "ingredientsConsumed": {}
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/assets/steps/pan.svg",
+        "image": "/assets/ingredient-steak.svg",
+        "finishedImage": "/assets/ingredient-steak.svg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 40,
+            "direction": "clockwise",
+            "rotations": 1
+          }
+        ],
+        "ingredientsConsumed": {
+          "13": 1
+        }
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/assets/steps/pan.svg",
+        "image": "/assets/ingredient-steak.svg",
+        "finishedImage": "/assets/steps/steak/03-steak-top-seared.png",
+        "lines": [
+          {
+            "start": { "x": 100, "y": 170 },
+            "end": { "x": 100, "y": 30 },
+            "radius": 30
+          }
+        ],
+        "ingredientsConsumed": {}
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/assets/steps/pan.svg",
+        "image": "/assets/steps/steak/03-steak-top-seared.png",
+        "finishedImage": "/assets/steps/steak/03-steak-top-seared.png",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 40,
+            "direction": "counterclockwise",
+            "rotations": 1
+          }
+        ],
+        "ingredientsConsumed": {}
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/assets/steps/pan.svg",
+        "image": "/assets/steps/steak/03-steak-top-seared.png",
+        "finishedImage": "/assets/steps/steak/04-steak-fully-seared.png",
+        "lines": [
+          {
+            "start": { "x": 100, "y": 170 },
+            "end": { "x": 100, "y": 30 },
+            "radius": 30
+          }
+        ],
+        "ingredientsConsumed": {}
+      }
+    ]
   }
 ]

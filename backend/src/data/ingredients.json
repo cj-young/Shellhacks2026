@@ -70,5 +70,17 @@
     "name": "Onion",
     "image": "/assets/ingredient-onion.svg",
     "category": "Produce"
+  },
+  {
+    "id": 12,
+    "name": "Potato",
+    "image": "/assets/ingredient-potato.svg",
+    "category": "Produce"
+  },
+  {
+    "id": 13,
+    "name": "Steak",
+    "image": "/assets/ingredient-steak.svg",
+    "category": "Meat"
   }
 ]
