@@ -1,5 +1,5 @@
 {
-  "_note": "Presentation for backend/src/data/recipes.json, one entry per stage in order, keyed by recipe name (letters only, lowercase). gesture: host card icon (chop|stir|flip|plate). station: placeholder art (board|bowl|pan|pot|plate). After editing, run: node scripts/generate-step-art.mjs",
+  "_note": "Presentation for backend/src/data/recipes.json, one entry per stage in order, keyed by recipe name (letters only, lowercase). gesture: host card icon (chop|stir|flip|plate). station: placeholder art (board|bowl|pan|pot|plate). art (optional): final picture of the dish at that step, drawn under the gesture instead of the station placeholder. After editing, run: node scripts/generate-step-art.mjs",
   "spaghettimeatballs": [
     {
       "label": "Roll a meatball",
@@ -67,49 +67,57 @@
       "label": "Mix the beef",
       "gesture": "stir",
       "word": "MIX!",
-      "station": "bowl"
+      "station": "bowl",
+      "art": "/assets/ingredient-ground-beef.svg"
     },
     {
       "label": "Shape the patty",
       "gesture": "stir",
       "word": "SHAPE!",
-      "station": "board"
+      "station": "board",
+      "art": "/assets/steps/cheeseburger/step-2.png"
     },
     {
       "label": "Flip the patty",
       "gesture": "flip",
       "word": "FLIP!",
-      "station": "pan"
+      "station": "pan",
+      "art": "/assets/steps/cheeseburger/step-3.png"
     },
     {
       "label": "Let it sizzle",
       "gesture": "stir",
       "word": "SIZZLE!",
-      "station": "pan"
+      "station": "pan",
+      "art": "/assets/steps/cheeseburger/step-4.png"
     },
     {
       "label": "Flip it again",
       "gesture": "flip",
       "word": "FLIP!",
-      "station": "pan"
+      "station": "pan",
+      "art": "/assets/steps/cheeseburger/step-5.png"
     },
     {
       "label": "Slice the lettuce",
       "gesture": "chop",
       "word": "SLICE!",
-      "station": "board"
+      "station": "board",
+      "art": "/assets/steps/cheeseburger/step-6.png"
     },
     {
       "label": "Shred the lettuce",
       "gesture": "chop",
       "word": "SHRED!",
-      "station": "board"
+      "station": "board",
+      "art": "/assets/steps/cheeseburger/step-7.png"
     },
     {
       "label": "Stack the burger",
       "gesture": "plate",
       "word": "STACK!",
-      "station": "plate"
+      "station": "plate",
+      "art": "/assets/steps/cheeseburger/step-8.png"
     }
   ],
   "pancakes": [
@@ -117,49 +125,57 @@
       "label": "Pour in the flour",
       "gesture": "stir",
       "word": "POUR!",
-      "station": "bowl"
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-1.png"
     },
     {
       "label": "Pour in the milk",
       "gesture": "stir",
       "word": "POUR!",
-      "station": "bowl"
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-2.png"
     },
     {
       "label": "Crack the egg",
       "gesture": "chop",
       "word": "CRACK!",
-      "station": "bowl"
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-3.png"
     },
     {
       "label": "Whisk it",
       "gesture": "stir",
       "word": "WHISK!",
-      "station": "bowl"
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-4.png"
     },
     {
       "label": "Whisk the other way",
       "gesture": "stir",
       "word": "WHISK!",
-      "station": "bowl"
+      "station": "bowl",
+      "art": "/assets/steps/pancakes/step-5.png"
     },
     {
       "label": "Pour a pancake",
       "gesture": "stir",
       "word": "POUR!",
-      "station": "pan"
+      "station": "pan",
+      "art": "/assets/steps/pancakes/step-6.png"
     },
     {
       "label": "Flip it!",
       "gesture": "flip",
       "word": "FLIP!",
-      "station": "pan"
+      "station": "pan",
+      "art": "/assets/steps/pancakes/step-7.png"
     },
     {
       "label": "Flip it onto the plate",
       "gesture": "plate",
       "word": "PLATE!",
-      "station": "plate"
+      "station": "plate",
+      "art": "/assets/steps/pancakes/step-8.png"
     }
   ]
 }

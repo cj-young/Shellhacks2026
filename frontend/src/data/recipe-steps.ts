@@ -23,6 +23,11 @@ export type StepInfo = {
   /** Big word on the host card. */
   word: string;
   station: Station;
+  /**
+   * Final art for the dish at this step (in public/assets/steps). The phone
+   * draws it under the gesture, lined up with the 0–200px gesture space.
+   */
+  art?: string;
 };
 
 const step = (
@@ -117,8 +122,12 @@ export function withStepArt(recipe: Recipe): Recipe {
       const scene = `/assets/steps/${[info.station, ...art].join("-")}.svg`;
       return {
         ...stage,
+        // With final step art (drawn by the phone under the gesture) there's
+        // no placeholder scene behind it.
         backgroundImage: isPlaceholder(stage.backgroundImage)
-          ? scene
+          ? info.art
+            ? undefined
+            : scene
           : stage.backgroundImage,
         image: isPlaceholder(stage.image) ? undefined : stage.image,
         finishedImage: isPlaceholder(stage.finishedImage)

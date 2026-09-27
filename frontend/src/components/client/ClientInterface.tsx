@@ -78,6 +78,16 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
     () => (currentRecipe ? withStepArt(currentRecipe) : undefined),
     [currentRecipe],
   );
+  // Preload this recipe's step art so each step's picture is ready when it starts.
+  const recipeName = currentRecipe?.name;
+  const stageCount = currentRecipe?.stages.length ?? 0;
+  useEffect(() => {
+    if (!recipeName) return;
+    for (let i = 0; i < stageCount; i++) {
+      const art = stepInfo(recipeName, i).art;
+      if (art) new Image().src = art;
+    }
+  }, [recipeName, stageCount]);
   const inventory = useMemo(() => {
     if (!me) return [];
 
@@ -508,6 +518,26 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
                 background: "#FFF6E3",
               }}
             >
+              {activeStep?.art && (
+                // Final art for this step, under the gesture and lined up with
+                // its 0–200px space. Each step's art is the dish so far.
+                <img
+                  key={activeStep.art}
+                  src={activeStep.art}
+                  alt=""
+                  draggable={false}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: 200,
+                    height: 200,
+                    pointerEvents: "none",
+                    animation: "stepArtIn 260ms ease-out both",
+                  }}
+                />
+              )}
+              <style>{`@keyframes stepArtIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }`}</style>
               <MasterRecipe
                 recipe={stepRecipe}
                 initialStageIndex={Math.max(0, activeStageIndex)}
