@@ -144,6 +144,10 @@ export function useGameConnection(auth: GameAuth | null): GameConnection {
     );
     socket.on("update_state", (gameState: GameState) => {
       setState(gameState);
+      // Keep the lobby roster in sync with authoritative state. The chef
+      // assignment happens at start (not via `player_updated`), so without this
+      // the host never sees avatars for players who didn't pick one.
+      setPlayers(gameState.players);
       // `update_state` is only ever sent for an active/finished game, never in
       // the lobby, so receiving it means the game has started (this restores
       // the in-game screen after a mid-game reload).
