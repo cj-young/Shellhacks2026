@@ -92,4 +92,6 @@ export const SOUNDS: SoundTable = {
   "music.game": { src: "/assets/audio/main-music.mp3", volume: 1 },
   "knife.chop": { src: "/assets/audio/knife-chop.mp3", volume: 0.8 },
   "knife.slice": { src: "/assets/audio/knife-chop.mp3", volume: 0.8 },
+  "recipe.complete": { src: "/assets/audio/recipe-finish.mp3", volume: 0.6 },
+  "sabotage.freeze": { src: "/assets/audio/freeze.mp3", volume: 0.7 },
 };
