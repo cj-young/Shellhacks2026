@@ -4,6 +4,7 @@ import { INK, PhoneFrame, ROYAL, SKY, SUN, TOMATO, lilita } from "./design";
 import { IngredientIcon } from "./IngredientIcon";
 
 import { paper } from "./paper";
+
 export type GameIconKind =
   "chop" | "stir" | "flip" | "steal" | "blackout" | "basket";
 
@@ -161,6 +162,7 @@ const CART_BED = { left: 0.24, right: 0.23, top: 0.06, bottom: 0.17 };
 const CART_TILT = 90;
 
 export function Basket({
+  silhouette = false,
   items,
   gone = -1,
   width = 346,
@@ -168,6 +170,7 @@ export function Basket({
   token = 66,
   onItemTap,
 }: {
+  silhouette?: boolean;
   /** Ingredient ids (menu ids or design-handoff kinds). */
   items: string[];
   onItemTap?: (index: number) => void;
@@ -280,7 +283,7 @@ export function Basket({
                   transform: `rotate(${-CART_TILT}deg)`,
                 }}
               >
-                <IngredientIcon id={kind} size={icon} />
+                <IngredientIcon silhouette={silhouette} id={kind} size={icon} />
               </div>
             ),
           )}

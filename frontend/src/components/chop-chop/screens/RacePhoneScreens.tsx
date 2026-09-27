@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import {
   INK,
@@ -25,6 +25,7 @@ import {
 import type { AvatarMood } from "../race";
 
 import { paper } from "#/components/chop-chop/paper";
+
 type Common = {
   /** Draw the phone mockup frame (dev switcher) instead of filling the device. */
   framed?: boolean;
@@ -117,6 +118,8 @@ type Drag = {
 };
 
 export function StoreScreen({
+  blackout = false,
+  disabled = false,
   framed,
   score,
   progress,
@@ -134,6 +137,8 @@ export function StoreScreen({
   hint,
   illustrateDrag,
 }: Common & {
+  blackout?: boolean;
+  disabled?: boolean;
   aisleName: string;
   aisleIndex: number;
   aisleCount: number;
@@ -155,19 +160,22 @@ export function StoreScreen({
 }) {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
+  useEffect(() => {
+    if (disabled) setDrag(null);
+  }, [disabled]);
   // Fill shelves evenly: 2 per shelf for up to 6 items, 3 per shelf beyond that.
   const perShelf = Math.min(
     MAX_PER_SHELF,
     Math.max(2, Math.ceil(shelf.length / SHELF_COUNT)),
   );
   const rows = Array.from({ length: SHELF_COUNT }, (_, r) =>
-    Array.from({ length: perShelf }, (_, i) => shelf.at(r * perShelf + i)),
+    Array.from({ length: perShelf }, (_slot, i) => shelf.at(r * perShelf + i)),
   );
   const itemSize = perShelf > 2 ? 76 : 82;
   const nameSize = Math.min(40, Math.floor(210 / (0.62 * aisleName.length)));
 
   const itemHandlers = (slot: number, kind: string) =>
-    onTake
+    onTake && !disabled
       ? {
           onPointerDown: (e: React.PointerEvent) => {
             e.currentTarget.setPointerCapture(e.pointerId);
@@ -326,6 +334,7 @@ export function StoreScreen({
                       }}
                     >
                       <IngredientIcon
+                        silhouette={blackout}
                         id={item.kind}
                         size={item.size ?? itemSize}
                         rotate={
@@ -360,11 +369,21 @@ export function StoreScreen({
               strokeLinecap="round"
             />
           </svg>
-          <DragGhost kind={illustrateDrag} left={168} top={510} />
+          <DragGhost
+            silhouette={blackout}
+            kind={illustrateDrag}
+            left={168}
+            top={510}
+          />
         </>
       )}
       {drag && (
-        <DragGhost kind={drag.kind} left={drag.x - 60} top={drag.y - 92} />
+        <DragGhost
+          silhouette={blackout}
+          kind={drag.kind}
+          left={drag.x - 60}
+          top={drag.y - 92}
+        />
       )}
 
       {hint && (
@@ -386,6 +405,7 @@ export function StoreScreen({
       {/* Cart fills the space between the shelves/hint and Leave store (736). */}
       <div style={{ position: "absolute", top: 558, left: 18 }}>
         <Basket
+          silhouette={blackout}
           items={basket}
           width={354}
           height={172}
@@ -415,10 +435,12 @@ export function StoreScreen({
 }
 
 function DragGhost({
+  silhouette = false,
   kind,
   left,
   top,
 }: {
+  silhouette?: boolean;
   kind: string;
   left: number;
   top: number;
@@ -435,7 +457,12 @@ function DragGhost({
           filter: "drop-shadow(0 16px 10px rgba(122,78,30,.28))",
         }}
       >
-        <IngredientIcon id={kind} size={100} rotate={-10} />
+        <IngredientIcon
+          silhouette={silhouette}
+          id={kind}
+          size={100}
+          rotate={-10}
+        />
       </div>
       <div
         style={{

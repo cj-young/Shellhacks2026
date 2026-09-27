@@ -7,6 +7,7 @@ export type CursorPoint = {
 };
 
 type CursorPathTrackerProps = {
+  disabled?: boolean;
   /** Called whenever the in-progress path changes, and with [] when it clears. */
   onPointsChange?: (points: CursorPoint[]) => void;
 };
@@ -14,13 +15,23 @@ type CursorPathTrackerProps = {
 /**
  * Draws a temporary trail while a mouse, pen, or touch pointer is held down.
  */
-export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
+export function CursorPathTracker({
+  onPointsChange,
+  disabled = false,
+}: CursorPathTrackerProps) {
   const [points, setPoints] = useState<CursorPoint[]>([]);
   const activePointerId = useRef<number | null>(null);
 
   useEffect(() => {
     onPointsChange?.(points);
   }, [onPointsChange, points]);
+
+  useEffect(() => {
+    if (disabled) {
+      activePointerId.current = null;
+      setPoints([]);
+    }
+  }, [disabled]);
 
   const getPoint = (event: PointerEvent<HTMLDivElement>): CursorPoint => {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -42,7 +53,7 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (activePointerId.current !== null) return;
+    if (disabled || activePointerId.current !== null) return;
 
     activePointerId.current = event.pointerId;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -50,7 +61,7 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerId !== activePointerId.current) return;
+    if (disabled || event.pointerId !== activePointerId.current) return;
     addPoint(event);
   };
 
