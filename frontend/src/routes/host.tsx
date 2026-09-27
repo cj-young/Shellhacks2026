@@ -33,7 +33,6 @@ const CONNECTION_PROBLEMS = ["Connection failed", "Disconnected", "Error"];
 function HostScreen() {
   const [game, setGame] = useState<HostGame | null>(null);
   const [setupError, setSetupError] = useState("");
-  const [joinText, setJoinText] = useState<string | undefined>(undefined);
   const [joinUrl, setJoinUrl] = useState<string | undefined>(undefined);
   const creating = useRef(false);
   const connection = useGameConnection(
@@ -42,8 +41,6 @@ function HostScreen() {
   usePreloadStoreArt();
 
   useEffect(() => {
-    setJoinText(`${window.location.host}/join`);
-
     // Guards against React StrictMode running this effect twice and creating two rooms.
     const create = () => {
       if (creating.current) return;
@@ -127,7 +124,6 @@ function HostScreen() {
       <HostLobbyNew
         roomCode={game?.code ?? "······"}
         players={players}
-        joinText={joinText}
         joinUrl={joinUrl}
         canStart={connection.playerId !== null}
         onStart={startGame}
