@@ -1,27 +1,342 @@
 [
   {
-    "name": "Half-Moon Cookie",
+    "name": "Spaghetti",
     "ingredients": [
       {
-        "id": 0,
+        "id": 4,
+        "count": 1
+      },
+      {
+        "id": 5,
+        "count": 1
+      },
+      {
+        "id": 7,
         "count": 1
       }
     ],
     "stages": [
       {
         "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest.jpg",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {
             "start": { "x": 30, "y": 30 },
-            "end": { "x": 130, "y": 30 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {
+          "4": 1
+        }
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 70, "y": 170 },
             "radius": 20
           },
           {
-            "start": { "x": 130, "y": 30 },
-            "end": { "x": 130, "y": 130 },
+            "start": { "x": 70, "y": 170 },
+            "end": { "x": 110, "y": 30 },
             "radius": 20
+          },
+          {
+            "start": { "x": 110, "y": 30 },
+            "end": { "x": 140, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 140, "y": 170 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {
+          "5": 1
+        }
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 170 },
+            "end": { "x": 170, "y": 170 },
+            "radius": 20
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 170, "y": 70 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 170, "y": 70 },
+            "end": { "x": 30, "y": 110 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 30, "y": 110 },
+            "end": { "x": 170, "y": 140 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 170, "y": 140 },
+            "end": { "x": 30, "y": 170 },
+            "radius": 20
+          }
+        ]
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 30,
+            "direction": "clockwise",
+            "rotations": 3
+          }
+        ]
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 20,
+            "direction": "clockwise",
+            "rotations": 2
+          }
+        ],
+        "ingredientsConsumed": {
+          "7": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "Cheeseburger",
+    "ingredients": [
+      {
+        "id": 3,
+        "count": 1
+      },
+      {
+        "id": 6,
+        "count": 1
+      },
+      {
+        "id": 8,
+        "count": 1
+      },
+      {
+        "id": 9,
+        "count": 1
+      }
+    ],
+    "stages": [
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 40,
+            "direction": "clockwise",
+            "rotations": 5
+          }
+        ],
+        "ingredientsConsumed": {
+          "8": 1
+        }
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 40,
+            "direction": "clockwise",
+            "rotations": 1
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 100, "y": 170 },
+            "end": { "x": 100, "y": 30 },
+            "radius": 30
+          }
+        ]
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 40,
+            "direction": "counterclockwise",
+            "rotations": 1
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 100, "y": 170 },
+            "end": { "x": 100, "y": 30 },
+            "radius": 30
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 100, "y": 100 },
+            "end": { "x": 150, "y": 120 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {
+          "6": 1
+        }
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 70, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 70, "y": 170 },
+            "end": { "x": 110, "y": 30 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 110, "y": 30 },
+            "end": { "x": 140, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 140, "y": 170 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 130, "y": 70 },
+            "end": { "x": 150, "y": 120 },
+            "radius": 10
+          }
+        ],
+        "ingredientsConsumed": {
+          "3": 1,
+          "9": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "Pancakes",
+    "ingredients": [
+      {
+        "id": 0,
+        "count": 1
+      },
+      {
+        "id": 1,
+        "count": 1
+      },
+      {
+        "id": 2,
+        "count": 1
+      }
+    ],
+    "stages": [
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "lines": [
+          {
+            "start": { "x": 100, "y": 125 },
+            "end": { "x": 100, "y": 75 },
+            "radius": 30
           }
         ],
         "ingredientsConsumed": {
@@ -30,209 +345,106 @@
       },
       {
         "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest2.jpg",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 30, "y": 30 },
-            "end": { "x": 30, "y": 130 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 30, "y": 130 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
+            "start": { "x": 100, "y": 125 },
+            "end": { "x": 100, "y": 75 },
+            "radius": 30
           }
         ],
-        "ingredientsConsumed": {}
-      }
-    ]
-  },
-  {
-    "name": "Half-Moon Cookie",
-    "ingredients": [
-      {
-        "id": 0,
-        "count": 1
-      }
-    ],
-    "stages": [
-      {
-        "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest.jpg",
-        "lines": [
-          {
-            "start": { "x": 35, "y": 30 },
-            "end": { "x": 130, "y": 30 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 130, "y": 30 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
-          }
-        ],
-        "ingredientsConsumed": {}
+        "ingredientsConsumed": {
+          "2": 1
+        }
       },
       {
         "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest2.jpg",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 31, "y": 30 },
-            "end": { "x": 30, "y": 130 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 30, "y": 130 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
+            "start": { "x": 150, "y": 90 },
+            "end": { "x": 160, "y": 10 },
+            "radius": 5
           }
         ],
-        "ingredientsConsumed": {}
-      }
-    ]
-  },
-  {
-    "name": "Half-Moon Cookie",
-    "ingredients": [
+        "ingredientsConsumed": {
+          "1": 1
+        }
+      },
       {
-        "id": 0,
-        "count": 1
-      }
-    ],
-    "stages": [
-      {
-        "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest.jpg",
-        "lines": [
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
           {
-            "start": { "x": 32, "y": 30 },
-            "end": { "x": 130, "y": 30 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 130, "y": 30 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 40,
+            "direction": "clockwise",
+            "rotations": 3
           }
-        ],
-        "ingredientsConsumed": {}
+        ]
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 40,
+            "direction": "counterclockwise",
+            "rotations": 3
+          }
+        ]
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 10,
+            "direction": "clockwise",
+            "rotations": 1
+          }
+        ]
       },
       {
         "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest2.jpg",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 33, "y": 30 },
-            "end": { "x": 30, "y": 130 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 30, "y": 130 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
+            "start": { "x": 100, "y": 170 },
+            "end": { "x": 100, "y": 30 },
+            "radius": 30
           }
-        ],
-        "ingredientsConsumed": {}
-      }
-    ]
-  },
-  {
-    "name": "Half-Moon Cookie",
-    "ingredients": [
-      {
-        "id": 0,
-        "count": 1
-      }
-    ],
-    "stages": [
-      {
-        "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest.jpg",
-        "lines": [
-          {
-            "start": { "x": 34, "y": 30 },
-            "end": { "x": 130, "y": 30 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 130, "y": 30 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
-          }
-        ],
-        "ingredientsConsumed": {}
+        ]
       },
       {
         "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest2.jpg",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
         "lines": [
           {
-            "start": { "x": 36, "y": 30 },
-            "end": { "x": 30, "y": 130 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 30, "y": 130 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
+            "start": { "x": 100, "y": 170 },
+            "end": { "x": 100, "y": 30 },
+            "radius": 30
           }
-        ],
-        "ingredientsConsumed": {}
-      }
-    ]
-  },
-  {
-    "name": "Half-Moon Cookie",
-    "ingredients": [
-      {
-        "id": 0,
-        "count": 1
-      }
-    ],
-    "stages": [
-      {
-        "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest.jpg",
-        "lines": [
-          {
-            "start": { "x": 29, "y": 30 },
-            "end": { "x": 130, "y": 30 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 130, "y": 30 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
-          }
-        ],
-        "ingredientsConsumed": {}
-      },
-      {
-        "type": "lines",
-        "timeLimitMs": 30000,
-        "image": "/SlicedBreadTest2.jpg",
-        "lines": [
-          {
-            "start": { "x": 28, "y": 30 },
-            "end": { "x": 30, "y": 130 },
-            "radius": 20
-          },
-          {
-            "start": { "x": 30, "y": 130 },
-            "end": { "x": 130, "y": 130 },
-            "radius": 20
-          }
-        ],
-        "ingredientsConsumed": {}
+        ]
       }
     ]
   }

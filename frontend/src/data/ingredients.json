@@ -3,6 +3,60 @@
     "id": 0,
     "name": "Flour",
     "image": "/FlourTest.webp",
-    "category": "Grain"
+    "category": "Baking"
+  },
+  {
+    "id": 1,
+    "name": "Eggs",
+    "image": "/FlourTest.webp",
+    "category": "Baking"
+  },
+  {
+    "id": 2,
+    "name": "Milk",
+    "image": "/FlourTest.webp",
+    "category": "Dairy"
+  },
+  {
+    "id": 3,
+    "name": "Cheese",
+    "image": "/FlourTest.webp",
+    "category": "Dairy"
+  },
+  {
+    "id": 4,
+    "name": "Garlic",
+    "image": "/FlourTest.webp",
+    "category": "Produce"
+  },
+  {
+    "id": 5,
+    "name": "Tomato",
+    "image": "/FlourTest.webp",
+    "category": "Produce"
+  },
+  {
+    "id": 6,
+    "name": "Lettuce",
+    "image": "/FlourTest.webp",
+    "category": "Produce"
+  },
+  {
+    "id": 7,
+    "name": "Pasta",
+    "image": "/FlourTest.webp",
+    "category": "Dry Goods"
+  },
+  {
+    "id": 8,
+    "name": "Ground Beef",
+    "image": "/FlourTest.webp",
+    "category": "Meat"
+  },
+  {
+    "id": 9,
+    "name": "Burger Buns",
+    "image": "/FlourTest.webp",
+    "category": "Dry Goods"
   }
 ]
