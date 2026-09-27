@@ -74,7 +74,7 @@ export function GestureRecipe({
     : stage.image;
 
   return (
-    <div className="relative w-75 h-75 pointer-events-none flex">
+    <div className="relative h-full w-full overflow-hidden pointer-events-none">
       {stage.backgroundImage && (
         <img
           alt=""
@@ -94,10 +94,9 @@ export function GestureRecipe({
           className="z-50 w-fit h-fit whitespace-nowrap"
           style={{
             ...paper(22, 0),
-            // Centred on the stage's gesture space (0–200px), not the whole box.
             position: "absolute",
-            left: 100,
-            top: 100,
+            left: "50%",
+            top: "50%",
             transform: "translate(-50%, -50%)",
             background: "#2FA84F",
             padding: "4px 16px",

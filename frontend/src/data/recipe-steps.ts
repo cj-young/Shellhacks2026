@@ -124,13 +124,13 @@ export function withStepArt(recipe: Recipe): Recipe {
         ...stage,
         // With final step art (drawn by the phone under the gesture) there's
         // no placeholder scene behind it.
-        backgroundImage: isPlaceholder(stage.backgroundImage)
+        backgroundImage: stage.backgroundImage == "none" ? undefined : isPlaceholder(stage.backgroundImage)
           ? info.art
             ? undefined
             : scene
           : stage.backgroundImage,
         image: isPlaceholder(stage.image) ? undefined : stage.image,
-        finishedImage: isPlaceholder(stage.finishedImage)
+        finishedImage: stage.finishedImage == "none" ? undefined : isPlaceholder(stage.finishedImage)
           ? "/assets/steps/done.svg"
           : stage.finishedImage,
       };

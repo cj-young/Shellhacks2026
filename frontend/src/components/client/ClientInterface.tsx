@@ -505,9 +505,8 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
               All recipes done!
             </div>
           ) : ready && stepRecipe ? (
-            // Stage gestures use 0–200px coordinates from the top-left of the
-            // recipe box, so show that corner and put the finger tracker on the
-            // same origin (as on main). Real pixels: no scaling here.
+            // Artwork fills this box; gestures and the pointer tracker share
+            // its top-left origin, keeping the recipe's pixel coordinates intact.
             <div
               style={{
                 position: "relative",
@@ -519,8 +518,7 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
               }}
             >
               {activeStep?.art && (
-                // Final art for this step, under the gesture and lined up with
-                // its 0–200px space. Each step's art is the dish so far.
+                // Fit each step's artwork inside the same box as the stage.
                 <img
                   key={activeStep.art}
                   src={activeStep.art}
@@ -528,10 +526,11 @@ export function ClientInterface({ connection }: ClientInterfaceProps) {
                   draggable={false}
                   style={{
                     position: "absolute",
-                    left: 0,
-                    top: 0,
-                    width: 200,
-                    height: 200,
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    objectPosition: "center",
                     pointerEvents: "none",
                     animation: "stepArtIn 260ms ease-out both",
                   }}
