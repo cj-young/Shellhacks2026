@@ -1,6 +1,6 @@
 import menu from "./menu.json";
 
-export type Gesture = "chop" | "stir" | "flip" | "plate";
+export type Gesture = "chop" | "stir" | "flip" | "pour" | "scoop" | "plate";
 
 export type Shelf = { id: string; name: string };
 

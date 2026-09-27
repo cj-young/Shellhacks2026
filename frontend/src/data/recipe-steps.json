@@ -1,5 +1,5 @@
 {
-  "_note": "Presentation for backend/src/data/recipes.json, one entry per stage in order, keyed by recipe name (letters only, lowercase). gesture: host card icon (chop|stir|flip|plate). station: placeholder art (board|bowl|pan|pot|plate). art (optional): final picture of the dish at that step, drawn under the gesture instead of the station placeholder. doneArt (optional): picture on \"Success!\" (defaults to the next step's art). background (optional): surface behind the picture, e.g. /assets/steps/board.svg. tool (optional): { src, hotspot: [x, y] fractions, height } utensil that follows the finger. After editing, run: node scripts/generate-step-art.mjs",
+  "_note": "Presentation for backend/src/data/recipes.json, one entry per stage in order, keyed by recipe name (letters only, lowercase). gesture: host card icon (chop|stir|flip|pour|scoop|plate). station: placeholder art (board|bowl|pan|pot|plate). art (optional): final picture of the dish at that step, drawn under the gesture instead of the station placeholder. doneArt (optional): picture on \"Success!\" (defaults to the next step's art). background (optional): surface behind the picture, e.g. /assets/steps/board.svg. tool (optional): { src, hotspot: [x, y] fractions, height } utensil that follows the finger. After editing, run: node scripts/generate-step-art.mjs",
   "spaghettimeatballs": [
     {
       "label": "Roll a meatball",
@@ -156,14 +156,14 @@
   "pancakes": [
     {
       "label": "Pour in the flour",
-      "gesture": "stir",
+      "gesture": "pour",
       "word": "POUR!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-1.png"
     },
     {
       "label": "Pour in the milk",
-      "gesture": "stir",
+      "gesture": "pour",
       "word": "POUR!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-2.png"
@@ -201,7 +201,7 @@
     },
     {
       "label": "Pour a pancake",
-      "gesture": "stir",
+      "gesture": "pour",
       "word": "POUR!",
       "station": "pan",
       "art": "/assets/steps/pancakes/step-6.png"
@@ -224,56 +224,56 @@
   "guacamole": [
     {
       "label": "Slice it open",
-      "gesture": "slice",
+      "gesture": "chop",
       "word": "SLICE!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-1.png"
     },
     {
       "label": "Scoop out the pit",
-      "gesture": "slice",
+      "gesture": "scoop",
       "word": "SCOOP!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-2.png"
     },
     {
       "label": "Slice the stem",
-      "gesture": "slice",
+      "gesture": "chop",
       "word": "SLICE!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-3.png"
     },
     {
       "label": "Slice the bottom",
-      "gesture": "slice",
+      "gesture": "chop",
       "word": "SLICE!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-4.png"
     },
     {
       "label": "Dice the tomato",
-      "gesture": "slice",
+      "gesture": "chop",
       "word": "DICE!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-5.png"
     },
     {
       "label": "Slice the stem",
-      "gesture": "slice",
+      "gesture": "chop",
       "word": "SLICE!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-3.png"
     },
     {
       "label": "Slice the bottom",
-      "gesture": "slice",
+      "gesture": "chop",
       "word": "SLICE!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-4.png"
     },
     {
       "label": "Dice the onion",
-      "gesture": "slice",
+      "gesture": "chop",
       "word": "DICE!",
       "station": "bowl",
       "art": "/assets/steps/pancakes/step-5.png"
@@ -313,7 +313,7 @@
     },
     {
       "label": "Pour the garlic into the pan",
-      "gesture": "stir",
+      "gesture": "pour",
       "word": "POUR!",
       "station": "pan"
     },
