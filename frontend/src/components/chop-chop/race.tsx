@@ -370,18 +370,21 @@ export function PhoneTopBar({
   mood,
   progress,
   score,
+  top = 58,
 }: {
   mood: AvatarMood;
   /** Recipe progress, 0–100. */
   progress: number;
   score: number;
+  /** Distance from the top; 58 leaves room for the design's phone status bar. */
+  top?: number;
 }) {
   const panicked = mood === "panicked";
   return (
     <div
       style={{
         position: "absolute",
-        top: 58,
+        top,
         left: 18,
         right: 18,
         height: 66,

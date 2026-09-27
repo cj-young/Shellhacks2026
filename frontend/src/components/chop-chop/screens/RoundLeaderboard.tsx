@@ -65,7 +65,6 @@ export function RoundLeaderboard({
   }, []);
 
   const s = scale ?? 1;
-  const px = (n: number) => `${n * s}px`;
   const ranked = [...entries].sort((a, b) => b.points - a.points);
   const top = Math.max(1, ...ranked.map((e) => e.points));
   const rankOf = (points: number) =>
@@ -361,18 +360,6 @@ export function RoundLeaderboard({
                     cursor: onNextRound ? "pointer" : undefined,
                   }}
                 >
-                  <span
-                    style={{
-                      position: "absolute",
-                      left: px(44),
-                      top: px(16),
-                      width: px(70),
-                      height: px(14),
-                      borderRadius: px(7),
-                      background: "#fff",
-                      opacity: 0.6,
-                    }}
-                  />
                   Next Round!
                 </div>
               )}

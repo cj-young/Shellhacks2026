@@ -241,15 +241,6 @@ function Brand({ centered }: { centered: boolean }) {
       }}
     >
       <ChopChopLogo width={600} style={{ marginTop: 24 }} />
-      <div
-        style={{
-          marginTop: 20,
-          paddingLeft: centered ? 0 : 30,
-          font: nunito(900, 38),
-        }}
-      >
-        Cook together. Pass it on.
-      </div>
     </div>
   );
 }
@@ -684,18 +675,6 @@ function StartRow({
           opacity: canStart ? 1 : 0.5,
         }}
       >
-        <span
-          style={{
-            position: "absolute",
-            left: 70,
-            top: 18,
-            width: 90,
-            height: 16,
-            borderRadius: 8,
-            background: "#fff",
-            opacity: 0.6,
-          }}
-        />
         <div
           style={{
             ...paper("50%", 6),

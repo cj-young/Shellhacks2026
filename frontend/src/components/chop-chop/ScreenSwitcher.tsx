@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HostLobbyNew } from "./screens/HostLobbyNew";
 import { MobileJoinNew } from "./screens/MobileJoinNew";
 import { MobileWaitingNew } from "./screens/MobileWaitingNew";
 import { HostVictoryNew } from "./screens/HostVictoryNew";
-import { HostRaceStacks } from "./screens/HostRaceStacks";
+import {
+  HostRaceStacks,
+  RaceAnimationsPreview,
+} from "./screens/HostRaceStacks";
 import { TimesUpPreview } from "./screens/TimesUp";
 import {
   LeaderboardPreview,
@@ -58,6 +61,11 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
         id: "host-race-stacks",
         label: "Gameplay · card stacks",
         component: HostRaceStacks,
+      },
+      {
+        id: "host-race-animations",
+        label: "Gameplay · start + card animations",
+        component: RaceAnimationsPreview,
       },
       { id: "host-times-up", label: "Time's up", component: TimesUpPreview },
       {
@@ -180,6 +188,14 @@ const SECTIONS: { title: string; device: Device; screens: Screen[] }[] = [
 
 export function ScreenSwitcher() {
   const [currentScreen, setCurrentScreen] = useState("host-lobby");
+
+  // Open a screen straight from the URL, e.g. /chop-chop-dev#host-race-animations.
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (SECTIONS.some((s) => s.screens.some((screen) => screen.id === id))) {
+      setCurrentScreen(id);
+    }
+  }, []);
 
   const section =
     SECTIONS.find((s) =>

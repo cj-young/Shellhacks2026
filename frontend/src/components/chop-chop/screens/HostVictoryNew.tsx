@@ -477,18 +477,6 @@ export function HostVictoryNew({
             cursor: "pointer",
           }}
         >
-          <span
-            style={{
-              position: "absolute",
-              left: 44,
-              top: 16,
-              width: 70,
-              height: 14,
-              borderRadius: 7,
-              background: "#fff",
-              opacity: 0.6,
-            }}
-          />
           Next Round!
         </div>
       </div>

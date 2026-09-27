@@ -27,7 +27,13 @@ type ServerPlayer = GameConnection["state"]["players"][number];
  * still reflect their cart and inventory.
  */
 function playerStack(
-  player: { id: string; name: string; color: string },
+  player: {
+    id: string;
+    name: string;
+    color: string;
+    character: string | null;
+    points: number;
+  },
   server: ServerPlayer | undefined,
   order: Recipe[],
 ): RaceStack | null {
@@ -38,7 +44,15 @@ function playerStack(
   const owned = (id: number) =>
     (server?.inventory[id] ?? 0) + (server?.cart[id] ?? 0);
   const stageIndex = server?.recipeStageIndex ?? 0;
-  const base = { ...player, recipe: recipeIndex + 1, recipeName: recipe.name };
+  const hasEverything = recipe.ingredients.every(
+    (needed) => (server?.inventory[needed.id] ?? 0) >= needed.count,
+  );
+  const base = {
+    ...player,
+    recipe: recipeIndex + 1,
+    recipeName: recipe.name,
+    allDone: (server?.recipeIndex ?? 0) >= order.length,
+  };
 
   if (server?.interfaceState === "recipe") {
     // Step name and icon for the stage they're on (see data/recipe-steps).
@@ -93,15 +107,20 @@ export function HostInterface({ connection }: HostInterfaceProps) {
     return () => clearTimeout(id);
   }, [results]);
 
+  const serverPlayers = new Map(connection.state.players.map((p) => [p.id, p]));
+  // Live score: the server's player score or the per-recipe tally, whichever is ahead.
+  const livePoints = (id: string) =>
+    Math.max(serverPlayers.get(id)?.score ?? 0, connection.scores[id] ?? 0);
+
   const players = connection.players
     .filter((player) => !player.isHost)
     .map((player, i) => ({
       id: player.id,
       name: player.name,
       color: lobbyColor(player.character, i),
+      character: player.character,
+      points: livePoints(player.id),
     }));
-
-  const serverPlayers = new Map(connection.state.players.map((p) => [p.id, p]));
 
   if (results && showLeaderboard) {
     const scoreFor = (id: string) =>
@@ -145,6 +164,7 @@ export function HostInterface({ connection }: HostInterfaceProps) {
         stacks={demo ? DEMO_STACKS : liveStacks}
         totalRecipes={demo ? 5 : Math.max(1, order.length)}
         secondsLeft={secondsLeft}
+        intro
         banner={
           demo
             ? players.length > 0
