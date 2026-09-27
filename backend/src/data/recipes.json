@@ -1,6 +1,6 @@
 [
   {
-    "name": "Spaghetti",
+    "name": "Spaghetti & Meatballs",
     "ingredients": [
       {
         "id": 4,
@@ -13,9 +13,67 @@
       {
         "id": 7,
         "count": 1
+      },
+      {
+        "id": 8,
+        "count": 1
       }
     ],
     "stages": [
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 60 },
+            "radius": 30,
+            "tolerance": 20,
+            "direction": "clockwise",
+            "rotations": 1
+          }
+        ],
+        "ingredientsConsumed": {
+          "8": 1
+        }
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 50, "y": 100 },
+            "radius": 30,
+            "tolerance": 20,
+            "direction": "clockwise",
+            "rotations": 1
+          }
+        ],
+        "ingredientsConsumed": {
+          "8": 1
+        }
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/FlourTest.webp",
+        "finishedImage": "/SlicedBreadTest2.jpg",
+        "spins": [
+          {
+            "center": { "x": 150, "y": 100 },
+            "radius": 30,
+            "tolerance": 20,
+            "direction": "clockwise",
+            "rotations": 1
+          }
+        ],
+        "ingredientsConsumed": {
+          "8": 1
+        }
+      },
       {
         "type": "lines",
         "backgroundImage": "/SlicedBreadTest.jpg",

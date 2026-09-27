@@ -10,6 +10,8 @@ export type RecipeStage = {
   image?: string;
   /** Optional foreground shown briefly after completing this stage. */
   finishedImage?: string;
+  /** How long the player has on this stage before it fails; null/absent = no limit. */
+  timeLimitMs?: number | null;
   ingredientsConsumed: Record<number, number>;
 } & (
   { type: "lines"; lines: LineType[] } | { type: "spin"; spins: SpinType[] }
@@ -25,8 +27,6 @@ export type SpinType = {
   tolerance: number;
   direction: SpinDirection;
   rotations: number;
-  /** How long the player has on this stage before it fails; null/absent = no limit. */
-  timeLimitMs?: number | null;
 };
 
 export type LineType = {

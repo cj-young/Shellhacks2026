@@ -15,7 +15,6 @@ export function generateRecipeOrder(length: number): Recipe[] {
     stages: recipe.stages.map((stage) => ({
       ...stage,
       ingredientsConsumed: { ...stage.ingredientsConsumed },
-      timeLimitMs: stage.timeLimitMs,
     })),
   })) as Recipe[];
 
