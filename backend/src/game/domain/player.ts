@@ -15,6 +15,8 @@ export interface Player {
   cart: Inventory;
   inventory: Inventory;
   score: number;
+  /** Epoch ms when the current stage's time limit expires; null = no limit. */
+  stageDeadlineAt: number | null;
 }
 
 export function normalizePlayerName(raw: string | undefined): string {

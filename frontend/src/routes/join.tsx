@@ -3,11 +3,25 @@ import { useCallback, useState } from "react";
 import { useGameConnection } from "#/lib/use-game-connection";
 import { ClientInterface } from "#/components/client/ClientInterface";
 
-export const Route = createFileRoute("/join")({ component: JoinScreen });
+export const Route = createFileRoute("/join")({
+  component: JoinScreen,
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = Array.isArray(search.code) ? search.code[0] : search.code;
+    if (typeof raw !== "string") return {};
+
+    const code = raw
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 6);
+    return code ? { code } : {};
+  },
+});
 
 function JoinScreen() {
+  const { code: codeParam } = Route.useSearch();
   const [nameInput, setNameInput] = useState("");
-  const [codeInput, setCodeInput] = useState("");
+  const [codeInput, setCodeInput] = useState(() => codeParam ?? "");
   const [joined, setJoined] = useState<{ code: string; name: string } | null>(
     null,
   );

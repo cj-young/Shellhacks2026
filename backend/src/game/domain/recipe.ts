@@ -25,6 +25,8 @@ export type SpinType = {
   tolerance: number;
   direction: SpinDirection;
   rotations: number;
+  /** How long the player has on this stage before it fails; null/absent = no limit. */
+  timeLimitMs?: number | null;
 };
 
 export type LineType = {

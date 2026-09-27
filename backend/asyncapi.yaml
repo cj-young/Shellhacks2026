@@ -329,6 +329,7 @@ components:
         - recipeIndex
         - recipeStageIndex
         - score
+        - stageDeadlineAt
       properties:
         id:
           type: string
@@ -380,6 +381,17 @@ components:
           description: Current score (may be negative after waste penalties).
           examples:
             - 100
+        stageDeadlineAt:
+          type:
+            - integer
+            - "null"
+          description: |
+            Epoch ms when the current stage's time limit expires, or null. It is only set while
+            the player lacks the current stage's ingredients; once they hold enough it clears.
+            If it elapses while they are still short, their inventory is cleared and the
+            current recipe restarts at stage 0 (no score change).
+          examples:
+            - 1790400532276
     JoinedPayload:
       type: object
       additionalProperties: false

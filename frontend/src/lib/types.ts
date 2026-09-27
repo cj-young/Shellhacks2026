@@ -16,6 +16,7 @@ export type PlayerSummary = {
   recipeIndex: number;
   recipeStageIndex: number;
   score: number;
+  stageDeadlineAt: number | null;
 };
 
 export type GameState = {
@@ -50,6 +51,7 @@ export type SpinType = {
   tolerance: number;
   direction: SpinDirection;
   rotations: number;
+  timeLimitMs?: number | null;
 };
 
 export type LineType = {
