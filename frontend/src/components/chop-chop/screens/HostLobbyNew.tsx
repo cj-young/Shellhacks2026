@@ -143,22 +143,36 @@ function LobbyLayout({
                 // The plate is positioned separately, centred on the one-third line.
                 gridTemplateColumns: `${640 * scale}px minmax(0,1fr) ${640 * scale}px`,
                 gridTemplateRows: "auto 1fr auto",
-                gridTemplateAreas:
-                  '"brand brand side" ". . side" ". start start"',
+                gridTemplateAreas: '"brand brand side" ". . side" ". . start"',
                 columnGap: 40 * scale,
                 rowGap: 30 * scale,
               }),
         }}
       >
         <div
-          style={zoom("brand", { justifySelf: portrait ? "center" : "start" })}
+          style={zoom("brand", {
+            justifySelf: portrait ? "center" : "start",
+            // Logo sits in front of the plate where they overlap.
+            position: "relative",
+            zIndex: 2,
+          })}
         >
-          <Brand centered={portrait} />
+          <Parallax amount={UI_PAN}>
+            <Brand centered={portrait} />
+          </Parallax>
         </div>
         <div
-          style={zoom("side", { justifySelf: "center", alignSelf: "start" })}
+          style={zoom("side", {
+            justifySelf: "center",
+            alignSelf: "start",
+            // Nudged left of its column's centre (design px; zoom scales it).
+            position: "relative",
+            left: portrait ? 0 : SIDE_SHIFT,
+          })}
         >
-          <JoinBadge roomCode={roomCode} joinText={joinText} />
+          <Parallax amount={UI_PAN}>
+            <JoinBadge roomCode={roomCode} joinText={joinText} />
+          </Parallax>
         </div>
         {portrait ? (
           <div
@@ -170,13 +184,15 @@ function LobbyLayout({
             <PlateStage players={players} />
           </div>
         ) : (
-          // Plate is centred on the one-third line, halfway down the screen.
+          // Plate is centred on the one-third line, a little below halfway down,
+          // behind the logo.
           <div
             style={{
               position: "absolute",
               left: "calc(100% / 3)",
-              top: "50%",
+              top: "57%",
               transform: "translate(-50%, -50%)",
+              zIndex: 1,
             }}
           >
             <div style={{ zoom: scale * PLATE_ZOOM }}>
@@ -187,15 +203,20 @@ function LobbyLayout({
         <div
           style={zoom("start", {
             alignSelf: "end",
-            justifySelf: portrait ? "center" : "end",
+            // Centred under the join badge, with the same nudge.
+            justifySelf: "center",
+            position: "relative",
+            left: portrait ? 0 : SIDE_SHIFT,
           })}
         >
-          <StartRow
-            count={players.length}
-            onStart={onStart}
-            canStart={canStart}
-            notice={notice}
-          />
+          <Parallax amount={UI_PAN}>
+            <StartRow
+              count={players.length}
+              onStart={onStart}
+              canStart={canStart}
+              notice={notice}
+            />
+          </Parallax>
         </div>
       </div>
     </>
@@ -351,8 +372,52 @@ function JoinBadge({
 /** How much larger than its 600×520 design size the plate is drawn in landscape. */
 const PLATE_ZOOM = 1.25;
 
-/** Max distance (px, design units) the plate and chefs drift toward the mouse. */
+/**
+ * Mouse parallax depth, back to front: veggie border (6px, in VeggieBackground),
+ * logo and room code (UI_PAN), then the plate and chefs (PLATE_PAN, also scaled
+ * by PLATE_ZOOM). Values are design px, so they scale with the screen.
+ */
+const UI_PAN = 10;
+
+/** Landscape: how far (design px) the join badge and start row sit left of their column centre. */
+const SIDE_SHIFT = -200;
 const PLATE_PAN = 16;
+
+/** Drifts its children toward the mouse by up to `amount` px. */
+function Parallax({
+  amount,
+  children,
+}: {
+  amount: number;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const onMove = (e: MouseEvent) => {
+      const el = ref.current;
+      if (!el) return;
+      const dx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const dy = (e.clientY / window.innerHeight - 0.5) * 2;
+      el.style.transform = `translate(${dx * amount}px, ${dy * amount}px)`;
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [amount]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        transition: "transform 450ms cubic-bezier(.2,.8,.2,1)",
+        willChange: "transform",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 // Fixed 2×2 spots on the 600×520 plate stage (bottom-centre anchor, design px), filled in
 // join order: top-left, top-right, bottom-left, bottom-right.

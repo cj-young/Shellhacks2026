@@ -50,8 +50,8 @@ const CLUSTERS: {
   },
 ];
 
-/** Max distance (px) the clusters drift toward the mouse. */
-const PAN = 12;
+/** Max distance (px) the clusters drift toward the mouse; kept below the lobby's UI and plate so they read as further back. */
+const PAN = 6;
 
 // Sizes use container units so the layout follows this component's box (also inside
 // scaled previews), not the browser window. --u is px per original-image pixel:

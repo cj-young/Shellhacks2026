@@ -153,10 +153,10 @@ export function GameIcon({
 
 const CART_IMAGE = "/assets/cart-empty.png";
 /** Pixel size of the cart art. */
-const CART_W = 614;
-const CART_H = 738;
+const CART_W = 904;
+const CART_H = 1274;
 /** Insets (fraction of the cart art) of the green bed that holds items. */
-const CART_BED = { left: 0.17, right: 0.17, top: 0.08, bottom: 0.21 };
+const CART_BED = { left: 0.24, right: 0.23, top: 0.06, bottom: 0.17 };
 /** Clockwise turn of the cart, in degrees. */
 const CART_TILT = 90;
 
