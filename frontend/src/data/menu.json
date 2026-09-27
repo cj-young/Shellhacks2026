@@ -451,31 +451,52 @@
     {
       "id": "steak-potatoes",
       "name": "Steak & Potatoes",
-      "ingredients": ["steak", "potato", "butter", "garlic"],
+      "ingredients": ["steak", "potato", "garlic"],
       "steps": [
         {
           "gesture": "chop",
           "ingredient": "potato",
-          "label": "Chop potato"
+          "label": "Slice the potato into 4 vertical slices"
+        },
+        {
+          "gesture": "chop",
+          "ingredient": "potato",
+          "label": "Cube the sliced potato"
         },
         {
           "gesture": "chop",
           "ingredient": "garlic",
-          "label": "Chop garlic"
+          "label": "Slice the garlic"
+        },
+        {
+          "gesture": "chop",
+          "ingredient": "garlic",
+          "label": "Dice the garlic"
+        },
+        {
+          "gesture": "stir",
+          "ingredient": "garlic",
+          "label": "Pour the garlic into the pan"
+        },
+        {
+          "gesture": "stir",
+          "ingredient": "steak",
+          "label": "Fry the steak"
         },
         {
           "gesture": "flip",
           "ingredient": "steak",
-          "label": "Flip steak"
+          "label": "Flip the steak"
+        },
+        {
+          "gesture": "stir",
+          "ingredient": "steak",
+          "label": "Fry the other side of the steak"
         },
         {
           "gesture": "flip",
           "ingredient": "steak",
-          "label": "Flip steak"
-        },
-        {
-          "gesture": "plate",
-          "label": "Plate"
+          "label": "Flip the steak again"
         }
       ]
     },
