@@ -50,6 +50,7 @@ interface GameStatePayload {
     name: string;
     cart: Record<string, number>;
     inventory: Record<string, number>;
+    interfaceState: "store" | "recipe";
     recipeIndex: number;
     recipeStageIndex: number;
     score: number;
@@ -532,4 +533,117 @@ test("rejects a start from a non-host player", async () => {
   assert.equal(error.code, "NOT_HOST");
 
   guest.close();
+});
+
+test("broadcasts a player's screen mode to the host and rejects invalid modes", async () => {
+  const game = await gameModule.service.createGame();
+  const host = connectClient(base, { code: game.code, token: game.hostToken });
+  const client = connectClient(base, { code: game.code, name: "Chef" });
+  try {
+    const hostJoined = waitFor<JoinedPayload>(host, "joined");
+    host.connect();
+    await hostJoined;
+    const clientJoined = waitFor<JoinedPayload>(client, "joined");
+    client.connect();
+    const { playerId } = await clientJoined;
+    const initialState = waitFor<GameStatePayload>(host, "update_state");
+    host.emit("start_game");
+    assert.equal(
+      (await initialState).players.find((p) => p.id === playerId)
+        ?.interfaceState,
+      "store",
+    );
+
+    const checkoutState = new Promise<GameStatePayload>((resolve) => {
+      const onState = (state: GameStatePayload) => {
+        if (
+          state.players.find((p) => p.id === playerId)?.interfaceState ===
+          "recipe"
+        ) {
+          host.off("update_state", onState);
+          resolve(state);
+        }
+      };
+      host.on("update_state", onState);
+    });
+    client.emit("purchase_items", [{ id: ITEM_ID, count: 2 }]);
+    client.emit("update_interface_state", "recipe");
+    assert.deepEqual(
+      (await checkoutState).players.find((p) => p.id === playerId)?.inventory,
+      { [ITEM_ID]: 2 },
+    );
+
+    for (const mode of ["recipe", "store", "recipe"] as const) {
+      const updated = waitFor<GameStatePayload>(host, "update_state");
+      client.emit("update_interface_state", mode);
+      const state = await updated;
+      assert.equal(
+        state.players.find((p) => p.id === playerId)?.interfaceState,
+        mode,
+      );
+      assert.equal(
+        state.players.find((p) => p.id !== playerId)?.interfaceState,
+        "store",
+      );
+    }
+    const invalid = waitFor<GameErrorPayload>(client, "game_error");
+    client.emit("update_interface_state", "invalid");
+    assert.equal((await invalid).code, "INVALID_INTERFACE_STATE");
+    const saved = await gameModule.service.getGame(game.code);
+    assert.equal(
+      saved?.state.players.find((p) => p.id === playerId)?.interfaceState,
+      "recipe",
+    );
+  } finally {
+    client.close();
+    host.close();
+  }
+});
+
+test("host receives each player's current stage before the recipe is complete", async () => {
+  const game = await gameModule.service.createGame();
+  const host = connectClient(base, { code: game.code, token: game.hostToken });
+  const client = connectClient(base, { code: game.code, name: "Chef" });
+  try {
+    const hostJoined = waitFor<JoinedPayload>(host, "joined");
+    host.connect();
+    await hostJoined;
+    const clientJoined = waitFor<JoinedPayload>(client, "joined");
+    client.connect();
+    const { playerId } = await clientJoined;
+    const started = waitFor<GameStatePayload>(host, "update_state");
+    const phoneStarted = waitFor<GameStatePayload>(client, "update_state");
+    host.emit("start_game");
+    await Promise.all([started, phoneStarted]);
+    const prep = waitFor<GameStatePayload>(host, "update_state");
+    const phonePrep = waitFor<GameStatePayload>(client, "update_state");
+    client.emit("update_interface_state", "recipe");
+    await Promise.all([prep, phonePrep]);
+
+    const stored = await gameModule.service.getGame(game.code);
+    const stages = stored?.state.recipeOrder[0]?.stages.length ?? 0;
+    assert.ok(stages > 1);
+    for (let completed = 1; completed <= stages; completed += 1) {
+      const hostUpdate = waitFor<GameStatePayload>(host, "update_state");
+      const phoneUpdate = waitFor<GameStatePayload>(client, "update_state");
+      client.emit("finish_stage");
+      const [hostState, phoneState] = await Promise.all([
+        hostUpdate,
+        phoneUpdate,
+      ]);
+      const player = hostState.players.find((entry) => entry.id === playerId);
+      assert.ok(player);
+      assert.equal(player.recipeStageIndex, completed < stages ? completed : 0);
+      assert.equal(player.recipeIndex, completed < stages ? 0 : 1);
+      assert.equal(player.score, completed < stages ? 0 : POINTS_PER_RECIPE);
+      assert.equal(player.interfaceState, "recipe");
+      assert.deepEqual(
+        player,
+        phoneState.players.find((entry) => entry.id === playerId),
+      );
+    }
+  } finally {
+    client.close();
+    host.close();
+  }
 });

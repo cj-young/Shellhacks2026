@@ -1,3 +1,4 @@
+import type { PlayerInterfaceState } from "../../game/domain/player.ts";
 import type { GameState } from "../../game/domain/game.ts";
 import type { PurchaseItem } from "../../game/domain/inventory.ts";
 import type { PlayerSummary } from "./player.ts";
@@ -64,6 +65,7 @@ export interface ClientToServerEvents {
   send_recipe_order: (order: number[]) => void; //order of recipe IDs
   recipe_completed: () => void;
   purchase_items: (items: PurchaseItem[]) => void;
+  update_interface_state: (interfaceState: PlayerInterfaceState) => void;
   update_cart: (items: PurchaseItem[]) => void;
   consume_ingredients: (items: PurchaseItem[]) => void;
   finish_stage: () => void;

@@ -6,6 +6,8 @@ import type { GestureRecipeDefinition } from "./GestureRecipe";
 export type MasterRecipeProps = {
   recipe: GestureRecipeDefinition;
   points: CursorPoint[];
+  /** Stage to resume on mount; later recipe changes still start at stage zero. */
+  initialStageIndex?: number;
   /** Time to show finishedImage before proceeding; unused when it is absent. */
   stageDelayMs?: number;
   /** Called once when every stage in the recipe has been completed. */
@@ -18,6 +20,7 @@ export type MasterRecipeProps = {
 export function MasterRecipe({
   recipe,
   points,
+  initialStageIndex = 0,
   stageDelayMs = 500,
   onCompleteChange,
   onStageChange,
@@ -25,7 +28,7 @@ export function MasterRecipe({
   const recipeKey = useMemo(() => JSON.stringify(recipe), [recipe]);
   const [progress, setProgress] = useState({
     recipeKey,
-    stageIndex: 0,
+    stageIndex: initialStageIndex,
     completedStageIndex: null as number | null,
   });
   const completedRecipeKey = useRef<string | null>(null);

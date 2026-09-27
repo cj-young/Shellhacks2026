@@ -128,6 +128,16 @@ channels:
     messages:
       purchaseItems:
         $ref: '#/components/messages/PurchaseItems'
+  updateInterfaceState:
+    address: update_interface_state
+    title: Update interface state
+    description: |
+      Sets the authenticated player's active phone screen during an active game.
+      Broadcasts update_state with players[].interfaceState so the host can select
+      shopping or prep cards. Invalid values return INVALID_INTERFACE_STATE.
+    messages:
+      updateInterfaceState:
+        $ref: '#/components/messages/UpdateInterfaceState'
   updateCart:
     address: update_cart
     title: Update cart
@@ -228,6 +238,11 @@ operations:
     summary: Receive a purchase request from a player.
     channel:
       $ref: '#/channels/purchaseItems'
+  receiveUpdateInterfaceState:
+    action: receive
+    summary: Receive the player's active store/recipe screen.
+    channel:
+      $ref: '#/channels/updateInterfaceState'
   receiveUpdateCart:
     action: receive
     summary: Receive a client-side cart snapshot from a player.
@@ -290,6 +305,10 @@ components:
       title: Purchase items
       payload:
         $ref: '#/components/schemas/PurchaseItemsPayload'
+    UpdateInterfaceState:
+      name: update_interface_state
+      payload:
+        $ref: '#/components/schemas/PlayerInterfaceState'
     UpdateCart:
       name: update_cart
       title: Update cart
@@ -315,6 +334,10 @@ components:
       payload:
         $ref: '#/components/schemas/GameEndedPayload'
   schemas:
+    PlayerInterfaceState:
+      type: string
+      enum: [store, recipe]
+      description: Active phone screen; initially store, preserved on reconnect.
     PlayerSummary:
       type: object
       additionalProperties: false
@@ -326,6 +349,7 @@ components:
         - connected
         - cart
         - inventory
+        - interfaceState
         - recipeIndex
         - recipeStageIndex
         - score
@@ -366,6 +390,8 @@ components:
             type: integer
           examples:
             - { "0": 2 }
+        interfaceState:
+          $ref: '#/components/schemas/PlayerInterfaceState'
         recipeIndex:
           type: integer
           description: Index of the player's current recipe within the recipe order.
@@ -520,6 +546,7 @@ components:
             - GAME_NOT_ACTIVE
             - PLAYER_NOT_FOUND
             - INVALID_ITEM
+            - INVALID_INTERFACE_STATE
             - INSUFFICIENT_INVENTORY
             - ALREADY_FINISHED
             - NOT_HOST

@@ -61,7 +61,7 @@ export function CursorPathTracker({ onPointsChange }: CursorPathTrackerProps) {
   return (
     <div
       aria-label="Drag anywhere to draw a temporary path"
-      className="absolute z-10 w-full h-full touch-none overflow-hidden bg-transparent"
+      className="absolute inset-0 z-10 w-full h-full touch-none overflow-hidden bg-transparent"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}

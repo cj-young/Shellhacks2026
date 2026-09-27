@@ -44,6 +44,24 @@ export function createSocketIoGateway(
   options: SocketIoGatewayOptions,
 ): SocketIoGateway {
   const { session } = options;
+  // Socket.IO can deliver multiple events before an async state write finishes.
+  // Serialize room mutations so checkout and screen changes cannot overwrite each other.
+  const pendingActions = new Map<string, Promise<void>>();
+  function enqueue(
+    gameCode: string,
+    action: () => Promise<void>,
+  ): Promise<void> {
+    const pending = pendingActions.get(gameCode) ?? Promise.resolve();
+    const next = pending.then(action);
+    const settled = next.catch(() => {});
+    pendingActions.set(gameCode, settled);
+    void settled.then(() => {
+      if (pendingActions.get(gameCode) === settled)
+        pendingActions.delete(gameCode);
+    });
+    return next;
+  }
+
   const timers = new Map<string, NodeJS.Timeout>();
   const stageSweeps = new Map<string, NodeJS.Timeout>();
   const io: GameServer = new Server(options.server, {
@@ -121,8 +139,17 @@ export function createSocketIoGateway(
       }
     }
 
+    function runAction(action: () => Promise<void>): void {
+      void enqueue(gameCode, action).catch(() => {
+        socket.emit("game_error", {
+          code: "INTERNAL_ERROR",
+          message: "Unable to update the game",
+        });
+      });
+    }
+
     socket.on("start_game", () => {
-      void handleStartGame();
+      runAction(handleStartGame);
     });
 
     async function handleStartGame(): Promise<void> {
@@ -163,23 +190,45 @@ export function createSocketIoGateway(
     });
 
     socket.on("purchase_items", (items) => {
-      void handlePurchase(items);
+      runAction(() => handlePurchase(items));
     });
 
+    socket.on("update_interface_state", (interfaceState) => {
+      runAction(() => handleUpdateInterfaceState(interfaceState));
+    });
+
+    async function handleUpdateInterfaceState(
+      interfaceState: unknown,
+    ): Promise<void> {
+      const update = await session.updateInterfaceState({
+        code: gameCode,
+        playerId: player.id,
+        interfaceState,
+      });
+      if (!update.ok) {
+        socket.emit("game_error", {
+          code: update.code,
+          message: update.message,
+        });
+        return;
+      }
+      io.to(room).emit("update_state", update.state);
+    }
+
     socket.on("update_cart", (items) => {
-      void handleUpdateCart(items);
+      runAction(() => handleUpdateCart(items));
     });
 
     socket.on("consume_ingredients", (items) => {
-      void handleConsumeIngredients(items);
+      runAction(() => handleConsumeIngredients(items));
     });
 
     socket.on("finish_stage", () => {
-      void handleFinishStage();
+      runAction(handleFinishStage);
     });
 
     socket.on("select_character", (character) => {
-      void handleSelectCharacter(character);
+      runAction(() => handleSelectCharacter(character));
     });
 
     async function handleSelectCharacter(character: unknown): Promise<void> {
@@ -299,7 +348,7 @@ export function createSocketIoGateway(
     }
 
     socket.on("disconnect", () => {
-      void handleDisconnect();
+      runAction(handleDisconnect);
     });
 
     async function handleDisconnect(): Promise<void> {
@@ -318,7 +367,7 @@ export function createSocketIoGateway(
 
     const expiry = setTimeout(
       () => {
-        void finishRound(gameCode);
+        void enqueue(gameCode, () => finishRound(gameCode));
       },
       Math.max(0, roundEndsAt - Date.now()),
     );
@@ -355,7 +404,7 @@ export function createSocketIoGateway(
   function startStageSweep(gameCode: string): void {
     stopStageSweep(gameCode);
     const sweep = setInterval(() => {
-      void checkStages(gameCode);
+      void enqueue(gameCode, () => checkStages(gameCode));
     }, options.stageSweepIntervalMs);
     sweep.unref();
     stageSweeps.set(gameCode, sweep);

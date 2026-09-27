@@ -36,6 +36,8 @@ function makeGame(overrides: Partial<Player> = {}): Game {
     reconnectToken: "token",
     joinedAt: 0,
     connected: true,
+    character: null,
+    interfaceState: "store",
     recipeIndex: 0,
     recipeStageIndex: 0,
     cart: {},
@@ -907,4 +909,47 @@ test("expireStages clears the deadline instead of resetting when items are held"
   const player = result.game.state.players[0];
   assert.deepEqual(player?.inventory, { 0: 2 });
   assert.equal(player?.stageDeadlineAt, null);
+});
+
+test("interface state persists on reconnect and requires an active game", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Chef" });
+  assert.ok(joined.ok);
+  assert.equal(joined.player.interfaceState, "store");
+  assert.deepEqual(
+    await service.updateInterfaceState(game.code, joined.player.id, "recipe"),
+    {
+      ok: false,
+      code: "GAME_NOT_ACTIVE",
+    },
+  );
+  await service.startGame(game.code);
+  assert.deepEqual(
+    await service.updateInterfaceState(game.code, "missing", "recipe"),
+    {
+      ok: false,
+      code: "PLAYER_NOT_FOUND",
+    },
+  );
+  const updated = await service.updateInterfaceState(
+    game.code,
+    joined.player.id,
+    "recipe",
+  );
+  assert.ok(updated.ok);
+  await service.markDisconnected(game.code, joined.player.id);
+  const resumed = await service.joinPlayer(game.code, {
+    reconnectToken: joined.player.reconnectToken,
+  });
+  assert.ok(resumed.ok);
+  assert.equal(resumed.player.interfaceState, "recipe");
+  await service.endRound(game.code);
+  assert.deepEqual(
+    await service.updateInterfaceState(game.code, joined.player.id, "store"),
+    {
+      ok: false,
+      code: "GAME_NOT_ACTIVE",
+    },
+  );
 });

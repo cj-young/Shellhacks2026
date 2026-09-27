@@ -5,6 +5,8 @@ export function MakeEmptyState() {
   } as GameState;
 }
 
+export type PlayerInterfaceState = "store" | "recipe";
+
 export type PlayerSummary = {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ export type PlayerSummary = {
   character: string | null;
   cart: Record<number, number>;
   inventory: Record<number, number>;
+  interfaceState: PlayerInterfaceState;
   recipeIndex: number;
   recipeStageIndex: number;
   score: number;

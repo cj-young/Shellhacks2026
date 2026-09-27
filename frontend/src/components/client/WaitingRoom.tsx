@@ -292,6 +292,7 @@ const PREVIEW_PLAYERS = [
   connected: true,
   cart: {},
   inventory: {},
+  interfaceState: "store",
   recipeIndex: 0,
   recipeStageIndex: 0,
   score: 0,

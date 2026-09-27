@@ -96,6 +96,17 @@ export type UpdateCartResult =
         | "INVALID_ITEM";
     };
 
+export type UpdateInterfaceStateResult =
+  | { ok: true; game: Game }
+  | {
+      ok: false;
+      code:
+        | "GAME_NOT_FOUND"
+        | "GAME_NOT_ACTIVE"
+        | "PLAYER_NOT_FOUND"
+        | "INVALID_INTERFACE_STATE";
+    };
+
 export type FinishStageResult =
   | { ok: true; game: Game }
   | {
@@ -189,6 +200,7 @@ export class GameService {
       connected: true,
       character: null,
 
+      interfaceState: "store",
       recipeIndex: 0,
       recipeStageIndex: 0,
       cart: {},
@@ -354,6 +366,30 @@ export class GameService {
     await this.#store.save(next);
 
     return { ok: true, game: next, player: updated };
+  }
+
+  async updateInterfaceState(
+    code: string,
+    playerId: string,
+    interfaceState: unknown,
+  ): Promise<UpdateInterfaceStateResult> {
+    const game = await this.#store.get(normalizeGameCode(code));
+    if (!game) return { ok: false, code: "GAME_NOT_FOUND" };
+    if (game.status !== "active") return { ok: false, code: "GAME_NOT_ACTIVE" };
+    if (!game.state.players.some((player) => player.id === playerId)) {
+      return { ok: false, code: "PLAYER_NOT_FOUND" };
+    }
+    if (interfaceState !== "store" && interfaceState !== "recipe") {
+      return { ok: false, code: "INVALID_INTERFACE_STATE" };
+    }
+    const next = this.#withPlayers(
+      game,
+      game.state.players.map((player) =>
+        player.id === playerId ? { ...player, interfaceState } : player,
+      ),
+    );
+    await this.#store.save(next);
+    return { ok: true, game: next };
   }
 
   async updateCart(

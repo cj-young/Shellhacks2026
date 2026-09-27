@@ -252,6 +252,30 @@ export class GameSession {
     return { ok: true, player: toPlayerSummary(result.player) };
   }
 
+  async updateInterfaceState(input: {
+    code: string;
+    playerId: string;
+    interfaceState: unknown;
+  }): Promise<PurchaseResult> {
+    const result = await this.#gameService.updateInterfaceState(
+      input.code,
+      input.playerId,
+      input.interfaceState,
+    );
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message: PURCHASE_MESSAGES[result.code] ?? "Invalid interface state",
+      };
+    }
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+    };
+  }
+
   async updateCart(input: UpdateCartInput): Promise<UpdateCartResult> {
     const result = await this.#gameService.updateCart(
       input.code,
