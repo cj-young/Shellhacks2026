@@ -1,13 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useWebHaptics } from "web-haptics/react";
 import type { CursorPoint } from "./CursorPathTracker";
 import { GestureRecipe } from "./GestureRecipe";
 import type { GestureRecipeDefinition } from "./GestureRecipe";
-
-/** Short tap given for each recipe stage. */
-const STAGE_HAPTIC = 40;
-/** Two-tap "success" given when a recipe's final stage is completed. */
-const RECIPE_HAPTIC = "success";
 
 export type MasterRecipeProps = {
   /** Freeze gesture recognition and stage advancement without losing progress. */
@@ -41,9 +35,6 @@ export function MasterRecipe({
     completedStageIndex: null as number | null,
   });
   const completedRecipeKey = useRef<string | null>(null);
-  // Tracks the last stage that got a haptic, so it fires once per stage.
-  const hapticFor = useRef<string | null>(null);
-  const { trigger } = useWebHaptics();
 
   // A new recipe must begin at stage zero immediately, before effects run.
   const currentProgress =
@@ -112,14 +103,6 @@ export function MasterRecipe({
       }
       onMatchChange={(matches) => {
         if (paused || !matches) return;
-
-        const stageKey = `${recipeKey}:${currentProgress.stageIndex}`;
-        if (hapticFor.current !== stageKey) {
-          hapticFor.current = stageKey;
-          const isFinalStage =
-            currentProgress.stageIndex >= recipe.stages.length - 1;
-          void trigger(isFinalStage ? RECIPE_HAPTIC : STAGE_HAPTIC);
-        }
 
         setProgress((current) =>
           current.recipeKey === recipeKey &&
