@@ -15,9 +15,9 @@ import { iconIdFor } from "#/components/client/Store";
 const TIMES_UP_MS = 3000;
 const SHOP_ROTATIONS = [-6, 5, -4, 6];
 
-// Same lookup as the team's original host screen: recipe ingredient ids index into ingredients.json.
+// Recipe ingredients reference ingredients.json by id (same as the team's host screen).
 const ingredientById = (id: number): Ingredient | undefined =>
-  ingredients.at(id);
+  ingredients.find((entry) => entry.id === id);
 
 type ServerPlayer = GameConnection["state"]["players"][number];
 

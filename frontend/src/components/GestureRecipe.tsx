@@ -1,18 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CursorPoint } from "./CursorPathTracker";
 import { LineTarget } from "./LineTarget";
+import { SpinGesture } from "./SpinGesture";
+import type { LineType, RecipeStage, SpinType } from "../lib/types";
 
 import { paper } from "#/components/chop-chop/paper";
-export type GestureRecipeLine = {
-  start: CursorPoint;
-  end: CursorPoint;
-  radius: number;
-};
-
-export type GestureRecipeStage = {
-  image?: string;
-  lines: GestureRecipeLine[];
-};
+export type GestureRecipeLine = LineType;
+export type GestureRecipeStage = Omit<RecipeStage, "ingredientsConsumed"> &
+  ({ type: "lines"; lines: LineType[] } | { type: "spin"; spins: SpinType[] });
 
 /** Shape of one recipe entry in data/recipes.json. */
 export type GestureRecipeDefinition = {
@@ -23,63 +18,78 @@ export type GestureRecipeDefinition = {
 export type GestureRecipeProps = {
   stage: GestureRecipeStage;
   points: CursorPoint[];
-  /** True only while every line in this stage has been matched. */
+  /** Holds the finished appearance while the parent waits to advance. */
+  completed?: boolean;
+  /** True only while every target in this stage has been matched. */
   onMatchChange?: (matches: boolean) => void;
 };
 
 type MatchState = {
   stageKey: string;
-  lines: boolean[];
+  targets: boolean[];
 };
 
 export function GestureRecipe({
   stage,
   points,
+  completed = false,
   onMatchChange,
 }: GestureRecipeProps) {
   const stageKey = useMemo(() => JSON.stringify(stage), [stage]);
-  const stageLines = stage.lines;
+  const targetCount =
+    stage.type === "spin" ? stage.spins.length : stage.lines.length;
   const [matchState, setMatchState] = useState<MatchState>({
     stageKey,
-    lines: Array(stageLines.length).fill(false),
+    targets: Array(targetCount).fill(false),
   });
 
   const matches =
-    stageLines.length > 0 &&
+    targetCount > 0 &&
     matchState.stageKey === stageKey &&
-    matchState.lines.length === stageLines.length &&
-    matchState.lines.every(Boolean);
+    matchState.targets.length === targetCount &&
+    matchState.targets.every(Boolean);
 
   useEffect(() => {
     onMatchChange?.(matches);
   }, [matches, onMatchChange]);
 
-  const updateLineMatch = (index: number, lineMatches: boolean) => {
+  const updateTargetMatch = (index: number, targetMatches: boolean) => {
     setMatchState((currentState) => {
       const currentMatches =
         currentState.stageKey === stageKey
-          ? currentState.lines
-          : Array(stageLines.length).fill(false);
+          ? currentState.targets
+          : Array(targetCount).fill(false);
 
-      if (currentMatches[index] === lineMatches) return currentState;
+      if (currentMatches[index] === targetMatches) return currentState;
 
       const nextMatches = [...currentMatches];
-      nextMatches[index] = lineMatches;
+      nextMatches[index] = targetMatches;
 
-      return { stageKey, lines: nextMatches };
+      return { stageKey, targets: nextMatches };
     });
   };
 
+  const foregroundImage = completed
+    ? stage.finishedImage || stage.image
+    : stage.image;
+
   return (
     <div className="relative w-75 h-75 pointer-events-none flex">
-      {stage.image && (
+      {stage.backgroundImage && (
         <img
           alt=""
           className="absolute inset-0 h-full w-full object-contain"
-          src={stage.image}
+          src={stage.backgroundImage}
         />
       )}
-      {matches && (
+      {foregroundImage && (
+        <img
+          alt=""
+          className="absolute inset-0 m-auto h-[70%] w-[70%] object-contain"
+          src={foregroundImage}
+        />
+      )}
+      {(completed || matches) && (
         <p
           className="absolute top-0 left-0 bottom-0 right-0 m-auto w-fit h-fit z-50"
           style={{
@@ -93,17 +103,29 @@ export function GestureRecipe({
           Success!
         </p>
       )}
-      {stageLines.map((line, index) => (
-        <LineTarget
-          key={`${stageKey}:${index}`}
-          allowStartOutsideTarget
-          end={line.end}
-          onMatchChange={(lineMatches) => updateLineMatch(index, lineMatches)}
-          origin={line.start}
-          points={points}
-          radius={line.radius}
-        />
-      ))}
+      {completed
+        ? null
+        : stage.type === "spin"
+          ? stage.spins.map((spin, index) => (
+              <SpinGesture
+                key={`${stageKey}:${index}`}
+                {...spin}
+                allowStartOutsideTarget
+                points={points}
+                onMatchChange={(matches) => updateTargetMatch(index, matches)}
+              />
+            ))
+          : stage.lines.map((line, index) => (
+              <LineTarget
+                key={`${stageKey}:${index}`}
+                allowStartOutsideTarget
+                end={line.end}
+                onMatchChange={(matches) => updateTargetMatch(index, matches)}
+                origin={line.start}
+                points={points}
+                radius={line.radius}
+              />
+            ))}
     </div>
   );
 }

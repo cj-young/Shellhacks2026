@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { VeggieBackground } from "../VeggieBackground";
 import type React from "react";
 import { PLATE_IMAGE, characterImage, getCharacter } from "#/data/characters";
@@ -53,6 +54,8 @@ interface HostLobbyProps {
   players?: LobbyPlayer[];
   /** Shown on the badge's lower arc as "OR VISIT …". */
   joinText?: string;
+  /** Link encoded in the QR code; the badge shows a placeholder without it. */
+  joinUrl?: string;
   onStart?: () => void;
   canStart?: boolean;
   notice?: string;
@@ -106,6 +109,7 @@ function LobbyLayout({
   roomCode = "YUMI",
   players = MOCK_PLAYERS,
   joinText = DEFAULT_JOIN_TEXT,
+  joinUrl,
   onStart,
   canStart = true,
   notice,
@@ -171,7 +175,11 @@ function LobbyLayout({
           })}
         >
           <Parallax amount={UI_PAN}>
-            <JoinBadge roomCode={roomCode} joinText={joinText} />
+            <JoinBadge
+              roomCode={roomCode}
+              joinText={joinText}
+              joinUrl={joinUrl}
+            />
           </Parallax>
         </div>
         {portrait ? (
@@ -249,9 +257,11 @@ function Brand({ centered }: { centered: boolean }) {
 function JoinBadge({
   roomCode,
   joinText,
+  joinUrl,
 }: {
   roomCode: string;
   joinText: string;
+  joinUrl?: string;
 }) {
   const arcText = `OR VISIT ${joinText.toUpperCase()}`;
   const arcFontSize = Math.min(
@@ -321,20 +331,30 @@ function JoinBadge({
             justifyContent: "center",
           }}
         >
-          <div
-            style={{
-              width: 220,
-              height: 220,
-              borderRadius: 16,
-              background: `repeating-linear-gradient(45deg,${DOT} 0 10px,#fff 10px 20px)`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              font: "700 18px ui-monospace,monospace",
-            }}
-          >
-            QR code
-          </div>
+          {joinUrl ? (
+            <QRCodeSVG
+              value={joinUrl}
+              size={220}
+              bgColor="#ffffff"
+              fgColor={INK}
+              title="Scan to join"
+            />
+          ) : (
+            <div
+              style={{
+                width: 220,
+                height: 220,
+                borderRadius: 16,
+                background: `repeating-linear-gradient(45deg,${DOT} 0 10px,#fff 10px 20px)`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                font: "700 18px ui-monospace,monospace",
+              }}
+            >
+              QR code
+            </div>
+          )}
         </div>
       </div>
 

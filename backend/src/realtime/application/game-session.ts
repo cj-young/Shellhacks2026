@@ -85,6 +85,14 @@ export interface FinishStageInput {
   playerId: string;
 }
 
+export type ExpireStagesResult =
+  | { ok: true; gameCode: string; state: ClientGameState; changed: boolean }
+  | { ok: false; code: string; message: string };
+
+export interface ExpireStagesInput {
+  code: string;
+}
+
 const JOIN_MESSAGES: Record<string, string> = {
   GAME_NOT_FOUND: "No game found for that code",
   GAME_STARTED: "This game has already started",
@@ -121,6 +129,11 @@ const FINISH_MESSAGES: Record<string, string> = {
   GAME_NOT_ACTIVE: "The game is not active",
   PLAYER_NOT_FOUND: "Player not found in this game",
   ALREADY_FINISHED: "This player has already finished all recipes",
+};
+
+const EXPIRE_MESSAGES: Record<string, string> = {
+  GAME_NOT_FOUND: "No game found for that code",
+  GAME_NOT_ACTIVE: "The game is not active",
 };
 
 export class GameSession {
@@ -303,6 +316,25 @@ export class GameSession {
       ok: true,
       gameCode: result.game.code,
       state: toClientGameState(result.game.state),
+    };
+  }
+
+  async expireStages(input: ExpireStagesInput): Promise<ExpireStagesResult> {
+    const result = await this.#gameService.expireStages(input.code);
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message: EXPIRE_MESSAGES[result.code] ?? "Unable to expire stages",
+      };
+    }
+
+    return {
+      ok: true,
+      gameCode: result.game.code,
+      state: toClientGameState(result.game.state),
+      changed: result.changed,
     };
   }
 

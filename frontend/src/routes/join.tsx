@@ -17,7 +17,20 @@ import {
 } from "#/components/chop-chop/design";
 
 import { paper } from "#/components/chop-chop/paper";
-export const Route = createFileRoute("/join")({ component: JoinScreen });
+export const Route = createFileRoute("/join")({
+  component: JoinScreen,
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = Array.isArray(search.code) ? search.code[0] : search.code;
+    if (typeof raw !== "string") return {};
+
+    const code = raw
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 6);
+    return code ? { code } : {};
+  },
+});
 
 const CODE_LENGTH = 6;
 
@@ -35,8 +48,9 @@ const focusRing = (focused: boolean): React.CSSProperties => ({
 });
 
 function JoinScreen() {
+  const { code: codeParam } = Route.useSearch();
   const [nameInput, setNameInput] = useState("");
-  const [codeInput, setCodeInput] = useState("");
+  const [codeInput, setCodeInput] = useState(() => codeParam ?? "");
   const [codeFocused, setCodeFocused] = useState(false);
   const [nameFocused, setNameFocused] = useState(false);
   const [joined, setJoined] = useState<{ code: string; name: string } | null>(

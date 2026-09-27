@@ -1,4 +1,5 @@
 import type { Inventory } from "./inventory.ts";
+import type { Sabotage } from "./sabotage.ts";
 
 export const MAX_PLAYER_NAME_LENGTH = 20;
 
@@ -24,6 +25,9 @@ export interface Player {
   cart: Inventory;
   inventory: Inventory;
   score: number;
+  /** Epoch ms when the current stage's time limit expires; null = no limit. */
+  stageDeadlineAt: number | null;
+  sabotages: Sabotage[];
 }
 
 export function normalizePlayerName(raw: string | undefined): string {

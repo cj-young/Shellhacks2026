@@ -1,6 +1,8 @@
 import ingredients from "./data/ingredients.json" with { type: "json" };
 import recipes from "./data/recipes.json" with { type: "json" };
+import sabotageDefinitions from "./data/sabotages.json" with { type: "json" };
 import type { Recipe } from "./game/domain/recipe.ts";
+import type { SabotageDefinition, SabotageId } from "./game/domain/sabotage.ts";
 
 export function getRandomIntInclusive(min: number, max: number) {
   min = Math.ceil(min);
@@ -13,9 +15,7 @@ export function generateRecipeOrder(length: number): Recipe[] {
     name: recipe.name,
     ingredients: recipe.ingredients,
     stages: recipe.stages.map((stage) => ({
-      type: stage.type,
-      image: stage.image,
-      lines: stage.lines,
+      ...stage,
       ingredientsConsumed: { ...stage.ingredientsConsumed },
     })),
   })) as Recipe[];
@@ -34,4 +34,14 @@ export function generateRecipeOrder(length: number): Recipe[] {
 /** Ingredient ids are positional indexes into the ingredients catalogue. */
 export function isKnownIngredientId(id: number): boolean {
   return Number.isInteger(id) && !!ingredients.find((v) => v.id == id);
+}
+
+export function listSabotageDefinitions(): SabotageDefinition[] {
+  return sabotageDefinitions as SabotageDefinition[];
+}
+
+export function getSabotageDefinition(
+  id: SabotageId,
+): SabotageDefinition | undefined {
+  return listSabotageDefinitions().find((definition) => definition.id === id);
 }

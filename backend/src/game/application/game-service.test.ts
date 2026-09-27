@@ -3,6 +3,8 @@ import { test } from "node:test";
 
 import ingredients from "../../data/ingredients.json" with { type: "json" };
 import type { Game } from "../domain/game.ts";
+import type { Player } from "../domain/player.ts";
+import type { Recipe } from "../domain/recipe.ts";
 import { InMemoryGameStore } from "../infrastructure/in-memory-game-store.ts";
 import type { GameStore } from "../ports/game-store.ts";
 import {
@@ -13,6 +15,67 @@ import {
 } from "./game-service.ts";
 
 const ITEM_ID = ingredients[0].id;
+
+function makeGame(overrides: Partial<Player> = {}): Game {
+  const recipe: Recipe = {
+    name: "Test",
+    ingredients: [],
+    stages: [
+      {
+        type: "lines",
+        lines: [],
+        ingredientsConsumed: { 0: 2 },
+        timeLimitMs: 1_000,
+      },
+    ],
+  };
+  const player: Player = {
+    id: "player-1",
+    name: "Ada",
+    isHost: false,
+    reconnectToken: "token",
+    joinedAt: 0,
+    connected: true,
+    recipeIndex: 0,
+    recipeStageIndex: 0,
+    cart: {},
+    inventory: {},
+    score: 0,
+    stageDeadlineAt: null,
+    sabotages: [],
+    ...overrides,
+  };
+  return {
+    code: "TEST01",
+    hostToken: "host",
+    status: "active",
+    createdAt: 0,
+    state: {
+      recipeOrder: [recipe],
+      players: [player],
+      roundStartedAt: 0,
+      roundEndsAt: 1_000_000,
+    },
+  };
+}
+
+function mutableStore(initial: Game): GameStore {
+  let current = initial;
+  return {
+    async createIfAbsent(): Promise<boolean> {
+      return false;
+    },
+    async get(): Promise<Game | undefined> {
+      return current;
+    },
+    async save(next: Game): Promise<void> {
+      current = next;
+    },
+    async delete(): Promise<boolean> {
+      return false;
+    },
+  };
+}
 
 test("createGame stores the game and getGame finds it case-insensitively", async () => {
   const service = new GameService(new InMemoryGameStore());
@@ -138,6 +201,7 @@ test("joinPlayer creates and persists a player, resolving the host", async () =>
   assert.equal(guest.player.name, "Player");
   assert.ok(host.player.reconnectToken.length > 0);
   assert.notEqual(host.player.reconnectToken, guest.player.reconnectToken);
+  assert.deepEqual(host.player.sabotages, []);
   assert.equal((await service.getGame(game.code))?.state.players.length, 2);
 });
 
@@ -653,4 +717,194 @@ test("selectCharacter rejects unknown chefs, the host, and picks after start", a
     await service.selectCharacter(game.code, ada.player.id, "cow"),
     { ok: false, code: "GAME_STARTED" },
   );
+});
+
+test("startGame arms each player's stage deadline", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+
+  const result = await service.startGame(game.code, { durationMs: 60_000 });
+  if (!result.ok) {
+    assert.fail("expected start to succeed");
+  }
+
+  const state = result.game.state;
+  const stage = state.recipeOrder[0]?.stages[0];
+  const missingNow = Object.entries(stage?.ingredientsConsumed ?? {}).some(
+    ([, count]) => count > 0,
+  );
+  const limit = stage?.timeLimitMs ?? null;
+  const expected =
+    missingNow && limit !== null ? (state.roundStartedAt ?? 0) + limit : null;
+  assert.equal(state.players[0]?.stageDeadlineAt, expected);
+});
+
+test("checkout and consuming clear the stage deadline", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  await service.addItemsToInventory(game.code, joined.player.id, [
+    { id: ITEM_ID, count: 1 },
+  ]);
+  assert.equal(
+    (await service.getGame(game.code))?.state.players[0]?.stageDeadlineAt,
+    null,
+  );
+
+  await service.consumeItemsFromInventory(game.code, joined.player.id, [
+    { id: ITEM_ID, count: 1 },
+  ]);
+  assert.equal(
+    (await service.getGame(game.code))?.state.players[0]?.stageDeadlineAt,
+    null,
+  );
+});
+
+test("finishStage arms the next stage's deadline", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  const result = await service.finishStage(game.code, joined.player.id);
+
+  if (!result.ok) {
+    assert.fail("expected finish to succeed");
+  }
+  const player = result.game.state.players[0];
+  const stage =
+    result.game.state.recipeOrder[player.recipeIndex]?.stages[
+      player.recipeStageIndex
+    ];
+  const missingNow = Object.entries(stage?.ingredientsConsumed ?? {}).some(
+    ([, count]) => count > 0,
+  );
+  if (missingNow && stage?.timeLimitMs != null) {
+    assert.equal(typeof player?.stageDeadlineAt, "number");
+  } else {
+    assert.equal(player?.stageDeadlineAt, null);
+  }
+});
+
+test("expireStages does nothing before the deadline", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+
+  const result = await service.expireStages(game.code, Date.now());
+
+  if (!result.ok) {
+    assert.fail("expected expire to succeed");
+  }
+  assert.equal(result.changed, false);
+});
+
+test("expireStages rejects a lobby game", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+
+  const result = await service.expireStages(game.code);
+
+  assert.equal(result.ok, false);
+  if (result.ok) {
+    assert.fail("expected expire to fail");
+  }
+  assert.equal(result.code, "GAME_NOT_ACTIVE");
+});
+
+test("does not arm a deadline when the player already holds the stage's items", async () => {
+  const service = new GameService(new InMemoryGameStore());
+  const game = await service.createGame();
+  const joined = await service.joinPlayer(game.code, { name: "Ada" });
+  if (!joined.ok) {
+    assert.fail("expected the join to succeed");
+  }
+  await service.startGame(game.code);
+  await service.addItemsToInventory(game.code, joined.player.id, [
+    { id: ITEM_ID, count: 2 },
+  ]);
+
+  const advance = await service.finishStage(game.code, joined.player.id);
+  if (!advance.ok) {
+    assert.fail("expected finish to succeed");
+  }
+  assert.equal(advance.game.state.players[0]?.stageDeadlineAt, null);
+
+  const expire = await service.expireStages(game.code, Date.now() + 10_000_000);
+  if (!expire.ok) {
+    assert.fail("expected expire to succeed");
+  }
+  assert.equal(expire.changed, false);
+});
+
+test("checkout keeps the deadline while short and clears it once satisfied", async () => {
+  const store = mutableStore(makeGame({ stageDeadlineAt: 5_000 }));
+  const service = new GameService(store);
+
+  const partial = await service.addItemsToInventory("TEST01", "player-1", [
+    { id: 0, count: 1 },
+  ]);
+  if (!partial.ok) {
+    assert.fail("expected the purchase to succeed");
+  }
+  assert.equal(partial.game.state.players[0]?.stageDeadlineAt, 5_000);
+
+  const complete = await service.addItemsToInventory("TEST01", "player-1", [
+    { id: 0, count: 1 },
+  ]);
+  if (!complete.ok) {
+    assert.fail("expected the purchase to succeed");
+  }
+  assert.equal(complete.game.state.players[0]?.stageDeadlineAt, null);
+});
+
+test("expireStages clears inventory and restarts the recipe when missing", async () => {
+  const store = mutableStore(
+    makeGame({ inventory: { 0: 1 }, stageDeadlineAt: 5_000 }),
+  );
+  const service = new GameService(store);
+
+  const result = await service.expireStages("TEST01", 6_000);
+
+  if (!result.ok) {
+    assert.fail("expected expire to succeed");
+  }
+  assert.equal(result.changed, true);
+  const player = result.game.state.players[0];
+  assert.equal(player?.recipeStageIndex, 0);
+  assert.deepEqual(player?.inventory, {});
+  assert.equal(player?.stageDeadlineAt, 7_000);
+});
+
+test("expireStages clears the deadline instead of resetting when items are held", async () => {
+  const store = mutableStore(
+    makeGame({ inventory: { 0: 2 }, stageDeadlineAt: 5_000 }),
+  );
+  const service = new GameService(store);
+
+  const result = await service.expireStages("TEST01", 6_000);
+
+  if (!result.ok) {
+    assert.fail("expected expire to succeed");
+  }
+  assert.equal(result.changed, true);
+  const player = result.game.state.players[0];
+  assert.deepEqual(player?.inventory, { 0: 2 });
+  assert.equal(player?.stageDeadlineAt, null);
 });

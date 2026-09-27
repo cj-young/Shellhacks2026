@@ -18,6 +18,7 @@ function HostScreen() {
   const [game, setGame] = useState<HostGame | null>(null);
   const [setupError, setSetupError] = useState("");
   const [joinText, setJoinText] = useState<string | undefined>(undefined);
+  const [joinUrl, setJoinUrl] = useState<string | undefined>(undefined);
   const creating = useRef(false);
   const connection = useGameConnection(
     game ? { code: game.code, token: game.hostToken, name: game.name } : null,
@@ -42,6 +43,15 @@ function HostScreen() {
         );
       });
   }, []);
+
+  // The QR code opens the join page with this room's code filled in.
+  useEffect(() => {
+    setJoinUrl(
+      game
+        ? new URL(`/join?code=${game.code}`, window.location.origin).toString()
+        : undefined,
+    );
+  }, [game]);
 
   const startGame = useCallback(() => {
     connection.socketRef.current?.emit("start_game");
@@ -74,6 +84,7 @@ function HostScreen() {
         roomCode={game?.code ?? "······"}
         players={players}
         joinText={joinText}
+        joinUrl={joinUrl}
         canStart={connection.playerId !== null}
         onStart={startGame}
         notice={notice}
