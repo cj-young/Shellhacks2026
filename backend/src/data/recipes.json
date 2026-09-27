@@ -68,7 +68,6 @@
           }
         ]
       },
-      ,
       {
         "type": "spin",
         "backgroundImage": "/assets/steps/pan.svg",
@@ -511,6 +510,181 @@
             "start": { "x": 100, "y": 170 },
             "end": { "x": 100, "y": 30 },
             "radius": 30
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Guacamole",
+    "ingredients": [
+      {
+        "id": 5,
+        "count": 1
+      },
+      {
+        "id": 10,
+        "count": 1
+      },
+      {
+        "id": 11,
+        "count": 1
+      }
+    ],
+    "stages": [
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/steps/guacamole/01-avocado-unsliced.png",
+        "finishedImage": "/assets/steps/guacamole/02-avocado-sliced-open.png",
+        "lines": [
+          {
+            "start": { "x": 100, "y": 125 },
+            "end": { "x": 100, "y": 75 },
+            "radius": 30
+          }
+        ],
+        "ingredientsConsumed": {
+          "10": 1
+        }
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/steps/guacamole/02-avocado-sliced-open.png",
+        "finishedImage": "/assets/steps/guacamole/03-avocado-pit-removed.png",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 130 },
+            "radius": 20,
+            "tolerance": 15,
+            "direction": "clockwise",
+            "rotations": 1
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/ingredient-tomato.svg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {
+          "5": 1
+        }
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/ingredient-tomato.svg",
+        "finishedImage": "/assets/steps/guacamole/newtomato.png",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 170 },
+            "end": { "x": 170, "y": 170 },
+            "radius": 20
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/steps/guacamole/newtomato.png",
+        "finishedImage": "/assets/steps/guacamole/newchoppedtomato.png",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 170, "y": 70 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 170, "y": 70 },
+            "end": { "x": 30, "y": 110 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 30, "y": 110 },
+            "end": { "x": 170, "y": 140 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 170, "y": 140 },
+            "end": { "x": 30, "y": 170 },
+            "radius": 20
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/ingredient-onion.svg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ],
+        "ingredientsConsumed": {
+          "11": 1
+        }
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/ingredient-onion.svg",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 170 },
+            "end": { "x": 170, "y": 170 },
+            "radius": 20
+          }
+        ]
+      },
+      {
+        "type": "lines",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/ingredient-onion.svg",
+        "finishedImage": "/assets/steps/guacamole/newchoppedgarlic.png",
+        "lines": [
+          {
+            "start": { "x": 30, "y": 30 },
+            "end": { "x": 70, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 70, "y": 170 },
+            "end": { "x": 110, "y": 30 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 110, "y": 30 },
+            "end": { "x": 140, "y": 170 },
+            "radius": 20
+          },
+          {
+            "start": { "x": 140, "y": 170 },
+            "end": { "x": 170, "y": 30 },
+            "radius": 20
+          }
+        ]
+      },
+      {
+        "type": "spin",
+        "backgroundImage": "/SlicedBreadTest.jpg",
+        "image": "/assets/steps/guacamole/04-bowl-avocado-onion-tomato.png",
+        "spins": [
+          {
+            "center": { "x": 100, "y": 100 },
+            "radius": 70,
+            "tolerance": 20,
+            "direction": "clockwise",
+            "rotations": 3
           }
         ]
       }
