@@ -3,4 +3,11 @@ import { RecipeWalkthrough } from "../components/dev/RecipeWalkthrough";
 
 export const Route = createFileRoute("/recipe-walkthrough")({
   component: RecipeWalkthrough,
+  head: () => ({
+    meta: [
+      {
+        title: "chopchop | walkthrough",
+      },
+    ],
+  }),
 });

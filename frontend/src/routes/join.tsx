@@ -17,6 +17,7 @@ import {
 } from "#/components/chop-chop/design";
 
 import { paper } from "#/components/chop-chop/paper";
+
 export const Route = createFileRoute("/join")({
   component: JoinScreen,
   validateSearch: (search: Record<string, unknown>) => {
@@ -30,6 +31,13 @@ export const Route = createFileRoute("/join")({
       .slice(0, 6);
     return code ? { code } : {};
   },
+  head: () => ({
+    meta: [
+      {
+        title: "chopchop | join",
+      },
+    ],
+  }),
 });
 
 const CODE_LENGTH = 6;

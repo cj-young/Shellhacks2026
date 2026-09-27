@@ -15,7 +15,16 @@ import {
   lobbyColor,
 } from "#/components/chop-chop/screens/HostLobbyNew";
 
-export const Route = createFileRoute("/host")({ component: HostScreen });
+export const Route = createFileRoute("/host")({
+  component: HostScreen,
+  head: () => ({
+    meta: [
+      {
+        title: "chopchop | host",
+      },
+    ],
+  }),
+});
 
 const CONNECTION_PROBLEMS = ["Connection failed", "Disconnected", "Error"];
 
