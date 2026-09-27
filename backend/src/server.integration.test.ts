@@ -10,6 +10,7 @@ import { createApp } from "./app.ts";
 import {
   createGameModule,
   POINTS_PER_RECIPE,
+  WASTE_PENALTY_PER_ITEM,
   type GameModule,
 } from "./game/index.ts";
 import { createRealtimeModule, type RealtimeModule } from "./realtime/index.ts";
@@ -446,6 +447,44 @@ test("finishes a recipe and broadcasts progress to everyone", async () => {
   assert.equal(player?.score, POINTS_PER_RECIPE);
   assert.equal(player?.recipeIndex, 1);
   assert.equal(player?.recipeStageIndex, 0);
+  assert.deepEqual(player?.inventory, {});
+
+  host.close();
+});
+
+test("deducts food waste when a recipe is finished with leftovers", async () => {
+  const game = await gameModule.service.createGame();
+
+  const host = connectClient(base, {
+    code: game.code,
+    token: game.hostToken,
+    name: "Hosty",
+  });
+  const joined = waitFor<JoinedPayload>(host, "joined");
+  host.connect();
+  await joined;
+
+  const started = waitFor<GameStartedPayload>(host, "game_started");
+  const startState = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("start_game");
+  await Promise.all([started, startState]);
+
+  const purchased = waitFor<GameStatePayload>(host, "update_state");
+  host.emit("purchase_items", [{ id: ITEM_ID, count: 3 }]);
+  await purchased;
+
+  const stored = await gameModule.service.getGame(game.code);
+  const totalStages = stored?.state.recipeOrder[0]?.stages.length ?? 0;
+
+  let last: GameStatePayload | undefined;
+  for (let index = 0; index < totalStages; index += 1) {
+    const next = waitFor<GameStatePayload>(host, "update_state");
+    host.emit("finish_stage");
+    last = await next;
+  }
+
+  const player = last?.players.find((entry) => entry.name === "Hosty");
+  assert.equal(player?.score, POINTS_PER_RECIPE - 3 * WASTE_PENALTY_PER_ITEM);
   assert.deepEqual(player?.inventory, {});
 
   host.close();
